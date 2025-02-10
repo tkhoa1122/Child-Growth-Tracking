@@ -1,46 +1,37 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import './App.css'
-
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <>
-//       <div>
-//         <a href="https://vite.dev" target="_blank">
-//           <img src={viteLogo} className="logo" alt="Vite logo" />
-//         </a>
-//         <a href="https://react.dev" target="_blank">
-//           <img src={reactLogo} className="logo react" alt="React logo" />
-//         </a>
-//       </div>
-//       <h1>Vite + React</h1>
-//       <div className="card">
-//         <button onClick={() => setCount((count) => count + 1)}>
-//           count is {count}
-//         </button>
-//         <p>
-//           Edit <code>src/App.jsx</code> and save to test HMR
-//         </p>
-//       </div>
-//       <p className="read-the-docs">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//     </>
-//   )
-// }
-
-// export default App
+import { LoadingScreen } from './components/LoadingScreen'
+import { Home } from './components/sections/Home'
+import { About } from './components/sections/About'
+import { Contact } from './components/sections/Contact'
+import { Projects } from './components/sections/Projects'
+import { Login } from './components/Login'
+import {RegisterPage} from './components/RegisterPage'
+import { Navbar } from './components/sections/Navbar'
+import "./index.css"
 
 function App() {
+  const [isLoaded, setIsLoaded] = useState(false)
   return (
-    <div className="text-center p-5">
-      <h1 className="text-4xl text-blue-600 font-bold">Hello Tailwind!</h1>
-    </div>
-  );
+    <Router>
+      <>
+        {!isLoaded && <LoadingScreen onComplete={() => setIsLoaded(true)} />}
+        <div className={`min-h-screen transition-opacity duration-600 ${isLoaded ? "opacity-100" : "opacity-0"} bg-[rgba(3, 3, 3, 0.8)] text-gray-100`}>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<RegisterPage />} />
+          </Routes>
+        </div>
+      </>
+    </Router>
+  )
 }
 
-export default App;
+export default App
