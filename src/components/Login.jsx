@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { Header } from './Header';
+import { Footer } from './Footer';
 import backgroundImage from '../assets/background.jpg';
 
 export const Login = () => {
@@ -64,126 +66,132 @@ export const Login = () => {
     };
 
     return (
-        <div 
-            className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-            style={{
-                backgroundImage: `url(${backgroundImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                backgroundAttachment: 'fixed',
-                position: 'relative'
-            }}
-        >
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" style={{ position: 'fixed' }}></div>
+        <div className="h-370 flex flex-col">
+            <Header />
+            
+            {/* Main Content */}
+            <main 
+                className="flex-grow flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8 relative"
+                style={{
+                    backgroundImage: `url(${backgroundImage})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundAttachment: 'fixed'
+                }}
+            >
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
-            {/* Form Container */}
-            <div className="max-w-md w-full space-y-8 relative z-10">
-                <div className="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-2xl">
-                    <div>
-                        <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">
-                            Đăng nhập
-                        </h2>
-                        <p className="mt-2 text-center text-sm text-gray-600">
-                            Hoặc{' '}
-                            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                                đăng ký tài khoản mới
-                            </Link>
-                        </p>
-                    </div>
-
-                    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                        {/* Email Field */}
-                        <div className="mb-4">
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center z-20">
-                                    <FaEnvelope className="h-5 w-5 text-gray-600" />
-                                </div>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    onBlur={() => handleBlur('email')}
-                                    className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${
-                                        touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
-                                    } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                                    placeholder="Địa chỉ email"
-                                />
-                            </div>
-                            <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${touched.email && errors.email ? 'opacity-100' : 'opacity-0'}`}>
-                                {errors.email || 'Email là bắt buộc'}
+                {/* Form Container */}
+                <div className="max-w-md w-full space-y-8 relative z-10">
+                    <div className="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-2xl">
+                        <div>
+                            <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">
+                                Đăng nhập
+                            </h2>
+                            <p className="mt-2 text-center text-sm text-gray-600">
+                                Hoặc{' '}
+                                <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                                    đăng ký tài khoản mới
+                                </Link>
                             </p>
                         </div>
 
-                        {/* Password Field */}
-                        <div className="mb-4">
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center z-20">
-                                    <FaLock className="h-5 w-5 text-gray-600" />
+                        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                            {/* Email Field */}
+                            <div className="mb-4">
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center z-20">
+                                        <FaEnvelope className="h-5 w-5 text-gray-600" />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        onBlur={() => handleBlur('email')}
+                                        className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${
+                                            touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
+                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                        placeholder="Địa chỉ email"
+                                    />
                                 </div>
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    onBlur={() => handleBlur('password')}
-                                    className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${
-                                        touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
-                                    } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                                    placeholder="Mật khẩu"
-                                />
+                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${touched.email && errors.email ? 'opacity-100' : 'opacity-0'}`}>
+                                    {errors.email || 'Email là bắt buộc'}
+                                </p>
+                            </div>
+
+                            {/* Password Field */}
+                            <div className="mb-4">
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center z-20">
+                                        <FaLock className="h-5 w-5 text-gray-600" />
+                                    </div>
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        onBlur={() => handleBlur('password')}
+                                        className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${
+                                            touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
+                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                        placeholder="Mật khẩu"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center z-20"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? (
+                                            <FaEyeSlash className="h-5 w-5 text-gray-600" />
+                                        ) : (
+                                            <FaEye className="h-5 w-5 text-gray-600" />
+                                        )}
+                                    </button>
+                                </div>
+                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${touched.password && errors.password ? 'opacity-100' : 'opacity-0'}`}>
+                                    {errors.password || 'Mật khẩu là bắt buộc'}
+                                </p>
+                            </div>
+
+                            {/* Remember Me & Forgot Password */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        name="rememberMe"
+                                        checked={formData.rememberMe}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    />
+                                    <label className="ml-2 block text-sm text-gray-900">
+                                        Ghi nhớ đăng nhập
+                                    </label>
+                                </div>
+                                <div className="text-sm">
+                                    <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                                        Quên mật khẩu?
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Submit Button */}
+                            <div>
                                 <button
-                                    type="button"
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center z-20"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    type="submit"
+                                    className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300"
                                 >
-                                    {showPassword ? (
-                                        <FaEyeSlash className="h-5 w-5 text-gray-600" />
-                                    ) : (
-                                        <FaEye className="h-5 w-5 text-gray-600" />
-                                    )}
+                                    Đăng nhập
                                 </button>
                             </div>
-                            <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${touched.password && errors.password ? 'opacity-100' : 'opacity-0'}`}>
-                                {errors.password || 'Mật khẩu là bắt buộc'}
-                            </p>
-                        </div>
-
-                        {/* Remember Me & Forgot Password */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    name="rememberMe"
-                                    checked={formData.rememberMe}
-                                    onChange={handleChange}
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                />
-                                <label className="ml-2 block text-sm text-gray-900">
-                                    Ghi nhớ đăng nhập
-                                </label>
-                            </div>
-                            <div className="text-sm">
-                                <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                                    Quên mật khẩu?
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Submit Button */}
-                        <div>
-                            <button
-                                type="submit"
-                                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300"
-                            >
-                                Đăng nhập
-                            </button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
-            </div>
+            </main>
+
+            <Footer />
         </div>
     );
 };
