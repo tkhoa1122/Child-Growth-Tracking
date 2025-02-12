@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import backgroundImage from '../assets/background.jpg';
@@ -17,6 +17,12 @@ export const Login = () => {
     const [touched, setTouched] = useState({
         email: false,
         password: false
+    });
+
+    const [notification, setNotification] = useState({
+        show: false,
+        message: '',
+        type: '' // 'success' hoặc 'error'
     });
 
     const validateForm = () => {
@@ -46,7 +52,25 @@ export const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            console.log('Form submitted:', formData);
+            // Kiểm tra thông tin đăng nhập
+            if (formData.email === 'thonglyngocse@gmail.com' && formData.password === 'abcABC123!@#') {
+                setNotification({
+                    show: true,
+                    message: 'Đăng nhập thành công!',
+                    type: 'success'
+                });
+            } else {
+                setNotification({
+                    show: true,
+                    message: 'Email hoặc mật khẩu không chính xác!',
+                    type: 'error'
+                });
+            }
+
+            // Tự động ẩn thông báo sau 3 giây
+            setTimeout(() => {
+                setNotification(prev => ({ ...prev, show: false }));
+            }, 3000);
         }
     };
 
@@ -69,6 +93,24 @@ export const Login = () => {
         <div className="h-370 flex flex-col">
             <Header />
             
+            {/* Thêm thông báo popup */}
+            {notification.show && (
+                <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
+                    notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+                }`}>
+                    {notification.type === 'success' ? (
+                        <FaCheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                    ) : (
+                        <FaTimesCircle className="w-6 h-6 text-red-500 mr-2" />
+                    )}
+                    <span className={`font-medium ${
+                        notification.type === 'success' ? 'text-green-700' : 'text-red-700'
+                    }`}>
+                        {notification.message}
+                    </span>
+                </div>
+            )}
+
             {/* Main Content */}
             <main 
                 className="flex-grow flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8 relative"
