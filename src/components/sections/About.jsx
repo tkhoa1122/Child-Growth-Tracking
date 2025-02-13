@@ -70,7 +70,7 @@ export const About = () => {
                     <h1 className="text-5xl font-bold text-white mb-6">
                         Về Chúng Tôi
                     </h1>
-                    <p className="text-xl text-gray-200 max-w-3xl mx-auto">
+                    <p className="text-xl text-gray-200 max-w-4xl mx-auto">
                         Chúng tôi là đội ngũ chuyên gia y tế và chăm sóc sức khỏe hàng đầu, 
                         với sứ mệnh mang đến thông tin và dịch vụ chăm sóc sức khỏe 
                         chất lượng cao cho trẻ em Việt Nam.

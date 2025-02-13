@@ -12,6 +12,7 @@ import {
     Legend
 } from 'chart.js';
 import { FaChild, FaChartLine, FaHeartbeat, FaBrain } from 'react-icons/fa';
+import backgroundImage from '../../assets/background.jpg';
 
 // Đăng ký các components cần thiết cho Chart.js
 ChartJS.register(
@@ -106,20 +107,29 @@ export const Projects = () => {
         <div className="flex flex-col min-h-screen">
             <Header />
 
-            <main className="flex-grow bg-gray-50 pt-8">
-                {/* Hero Section */}
-                <section className="bg-blue-600 text-white py-24 mt-8">
-                    <div className="max-w-7xl mx-auto px-4">
-                        <h1 className="text-4xl md:text-5xl font-bold text-center mb-8">
-                            Dự án Sức khỏe Nhi khoa
-                        </h1>
-                        <p className="text-xl text-center max-w-4xl mx-auto">
-                            Theo dõi và đánh giá sự phát triển của trẻ em từ 0-18 tuổi
-                            thông qua các chỉ số sức khỏe quan trọng
-                        </p>
-                    </div>
-                </section>
+            {/* Hero Section */}
+            <section 
+                className="relative pt-32 pb-20 px-4"
+                style={{
+                    backgroundImage: `url(${backgroundImage})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed'
+                }}
+            >
+                <div className="absolute inset-0 bg-black/60"></div>
+                <div className="relative z-10 max-w-7xl mx-auto text-center">
+                    <h1 className="text-5xl font-bold text-white mb-6">
+                        Dự án Sức khỏe Nhi khoa
+                    </h1>
+                    <p className="text-xl text-gray-200 max-w-4xl mx-auto">
+                        Theo dõi và đánh giá sự phát triển của trẻ em từ 0-18 tuổi
+                        thông qua các chỉ số sức khỏe quan trọng
+                    </p>
+                </div>
+            </section>
 
+            <main className="flex-grow bg-gray-50 pt-8">
                 {/* Projects Grid */}
                 <section className="py-20">
                     <div className="max-w-7xl mx-auto px-4">

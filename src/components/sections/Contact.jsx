@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import backgroundImage from '../../assets/background.jpg';
 
 export const Contact = () => {
     const [formData, setFormData] = useState({
@@ -30,10 +31,21 @@ export const Contact = () => {
             
             <main className="flex-grow bg-gray-50 pt-9">
                 {/* Hero Section */}
-                <section className="bg-blue-600 text-white py-24 mt-8">
-                    <div className="max-w-7xl mx-auto px-4 text-center">
-                        <h1 className="text-4xl md:text-5xl font-bold mb-6">Liên Hệ Với Chúng Tôi</h1>
-                        <p className="text-xl max-w-3xl mx-auto">
+                <section 
+                    className="relative pt-32 pb-20 px-4"
+                    style={{
+                        backgroundImage: `url(${backgroundImage})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundAttachment: 'fixed'
+                    }}
+                >
+                    <div className="absolute inset-0 bg-black/60"></div>
+                    <div className="relative z-10 max-w-7xl mx-auto text-center">
+                        <h1 className="text-5xl font-bold text-white mb-6">
+                            Liên Hệ Với Chúng Tôi
+                        </h1>
+                        <p className="text-xl text-gray-200 max-w-4xl mx-auto">
                             Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn 24/7. 
                             Hãy liên hệ ngay để được tư vấn chi tiết.
                         </p>
