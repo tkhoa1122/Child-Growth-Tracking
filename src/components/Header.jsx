@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaUserCircle } from 'react-icons/fa';
 
 export const Header = () => {
@@ -17,6 +17,9 @@ export const Header = () => {
     const handleLogout = () => {
         localStorage.removeItem('isAuthenticated');
         localStorage.removeItem('userName');
+        //setIsLoggedIn(false);
+        setShowUserMenu(false);
+        navigate('/');
     };
 
     return (
