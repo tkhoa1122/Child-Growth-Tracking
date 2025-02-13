@@ -1,13 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaUserCircle } from 'react-icons/fa';
 
 export const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    //demo
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const userName = localStorage.getItem('userName');
 
     const handleSearch = (e) => {
         e.preventDefault();
         console.log('Search query:', searchQuery);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('userName');
     };
 
     return (
@@ -43,23 +52,52 @@ export const Header = () => {
                     </div>
 
                     {/* Auth Buttons */}
-                    <div>
-        
-
-                    </div>
                     <div className="flex items-center space-x-4">
-                        <Link 
-                            to="/login" 
-                            className="px-4 py-2 text-black hover:text-blue-500 transition-colors"
-                        >
-                            Đăng nhập
-                        </Link>
-                        <Link 
-                            to="/register" 
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                        >
-                            Đăng ký
-                        </Link>
+                        {isAuthenticated ? (
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowUserMenu(!showUserMenu)}
+                                    className="flex items-center space-x-2 text-gray-700 hover:text-blue-500 transition-colors"
+                                >
+                                    <FaUserCircle className="w-6 h-6" />
+                                    <span>{userName}</span>
+                                </button>
+                                
+                                {/* Dropdown Menu */}
+                                {showUserMenu && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                                        <Link
+                                            to="/profile"
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
+                                            onClick={() => setShowUserMenu(false)}
+                                        >
+                                            Hồ Sơ
+                                        </Link>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
+                                        >
+                                            Đăng Xuất
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                <Link 
+                                    to="/login" 
+                                    className="px-4 py-2 text-black hover:text-blue-500 transition-colors"
+                                >
+                                    Đăng nhập
+                                </Link>
+                                <Link 
+                                    to="/register" 
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                    Đăng ký
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

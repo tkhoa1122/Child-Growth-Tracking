@@ -56,17 +56,20 @@ export const Login = () => {
         if (validateForm()) {
             // Kiểm tra thông tin đăng nhập
             if (formData.email === 'thonglyngocse@gmail.com' && formData.password === '12345a!') {
+                // Lưu trạng thái vào localStorage
+                localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem('userName', 'Thông Lý Ngọc');
+                
+                setIsAuthenticated(true);
                 setNotification({
                     show: true,
                     message: 'Đăng nhập thành công!',
                     type: 'success'
                 });
-                setIsAuthenticated(true);
                 // Chuyển hướng sau 1 giây để hiển thị thông báo trước khi chuyển trang
                 setTimeout(() => {
                     navigate("/");
                 }, 1000);
-                
             } else {
                 setNotification({
                     show: true,
