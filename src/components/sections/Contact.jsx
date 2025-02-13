@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
+import backgroundImage from '../../../public/Images/background.jpg';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
 import backgroundImage from '../../assets/background.jpg';
 
@@ -29,7 +30,7 @@ export const Contact = () => {
         <div className="flex flex-col min-h-screen">
             <Header />
             
-            <main className="flex-grow bg-gray-50 pt-9">
+            <main className="flex-grow">
                 {/* Hero Section */}
                 <section 
                     className="relative pt-32 pb-20 px-4"

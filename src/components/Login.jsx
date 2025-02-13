@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import backgroundImage from '../assets/background.jpg';
+import backgroundImage from '../../public/Images/background.jpg';
 
 export const Login = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,6 +51,15 @@ export const Login = () => {
         return Object.keys(tempErrors).length === 0;
     };
 
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     if (validateForm()) {
+    //         console.log('Form submitted:', formData);
+    //     }
+    // };
+
+    //for demo
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
@@ -76,12 +85,12 @@ export const Login = () => {
                     message: 'Email hoặc mật khẩu không chính xác!',
                     type: 'error'
                 });
+                
+                // Tự động ẩn thông báo lỗi sau 3 giây
+                setTimeout(() => {
+                    setNotification(prev => ({ ...prev, show: false }));
+                }, 3000);
             }
-
-            // Tự động ẩn thông báo sau 3 giây
-            setTimeout(() => {
-                setNotification(prev => ({ ...prev, show: false }));
-            }, 3000);
         }
     };
 

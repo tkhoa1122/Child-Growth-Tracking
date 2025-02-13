@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaUserCircle } from 'react-icons/fa';
 
 export const Header = () => {
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [showUserMenu, setShowUserMenu] = useState(false);
+    //this is main when we have API
+    //const [isLoggedIn, setIsLoggedIn] = useState(false);
     //demo
     const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
     const userName = localStorage.getItem('userName');
+
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -17,6 +21,9 @@ export const Header = () => {
     const handleLogout = () => {
         localStorage.removeItem('isAuthenticated');
         localStorage.removeItem('userName');
+        //setIsLoggedIn(false);
+        setShowUserMenu(false);
+        navigate('/');
     };
 
     return (
@@ -51,7 +58,7 @@ export const Header = () => {
                         </form>
                     </div>
 
-                    {/* Auth Buttons */}
+                    {/* Auth Buttons or User Menu */}
                     <div className="flex items-center space-x-4">
                         {isAuthenticated ? (
                             <div className="relative">
