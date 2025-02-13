@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import backgroundImage from '../assets/background.jpg';
 
 export const Login = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -59,18 +60,23 @@ export const Login = () => {
                     message: 'Đăng nhập thành công!',
                     type: 'success'
                 });
+                
+                // Chờ 1 giây trước khi chuyển hướng để người dùng thấy thông báo thành công
+                setTimeout(() => {
+                    navigate('/');
+                }, 1000);
             } else {
                 setNotification({
                     show: true,
                     message: 'Email hoặc mật khẩu không chính xác!',
                     type: 'error'
                 });
+                
+                // Tự động ẩn thông báo lỗi sau 3 giây
+                setTimeout(() => {
+                    setNotification(prev => ({ ...prev, show: false }));
+                }, 3000);
             }
-
-            // Tự động ẩn thông báo sau 3 giây
-            setTimeout(() => {
-                setNotification(prev => ({ ...prev, show: false }));
-            }, 3000);
         }
     };
 

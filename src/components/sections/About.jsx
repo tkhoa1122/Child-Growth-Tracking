@@ -70,7 +70,7 @@ export const About = () => {
                     <h1 className="text-5xl font-bold text-white mb-6">
                         Về Chúng Tôi
                     </h1>
-                    <p className="text-xl text-gray-200 max-w-3xl mx-auto">
+                    <p className="text-xl text-gray-200 max-w-4xl mx-auto">
                         Chúng tôi là đội ngũ chuyên gia y tế và chăm sóc sức khỏe hàng đầu, 
                         với sứ mệnh mang đến thông tin và dịch vụ chăm sóc sức khỏe 
                         chất lượng cao cho trẻ em Việt Nam.
@@ -111,7 +111,7 @@ export const About = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
                             <FaUsers className="w-12 h-12 text-blue-500 mb-6" />
-                            <h3 className="text-xl font-semibold mb-4">Tận tâm</h3>
+                            <h3 className="text-xl font-semibold text-blue-500 mb-4">Tận tâm</h3>
                             <p className="text-gray-600">
                                 Luôn đặt lợi ích của khách hàng lên hàng đầu, 
                                 phục vụ với tinh thần trách nhiệm cao nhất.
@@ -119,7 +119,7 @@ export const About = () => {
                         </div>
                         <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
                             <FaLightbulb className="w-12 h-12 text-blue-500 mb-6" />
-                            <h3 className="text-xl font-semibold mb-4">Sáng tạo</h3>
+                            <h3 className="text-xl font-semibold text-blue-500 mb-4">Sáng tạo</h3>
                             <p className="text-gray-600">
                                 Không ngừng đổi mới, tìm kiếm giải pháp tốt nhất 
                                 cho khách hàng và đối tác.
@@ -127,7 +127,7 @@ export const About = () => {
                         </div>
                         <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
                             <FaHandshake className="w-12 h-12 text-blue-500 mb-6" />
-                            <h3 className="text-xl font-semibold mb-4">Hợp tác</h3>
+                            <h3 className="text-xl font-semibold text-blue-500 mb-4">Hợp tác</h3>
                             <p className="text-gray-600">
                                 Xây dựng mối quan hệ bền vững với đối tác, 
                                 cùng nhau phát triển và thành công.
@@ -135,7 +135,7 @@ export const About = () => {
                         </div>
                         <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
                             <FaChartLine className="w-12 h-12 text-blue-500 mb-6" />
-                            <h3 className="text-xl font-semibold mb-4">Phát triển</h3>
+                            <h3 className="text-xl font-semibold text-blue-500 mb-4">Phát triển</h3>
                             <p className="text-gray-600">
                                 Cam kết phát triển bền vững, mang lại giá trị 
                                 lâu dài cho cộng đồng.
@@ -161,7 +161,7 @@ export const About = () => {
                                         className="w-32 h-32 rounded-full mx-auto object-cover"
                                     />
                                 </div>
-                                <h3 className="text-xl font-semibold text-center mb-2">
+                                <h3 className="text-xl font-semibold text-center text-blue-500 mb-2">
                                     {member.name}
                                 </h3>
                                 <div className="text-blue-500 text-center mb-4">
@@ -201,7 +201,7 @@ export const About = () => {
                                     </div>
                                 </div>
                                 <div className="w-full md:w-3/4">
-                                    <h3 className="text-xl font-semibold mb-2">
+                                    <h3 className="text-xl font-semibold text-blue-500 mb-2">
                                         {milestone.title}
                                     </h3>
                                     <p className="text-gray-600">
