@@ -3,6 +3,7 @@ import { Header } from '../Header';
 import { Footer } from '../Footer';
 import backgroundImage from '../../../public/Images/background.jpg';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import backgroundImage from '../../assets/background.jpg';
 
 export const Contact = () => {
     const [formData, setFormData] = useState({
