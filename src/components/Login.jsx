@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import backgroundImage from '../assets/background.jpg';
 
 export const Login = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -53,12 +55,18 @@ export const Login = () => {
         e.preventDefault();
         if (validateForm()) {
             // Kiểm tra thông tin đăng nhập
-            if (formData.email === 'thonglyngocse@gmail.com' && formData.password === 'abcABC123!@#') {
+            if (formData.email === 'thonglyngocse@gmail.com' && formData.password === '12345a!') {
                 setNotification({
                     show: true,
                     message: 'Đăng nhập thành công!',
                     type: 'success'
                 });
+                setIsAuthenticated(true);
+                // Chuyển hướng sau 1 giây để hiển thị thông báo trước khi chuyển trang
+                setTimeout(() => {
+                    navigate("/");
+                }, 1000);
+                
             } else {
                 setNotification({
                     show: true,
