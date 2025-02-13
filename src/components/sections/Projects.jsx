@@ -1,6 +1,7 @@
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { Line } from 'react-chartjs-2';
+import backgroundImage from '../../../public/Images/background.jpg';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -106,7 +107,6 @@ export const Projects = () => {
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
-
             {/* Hero Section */}
             <section 
                 className="relative pt-32 pb-20 px-4"
