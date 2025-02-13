@@ -75,14 +75,26 @@ export const RegisterPage = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const allFieldsTouched = Object.keys(touched).every(key => touched[key]);
-        
+
         if (!allFieldsTouched) {
-            setTouched(Object.keys(touched).reduce((acc, key) => ({...acc, [key]: true}), {}));
+            setTouched(Object.keys(touched).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
         }
-        
+
         if (validateForm()) {
             console.log('Form submitted:', formData);
             // Xử lý đăng ký ở đây
+
+            //for demo
+            // Giả sử đăng ký thành công, lưu thông tin vào localStorage
+            localStorage.setItem("user", JSON.stringify({
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                password: formData.password
+            }));
+
+            // Chuyển hướng người dùng sang trang đăng nhập
+            window.location.href = "/login";
         }
     };
 
@@ -103,7 +115,7 @@ export const RegisterPage = () => {
     };
 
     return (
-        <div 
+        <div
             className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
             style={{
                 backgroundImage: `url(${backgroundImage})`,
@@ -146,9 +158,8 @@ export const RegisterPage = () => {
                                         value={formData.firstName}
                                         onChange={handleChange}
                                         onBlur={() => handleBlur('firstName')}
-                                        className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${
-                                            touched.firstName && errors.firstName ? 'border-red-500' : 'border-gray-300'
-                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                        className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${touched.firstName && errors.firstName ? 'border-red-500' : 'border-gray-300'
+                                            } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                         placeholder="Họ"
                                     />
                                 </div>
@@ -164,9 +175,8 @@ export const RegisterPage = () => {
                                         value={formData.lastName}
                                         onChange={handleChange}
                                         onBlur={() => handleBlur('lastName')}
-                                        className={`appearance-none rounded-lg w-full px-3 py-3 border ${
-                                            touched.lastName && errors.lastName ? 'border-red-500' : 'border-gray-300'
-                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                        className={`appearance-none rounded-lg w-full px-3 py-3 border ${touched.lastName && errors.lastName ? 'border-red-500' : 'border-gray-300'
+                                            } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                         placeholder="Tên"
                                     />
                                 </div>
@@ -188,9 +198,8 @@ export const RegisterPage = () => {
                                     value={formData.username}
                                     onChange={handleChange}
                                     onBlur={() => handleBlur('username')}
-                                    className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${
-                                        touched.username && errors.username ? 'border-red-500' : 'border-gray-300'
-                                    } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                    className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${touched.username && errors.username ? 'border-red-500' : 'border-gray-300'
+                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                     placeholder="Username"
                                 />
                             </div>
@@ -211,9 +220,8 @@ export const RegisterPage = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     onBlur={() => handleBlur('email')}
-                                    className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${
-                                        touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
-                                    } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                    className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
+                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                     placeholder="Email"
                                 />
                             </div>
@@ -234,9 +242,8 @@ export const RegisterPage = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     onBlur={() => handleBlur('password')}
-                                    className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${
-                                        touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
-                                    } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                    className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
+                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                     placeholder="Mật khẩu"
                                 />
                                 <button
@@ -267,9 +274,8 @@ export const RegisterPage = () => {
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     onBlur={() => handleBlur('confirmPassword')}
-                                    className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${
-                                        touched.confirmPassword && errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                                    } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                    className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${touched.confirmPassword && errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                     placeholder="Xác nhận mật khẩu"
                                 />
                                 <button

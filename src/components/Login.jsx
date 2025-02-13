@@ -41,10 +41,53 @@ export const Login = () => {
         return Object.keys(tempErrors).length === 0;
     };
 
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     if (validateForm()) {
+    //         console.log('Form submitted:', formData);
+    //     }
+    // };
+
+    //for demo
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
             console.log('Form submitted:', formData);
+
+            if (formData.rememberMe) {
+                localStorage.setItem('rememberedEmail', formData.email);
+            } else {
+                localStorage.removeItem('rememberedEmail');
+            }
+        }
+    };
+
+    const handleLogin = (e) => {
+        e.preventDefault();
+
+        // Kiểm tra tài khoản (giả sử thành công)
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+
+        if (!storedUser) {
+            console.error("User is null, cannot read email.");
+            alert("You've not registered! ");
+            return;
+        }
+
+        if (storedUser.email === formData.email && storedUser.password === formData.password) {
+            console.log('Form submitted:', formData);
+            console.log('Stored user:', storedUser);
+            // Lưu trạng thái đăng nhập
+            localStorage.setItem("isAuthenticated", "true");
+    
+            // Chuyển hướng về trang chủ
+            window.location.href = "/home";
+        } else {
+            console.log(storedUser.email === formData.email && storedUser.password === formData.password);
+            console.log('Form submitted:', formData);
+            console.log('Stored user:', storedUser);
+            alert("Wrong Information!");
         }
     };
 
@@ -64,7 +107,7 @@ export const Login = () => {
     };
 
     return (
-        <div 
+        <div
             className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
             style={{
                 backgroundImage: `url(${backgroundImage})`,
@@ -93,7 +136,7 @@ export const Login = () => {
                         </p>
                     </div>
 
-                    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                    <form className="mt-8 space-y-6" onSubmit={handleLogin}>
                         {/* Email Field */}
                         <div className="mb-4">
                             <div className="relative">
@@ -106,9 +149,8 @@ export const Login = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     onBlur={() => handleBlur('email')}
-                                    className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${
-                                        touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
-                                    } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                    className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
+                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                     placeholder="Địa chỉ email"
                                 />
                             </div>
@@ -129,9 +171,8 @@ export const Login = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     onBlur={() => handleBlur('password')}
-                                    className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${
-                                        touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
-                                    } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                    className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
+                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                     placeholder="Mật khẩu"
                                 />
                                 <button

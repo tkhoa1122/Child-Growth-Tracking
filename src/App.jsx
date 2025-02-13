@@ -10,6 +10,7 @@ import { Login } from './components/Login'
 import {RegisterPage} from './components/RegisterPage'
 import { Navbar } from './components/sections/Navbar'
 import "./index.css"
+import Profile from './components/sections/Profile'
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -27,6 +28,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/profile" element={Profile} />
           </Routes>
         </div>
       </>
