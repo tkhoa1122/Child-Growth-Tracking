@@ -1,7 +1,6 @@
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { Line } from 'react-chartjs-2';
-import backgroundImage from '../../../public/Images/background.jpg';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -13,7 +12,6 @@ import {
     Legend
 } from 'chart.js';
 import { FaChild, FaChartLine, FaHeartbeat, FaBrain } from 'react-icons/fa';
-import backgroundImage from '../../assets/background.jpg';
 
 // Đăng ký các components cần thiết cho Chart.js
 ChartJS.register(
@@ -25,6 +23,8 @@ ChartJS.register(
     Tooltip,
     Legend
 );
+
+const backgroundImageUrl = '/Images/background.jpg';
 
 export const Projects = () => {
     // Data cho biểu đồ BMI theo tuổi (0-18 tuổi) - Nam
@@ -111,7 +111,7 @@ export const Projects = () => {
             <section 
                 className="relative pt-32 pb-20 px-4"
                 style={{
-                    backgroundImage: `url(${backgroundImage})`,
+                    backgroundImage: `url(${backgroundImageUrl})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundAttachment: 'fixed'

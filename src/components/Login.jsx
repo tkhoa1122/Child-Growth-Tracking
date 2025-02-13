@@ -51,15 +51,6 @@ export const Login = () => {
         return Object.keys(tempErrors).length === 0;
     };
 
-    // const handleSubmit = (e) => {
-    //     e.preventDefault();
-    //     if (validateForm()) {
-    //         console.log('Form submitted:', formData);
-    //     }
-    // };
-
-    //for demo
-
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
