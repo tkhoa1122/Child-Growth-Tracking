@@ -201,7 +201,7 @@ export const About = () => {
                                     </div>
                                 </div>
                                 <div className="w-full md:w-3/4">
-                                    <h3 className="text-xl font-semibold mb-2">
+                                    <h3 className="text-xl font-semibold text-blue-500 mb-2">
                                         {milestone.title}
                                     </h3>
                                     <p className="text-gray-600">

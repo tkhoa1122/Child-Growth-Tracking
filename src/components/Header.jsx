@@ -1,13 +1,22 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaSearch } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaSearch, FaUserCircle } from 'react-icons/fa';
 
 export const Header = () => {
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
 
     const handleSearch = (e) => {
         e.preventDefault();
         console.log('Search query:', searchQuery);
+    };
+
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+        setShowUserMenu(false);
+        navigate('/');
     };
 
     return (
@@ -42,20 +51,52 @@ export const Header = () => {
                         </form>
                     </div>
 
-                    {/* Auth Buttons */}
+                    {/* Auth Buttons or User Menu */}
                     <div className="flex items-center space-x-4">
-                        <Link 
-                            to="/login" 
-                            className="px-4 py-2 text-black hover:text-blue-500 transition-colors"
-                        >
-                            Đăng nhập
-                        </Link>
-                        <Link 
-                            to="/register" 
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                        >
-                            Đăng ký
-                        </Link>
+                        {isLoggedIn ? (
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowUserMenu(!showUserMenu)}
+                                    className="flex items-center space-x-2 text-gray-700 hover:text-blue-500 transition-colors"
+                                >
+                                    <FaUserCircle className="h-8 w-8" />
+                                </button>
+                                
+                                {/* Dropdown Menu */}
+                                {showUserMenu && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                                        <Link
+                                            to="/profile"
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
+                                            onClick={() => setShowUserMenu(false)}
+                                        >
+                                            Thông tin cá nhân
+                                        </Link>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-red-500"
+                                        >
+                                            Đăng xuất
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                <Link 
+                                    to="/login" 
+                                    className="px-4 py-2 text-black hover:text-blue-500 transition-colors"
+                                >
+                                    Đăng nhập
+                                </Link>
+                                <Link 
+                                    to="/register" 
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                    Đăng ký
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
