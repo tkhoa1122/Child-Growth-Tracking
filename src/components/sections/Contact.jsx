@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
-import backgroundImage from '../../assets/background.jpg';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
+
+// Thay vì import, sử dụng đường dẫn trực tiếp
+const backgroundImageUrl = '/Images/background.jpg';
 
 export const Contact = () => {
     const [formData, setFormData] = useState({
@@ -34,7 +36,7 @@ export const Contact = () => {
                 <section 
                     className="relative pt-32 pb-20 px-4"
                     style={{
-                        backgroundImage: `url(${backgroundImage})`,
+                        backgroundImage: `url(${backgroundImageUrl})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundAttachment: 'fixed'

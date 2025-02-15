@@ -5,8 +5,13 @@ import { FaSearch, FaUserCircle } from 'react-icons/fa';
 export const Header = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    //this is main when we have API
+    //const [isLoggedIn, setIsLoggedIn] = useState(false);
+    //demo
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const userName = localStorage.getItem('userName');
+
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -14,7 +19,9 @@ export const Header = () => {
     };
 
     const handleLogout = () => {
-        setIsLoggedIn(false);
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('userName');
+        //setIsLoggedIn(false);
         setShowUserMenu(false);
         navigate('/');
     };
@@ -53,13 +60,14 @@ export const Header = () => {
 
                     {/* Auth Buttons or User Menu */}
                     <div className="flex items-center space-x-4">
-                        {isLoggedIn ? (
+                        {isAuthenticated ? (
                             <div className="relative">
                                 <button
                                     onClick={() => setShowUserMenu(!showUserMenu)}
                                     className="flex items-center space-x-2 text-gray-700 hover:text-blue-500 transition-colors"
                                 >
-                                    <FaUserCircle className="h-8 w-8" />
+                                    <FaUserCircle className="w-6 h-6" />
+                                    <span>{userName}</span>
                                 </button>
                                 
                                 {/* Dropdown Menu */}
@@ -70,13 +78,13 @@ export const Header = () => {
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
                                             onClick={() => setShowUserMenu(false)}
                                         >
-                                            Thông tin cá nhân
+                                            Hồ Sơ
                                         </Link>
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-red-500"
+                                            className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
                                         >
-                                            Đăng xuất
+                                            Đăng Xuất
                                         </button>
                                     </div>
                                 )}

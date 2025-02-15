@@ -1,7 +1,7 @@
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { FaUsers, FaLightbulb, FaHandshake, FaChartLine } from 'react-icons/fa';
-import backgroundImage from '../../assets/background.jpg';
+const backgroundImageUrl = '/Images/background.jpg';
 
 export const About = () => {
     const teamMembers = [
@@ -59,7 +59,7 @@ export const About = () => {
             <section 
                 className="relative pt-32 pb-20 px-4"
                 style={{
-                    backgroundImage: `url(${backgroundImage})`,
+                    backgroundImage: `url(${backgroundImageUrl})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundAttachment: 'fixed'
