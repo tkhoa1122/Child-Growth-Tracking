@@ -4,6 +4,8 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } f
 import { Header } from './Header';
 import { Footer } from './Footer';
 import backgroundImage from '../../public/Images/background.jpg';
+import { useAuth } from './Utils/AuthContext';
+import api from './Utils/Axios';
 
 export const Login = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -26,6 +28,8 @@ export const Login = () => {
         message: '',
         type: '' // 'success' hoặc 'error'
     });
+
+    const { login } = useAuth();
 
     const validateForm = () => {
         let tempErrors = {};
@@ -51,33 +55,30 @@ export const Login = () => {
         return Object.keys(tempErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-            // Kiểm tra thông tin đăng nhập
-            if (formData.email === 'thonglyngocse@gmail.com' && formData.password === '12345a!') {
-                // Lưu trạng thái vào localStorage
-                localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('userName', 'Thông Lý Ngọc');
-                
+            try {
+                const response = await api.post('auth/login', {
+                    email: formData.email,
+                    password: formData.password
+                });
+                login(response.data.token);
                 setIsAuthenticated(true);
                 setNotification({
                     show: true,
                     message: 'Đăng nhập thành công!',
                     type: 'success'
                 });
-                // Chuyển hướng sau 1 giây để hiển thị thông báo trước khi chuyển trang
                 setTimeout(() => {
                     navigate("/");
                 }, 1000);
-            } else {
+            } catch (error) {
                 setNotification({
                     show: true,
                     message: 'Email hoặc mật khẩu không chính xác!',
                     type: 'error'
                 });
-                
-                // Tự động ẩn thông báo lỗi sau 3 giây
                 setTimeout(() => {
                     setNotification(prev => ({ ...prev, show: false }));
                 }, 3000);
