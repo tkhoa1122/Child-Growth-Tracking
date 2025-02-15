@@ -13,6 +13,7 @@ import "./index.css"
 import Profile from './components/protection_page/Profile'
 import { AuthProvider } from './components/Utils/AuthContext'
 import { ProtectedRoute } from './components/Utils/ProtectedRoute'
+import { FamilyProfileManagement } from './components/FamilyProfileManagement'
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -31,7 +32,7 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<RegisterPage />} />
-              
+              <Route path="/family-profile" element={<FamilyProfileManagement />} />
               <Route 
                 path="/profile" 
                 element={
@@ -41,6 +42,18 @@ function App() {
                   />
                 } 
               />
+
+              {/* <Route 
+                path="/family-profile" 
+                element={
+                  <ProtectedRoute 
+                    element={<FamilyProfileManagement />} 
+                    allowedRoles={['user', 'admin']} 
+                  />
+                } 
+              /> */}
+
+
             </Routes>
           </div>
         </>
