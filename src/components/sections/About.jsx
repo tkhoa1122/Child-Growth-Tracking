@@ -1,7 +1,7 @@
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { FaUsers, FaLightbulb, FaHandshake, FaChartLine } from 'react-icons/fa';
-const backgroundImageUrl = '/public/Images/background.jpg';
+const backgroundImageUrl = '/Images/background.jpg';
 
 export const About = () => {
     const teamMembers = [

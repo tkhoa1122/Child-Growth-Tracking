@@ -24,7 +24,7 @@ ChartJS.register(
     Legend
 );
 
-const backgroundImageUrl = '/public/Images/background.jpg';
+const backgroundImageUrl = 'Images/background.jpg';
 
 export const Projects = () => {
     // Data cho biểu đồ BMI theo tuổi (0-18 tuổi) - Nam

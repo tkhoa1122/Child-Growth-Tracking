@@ -4,7 +4,7 @@ import { Footer } from '../Footer';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
 
 // Thay vì import, sử dụng đường dẫn trực tiếp
-const backgroundImageUrl = '/public/Images/background.jpg';
+const backgroundImageUrl = '/Images/background.jpg';
 
 export const Contact = () => {
     const [formData, setFormData] = useState({
