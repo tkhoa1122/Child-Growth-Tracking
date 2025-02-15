@@ -88,9 +88,6 @@ export const RegisterPage = () => {
     if (validateForm()) {
       console.log("Form submitted:", formData);
       // Xử lý đăng ký ở đây
-
-      //for demo
-      // Giả sử đăng ký thành công, lưu thông tin vào localStorage
       localStorage.setItem(
         "user",
         JSON.stringify({
