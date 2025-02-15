@@ -14,7 +14,7 @@ import Profile from './components/protection_page/Profile'
 import { AuthProvider } from './components/Utils/AuthContext'
 import { ProtectedRoute } from './components/Utils/ProtectedRoute'
 import { FamilyProfileManagement } from './components/FamilyProfileManagement'
-
+import { DetailFamilyProfile } from './components/DetailFamilyProfile'
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
   return (
@@ -33,6 +33,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/family-profile" element={<FamilyProfileManagement />} />
+              <Route path="/detail-family-profile" element={<DetailFamilyProfile />} />
               <Route 
                 path="/profile" 
                 element={
