@@ -4,7 +4,7 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser } from "react-icons/fa";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import backgroundImage from '../../public/Images/background.jpg';
-import api from "../services/api";
+import api from "../components/Utils/Axios";
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
