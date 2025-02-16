@@ -25,7 +25,7 @@ ChartJS.register(
     Legend
 );
 
-const backgroundImageUrl = 'Images/background.jpg';
+const backgroundImageUrl = '/Images/background.jpg';
 
 export const Projects = () => {
     const [weight, setWeight] = useState('');

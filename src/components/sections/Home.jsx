@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import { Navbar } from './Navbar';
-import childHealth from '../../../public/Images/child-health.jpg';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { useEffect } from 'react';
+
+const childHealth = '/Images/child-health.jpg';
 
 export const Home = () => {
     useEffect(() => {
