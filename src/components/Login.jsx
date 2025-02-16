@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import backgroundImage from '../../public/Images/background.jpg';
 import { useAuth } from './Utils/AuthContext';
 import api from './Utils/Axios';
+
+const backgroundImage = '/Images/background.jpg';
 
 export const Login = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);

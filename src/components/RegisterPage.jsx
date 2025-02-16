@@ -4,6 +4,7 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser } from "react-icons/fa";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import backgroundImage from '../../public/Images/background.jpg';
+import api from "../services/api";
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,12 @@ export const RegisterPage = () => {
     email: false,
     password: false,
     confirmPassword: false,
+  });
+
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "success"
   });
 
   const validateForm = () => {
@@ -75,7 +82,7 @@ export const RegisterPage = () => {
     return Object.keys(tempErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const allFieldsTouched = Object.keys(touched).every((key) => touched[key]);
 
@@ -87,22 +94,51 @@ export const RegisterPage = () => {
 
     if (validateForm()) {
       console.log("Form submitted:", formData);
-      // Xử lý đăng ký ở đây
+      // // Xử lý đăng ký ở đây
+      // localStorage.setItem(
+      //   "user",
+      //   JSON.stringify({
+      //     firstName: formData.firstName,
+      //     lastName: formData.lastName,
+      //     email: formData.email,
+      //     password: formData.password,
+      //   })
+      // );
+        try {
+            // Gửi request đăng ký đến backend
+            const response = await api.post('api/Auth/register', {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                username: formData.username,
+                email: formData.email,
+                password: formData.password
+            });
 
-      //for demo
-      // Giả sử đăng ký thành công, lưu thông tin vào localStorage
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-        })
-      );
+            // Hiển thị thông báo thành công
+            setNotification({
+                show: true,
+                message: 'Đăng ký thành công!',
+                type: 'success'
+            });
 
-      // Chuyển hướng người dùng sang trang đăng nhập
-      window.location.href = "/login";
+            // Chuyển hướng đến trang đăng nhập sau 1 giây
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 1000);
+
+        } catch (error) {
+            // Xử lý lỗi từ backend
+            setNotification({
+                show: true,
+                message: error.response?.data || 'Đăng ký thất bại!',
+                type: 'error'
+            });
+            
+            // Tự động ẩn thông báo lỗi sau 3 giây
+            setTimeout(() => {
+                setNotification(prev => ({ ...prev, show: false }));
+            }, 3000);
+        }
     }
   };
 
@@ -137,7 +173,6 @@ export const RegisterPage = () => {
       >
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
-
         {/* Form Container */}
         <div className="max-w-md w-full space-y-8 relative z-10 my-8 bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-2xl">
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
@@ -149,80 +184,173 @@ export const RegisterPage = () => {
               to="/login"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              đăng nhập nếu đã có tài khoản
+              Đăng nhập nếu đã có tài khoản
             </Link>
           </p>
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {/* First Name & Last Name */}
             <div className="grid grid-cols-2 gap-4">
-              {/* First Name */}
-              <div className="relative">
-                <FaUser className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-600" />
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  onBlur={() => handleBlur("firstName")}
-                  className={`rounded-lg w-full pl-10 pr-3 py-3 border ${
-                    touched.firstName && errors.firstName
-                      ? "border-red-500"
-                      : "border-gray-300"
-                  } bg-white`}
-                  placeholder="Họ"
-                />
+              <div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaUser className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    onBlur={() => handleBlur('firstName')}
+                    className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${
+                      touched.firstName && errors.firstName ? 'border-red-500' : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                    placeholder="Họ"
+                  />
+                </div>
                 {touched.firstName && errors.firstName && (
-                  <p className="text-sm text-red-600">{errors.firstName}</p>
+                  <p className="mt-2 text-sm text-red-600">{errors.firstName}</p>
                 )}
               </div>
-
-              {/* Last Name */}
-              <div className="relative">
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  onBlur={() => handleBlur("lastName")}
-                  className={`rounded-lg w-full px-3 py-3 border ${
-                    touched.lastName && errors.lastName
-                      ? "border-red-500"
-                      : "border-gray-300"
-                  } bg-white`}
-                  placeholder="Tên"
-                />
+              <div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    onBlur={() => handleBlur('lastName')}
+                    className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${
+                      touched.lastName && errors.lastName ? 'border-red-500' : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                    placeholder="Tên"
+                  />
+                </div>
                 {touched.lastName && errors.lastName && (
-                  <p className="text-sm text-red-600">{errors.lastName}</p>
+                  <p className="mt-2 text-sm text-red-600">{errors.lastName}</p>
                 )}
               </div>
             </div>
+            {/* Username Field */}
+            <div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaUser className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur('username')}
+                  className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${
+                    touched.username && errors.username ? 'border-red-500' : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                  placeholder="Tên đăng nhập"
+                />
+              </div>
+              {touched.username && errors.username && (
+                <p className="mt-2 text-sm text-red-600">{errors.username}</p>
+              )}
+            </div>
 
             {/* Email Field */}
-            <div className="relative">
-              <FaEnvelope className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-600" />
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                onBlur={() => handleBlur("email")}
-                className={`rounded-lg w-full pl-10 pr-3 py-3 border ${
-                  touched.email && errors.email
-                    ? "border-red-500"
-                    : "border-gray-300"
-                } bg-white`}
-                placeholder="Email"
-              />
+            <div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaEnvelope className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur('email')}
+                  className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${
+                    touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                  placeholder="Email"
+                />
+              </div>
               {touched.email && errors.email && (
-                <p className="text-sm text-red-600">{errors.email}</p>
+                <p className="mt-2 text-sm text-red-600">{errors.email}</p>
               )}
+            </div>
+
+            {/* Password Fields */}
+            <div className="space-y-4">
+              <div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaLock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    onBlur={() => handleBlur('password')}
+                    className={`appearance-none rounded-lg relative block w-full pl-10 pr-10 py-2 border ${
+                      touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                    placeholder="Mật khẩu"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <FaEye className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+                {touched.password && errors.password && (
+                  <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+                )}
+              </div>
+
+              <div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaLock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    onBlur={() => handleBlur('confirmPassword')}
+                    className={`appearance-none rounded-lg relative block w-full pl-10 pr-10 py-2 border ${
+                      touched.confirmPassword && errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                    placeholder="Xác nhận mật khẩu"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <FaEyeSlash className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <FaEye className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+                {touched.confirmPassword && errors.confirmPassword && (
+                  <p className="mt-2 text-sm text-red-600">{errors.confirmPassword}</p>
+                )}
+              </div>
             </div>
 
             {/* Submit Button */}
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition duration-300"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Đăng ký
               </button>
