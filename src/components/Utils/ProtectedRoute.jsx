@@ -1,16 +1,13 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
-export const ProtectedRoute = ({ element, allowedRoles }) => {
-  const { isAuthenticated, userRole } = useAuth();
+export const ProtectedRoute = ({ children }) => {
+    const { isAuthenticated } = useAuth();
+    
+    if (!isAuthenticated) {
+        // Nếu chưa đăng nhập, chuyển hướng về trang login
+        return <Navigate to="/login" replace />;
+    }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    return <Navigate to="/" replace />;
-  }
-
-  return element;
+    return children;
 };
