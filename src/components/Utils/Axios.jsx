@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseUrl = "https://localhost:7190/";
+const baseUrl = "http://localhost:7190/";
 
 const config = {
   baseURL: baseUrl,
