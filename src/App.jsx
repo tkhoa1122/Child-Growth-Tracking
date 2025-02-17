@@ -45,7 +45,6 @@ function App() {
                   />
                 } 
               />
-              <Route path="/bmi" element={<BMIChecking />} />
               {/* <Route 
                 path="/family-profile" 
                 element={
