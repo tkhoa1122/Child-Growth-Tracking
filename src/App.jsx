@@ -15,6 +15,8 @@ import { AuthProvider } from './components/Utils/AuthContext'
 import { ProtectedRoute } from './components/Utils/ProtectedRoute'
 import { FamilyProfileManagement } from './components/FamilyProfileManagement'
 import { DetailFamilyProfile } from './components/DetailFamilyProfile'
+import { BMIChecking } from './components/sections/BMIChecking'
+
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
   return (
@@ -43,7 +45,7 @@ function App() {
                   />
                 } 
               />
-
+              <Route path="/bmi" element={<BMIChecking />} />
               {/* <Route 
                 path="/family-profile" 
                 element={

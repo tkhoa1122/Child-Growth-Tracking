@@ -4,7 +4,7 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } f
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { useAuth } from './Utils/AuthContext';
-import api from './Utils/Axios';
+import api from "../components/Utils/Axios";
 
 const backgroundImage = '/Images/background.jpg';
 

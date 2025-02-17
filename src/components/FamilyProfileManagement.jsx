@@ -3,6 +3,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { Navbar } from './sections/Navbar';
 import { FaUser, FaEnvelope, FaCalendar, FaMapMarkerAlt, FaVenusMars, FaCamera, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 export const FamilyProfileManagement = () => {
     // Dữ liệu mẫu
@@ -191,11 +192,13 @@ export const FamilyProfileManagement = () => {
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
                                                         <div className="flex-shrink-0 h-12 w-12">
-                                                            <img
-                                                                className="h-12 w-12 rounded-full object-cover"
-                                                                src={member.avatarUrl}
-                                                                alt={`${member.firstName} ${member.lastName}`}
-                                                            />
+                                                            <Link to={`/child-bmi/${member.id}`}>
+                                                                <img
+                                                                    className="h-12 w-12 rounded-full object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                                                                    src={member.avatarUrl}
+                                                                    alt={`${member.firstName} ${member.lastName}`}
+                                                                />
+                                                            </Link>
                                                         </div>
                                                         <div className="ml-4">
                                                             <div className="text-sm font-medium text-gray-900">
