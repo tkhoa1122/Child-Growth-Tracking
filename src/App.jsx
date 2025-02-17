@@ -15,6 +15,8 @@ import { AuthProvider } from './components/Utils/AuthContext'
 import { ProtectedRoute } from './components/Utils/ProtectedRoute'
 import { FamilyProfileManagement } from './components/FamilyProfileManagement'
 import { DetailFamilyProfile } from './components/DetailFamilyProfile'
+import { Product } from './components/Product'
+
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
   return (
@@ -43,6 +45,7 @@ function App() {
                   />
                 } 
               />
+              <Route path="/products" element={<Product />} />
 
               {/* <Route 
                 path="/family-profile" 
