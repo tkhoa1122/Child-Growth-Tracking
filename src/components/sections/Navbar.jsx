@@ -40,12 +40,16 @@ export const Navbar = () => {
                         <Link to="/about" className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors`}>
                             About
                         </Link>
+                        <Link to="/products" className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors`}>
+                            Products
+                        </Link>
                         <Link to="/projects" className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors`}>
                             Projects
                         </Link>
                         <Link to="/contact" className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors`}>
                             Contact
                         </Link>
+                      
                     </div>
                 </div>
 
@@ -83,6 +87,13 @@ export const Navbar = () => {
                             onClick={() => setIsMenuOpen(false)}
                         >
                             About
+                        </Link>
+                        <Link 
+                            to="/products" 
+                            className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors text-center`}
+                            onClick={() => setIsMenuOpen(false)}
+                        >
+                            Products
                         </Link>
                         <Link 
                             to="/projects" 

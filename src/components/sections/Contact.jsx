@@ -1,30 +1,53 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import emailjs from '@emailjs/browser';
 
 // Thay vì import, sử dụng đường dẫn trực tiếp
 const backgroundImageUrl = '/Images/background.jpg';
 
 export const Contact = () => {
+    const form = useRef();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         subject: '',
         message: ''
     });
+    const [status, setStatus] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Xử lý logic gửi form
-        console.log('Form submitted:', formData);
+        setStatus('sending');
+
+        try {
+            await emailjs.sendForm(
+                'service_nv7g0it', // Service ID từ EmailJS
+                'template_tfjcdsc', // Template ID từ EmailJS
+                form.current,
+                'DJobhjFZcTmwWYePX' // Public Key từ EmailJS
+            );
+
+            setStatus('success');
+            setFormData({
+                name: '',
+                email: '',
+                subject: '',
+                message: ''
+            });
+        } catch (error) {
+            console.error('Lỗi khi gửi email:', error);
+            setStatus('error');
+        }
     };
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
     };
 
     return (
@@ -128,11 +151,11 @@ export const Contact = () => {
                             </div>
 
                             {/* Contact Form */}
-                            <div className="bg-white p-8 rounded-xl shadow-lg">
+                            <div className="bg-gray-50 p-8 rounded-xl shadow-lg">
                                 <h2 className="text-2xl font-bold mb-6 text-gray-800">
                                     Gửi Tin Nhắn
                                 </h2>
-                                <form onSubmit={handleSubmit} className="space-y-6">
+                                <form ref={form} onSubmit={handleSubmit} className="space-y-6">
                                     <div>
                                         <label className="block text-gray-700 font-medium mb-2">
                                             Họ và tên
@@ -142,7 +165,7 @@ export const Contact = () => {
                                             name="name"
                                             value={formData.name}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                                             placeholder="Nhập họ và tên của bạn"
                                             required
                                         />
@@ -156,7 +179,7 @@ export const Contact = () => {
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                                             placeholder="example@email.com"
                                             required
                                         />
@@ -170,7 +193,7 @@ export const Contact = () => {
                                             name="subject"
                                             value={formData.subject}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                                             placeholder="Nhập tiêu đề"
                                             required
                                         />
@@ -184,16 +207,36 @@ export const Contact = () => {
                                             value={formData.message}
                                             onChange={handleChange}
                                             rows="5"
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                                             placeholder="Nhập nội dung tin nhắn của bạn"
                                             required
                                         ></textarea>
                                     </div>
+
+                                    {status === 'sending' && (
+                                        <div className="text-blue-500 text-center">
+                                            Đang gửi tin nhắn...
+                                        </div>
+                                    )}
+                                    
+                                    {status === 'success' && (
+                                        <div className="text-green-500 text-center">
+                                            Tin nhắn đã được gửi thành công!
+                                        </div>
+                                    )}
+                                    
+                                    {status === 'error' && (
+                                        <div className="text-red-500 text-center">
+                                            Có lỗi xảy ra. Vui lòng thử lại sau.
+                                        </div>
+                                    )}
+
                                     <button
                                         type="submit"
-                                        className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                                        disabled={status === 'sending'}
+                                        className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
                                     >
-                                        Gửi Tin Nhắn
+                                        {status === 'sending' ? 'Đang gửi...' : 'Gửi Tin Nhắn'}
                                     </button>
                                 </form>
                             </div>

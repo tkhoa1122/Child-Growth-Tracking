@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Header } from './Header';
-import { Footer } from './Footer';
-import { Navbar } from './sections/Navbar';
+import { Header } from '../Header';
+import { Footer } from '../Footer';
+import { Navbar } from '../sections/Navbar';
 import { FaUser, FaEnvelope, FaCalendar, FaMapMarkerAlt, FaVenusMars, FaCamera } from 'react-icons/fa';
 import { Line } from 'react-chartjs-2';
 import {
