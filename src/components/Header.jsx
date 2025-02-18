@@ -1,17 +1,26 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaUserCircle } from 'react-icons/fa';
+import { useAuth } from './Utils/AuthContext';
+import { jwtDecode } from 'jwt-decode';
 
 export const Header = () => {
     const navigate = useNavigate();
+    const { isAuthenticated, logout } = useAuth();
     const [searchQuery, setSearchQuery] = useState('');
     const [showUserMenu, setShowUserMenu] = useState(false);
-    //this is main when we have API
-    //const [isLoggedIn, setIsLoggedIn] = useState(false);
-    //demo
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    const userName = localStorage.getItem('userName');
 
+    // Lấy thông tin user từ token nếu đã đăng nhập
+    let userEmail = '';
+    if (isAuthenticated) {
+        const token = localStorage.getItem('token');
+        try {
+            const decoded = jwtDecode(token);
+            userEmail = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+        } catch (error) {
+            console.error('Error decoding token:', error);
+        }
+    }
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -19,10 +28,11 @@ export const Header = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('isAuthenticated');
-        localStorage.removeItem('userName');
-        //setIsLoggedIn(false);
+        // Gọi hàm logout từ AuthContext
+        logout();
+        // Đóng menu user nếu đang mở
         setShowUserMenu(false);
+        // Chuyển về trang chủ
         navigate('/');
     };
 
@@ -47,7 +57,7 @@ export const Header = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Tìm kiếm..."
-                                className="w-full px-4 py-2 pl-10 pr-4 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder:text-gray-500 placeholder:font-medium"
+                                className="w-full px-4 py-2 pl-10 pr-4 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-black"
                             />
                             <button 
                                 type="submit"
@@ -67,7 +77,7 @@ export const Header = () => {
                                     className="flex items-center space-x-2 text-gray-700 hover:text-blue-500 transition-colors"
                                 >
                                     <FaUserCircle className="w-6 h-6" />
-                                    <span>{userName}</span>
+                                    <span className="text-sm">{userEmail}</span>
                                 </button>
                                 
                                 {/* Dropdown Menu */}
