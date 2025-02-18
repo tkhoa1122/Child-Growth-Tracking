@@ -13,8 +13,10 @@ import "./index.css"
 import Profile from './components/protection_page/Profile'
 import { AuthProvider } from './components/Utils/AuthContext'
 import { ProtectedRoute } from './components/Utils/ProtectedRoute'
-import { FamilyProfileManagement } from './components/FamilyProfileManagement'
-import { DetailFamilyProfile } from './components/DetailFamilyProfile'
+import { FamilyProfileManagement } from './components/protection_page/FamilyProfileManagement'
+import { DetailFamilyProfile } from './components/protection_page/DetailFamilyProfile'
+import { Product } from './components/Product'
+
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -33,28 +35,39 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/family-profile" element={<FamilyProfileManagement />} />
-              <Route path="/detail-family-profile" element={<DetailFamilyProfile />} />
+              <Route path="/products" element={<Product />} />
               <Route 
                 path="/profile" 
                 element={
-                  <ProtectedRoute 
-                    element={<Profile />} 
-                    allowedRoles={['user', 'admin']} 
-                  />
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
                 } 
               />
-              {/* <Route 
+              <Route 
                 path="/family-profile" 
                 element={
-                  <ProtectedRoute 
-                    element={<FamilyProfileManagement />} 
-                    allowedRoles={['user', 'admin']} 
-                  />
+                  <ProtectedRoute>
+                    <FamilyProfileManagement />
+                  </ProtectedRoute>
                 } 
-              /> */}
-
-
+              />
+              <Route 
+                path="/detail-family" 
+                element={
+                  <ProtectedRoute>
+                    <DetailFamilyProfile />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="*" element={
+                <div className="flex items-center justify-center min-h-screen">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold mb-4">404</h1>
+                    <p className="text-xl">Trang không tồn tại</p>
+                  </div>
+                </div>
+              } />
             </Routes>
           </div>
         </>

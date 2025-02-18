@@ -30,20 +30,14 @@ const backgroundImageUrl = '/Images/background.jpg';
 export const Projects = () => {
     const [weight, setWeight] = useState('');
     const [height, setHeight] = useState('');
-    const [age, setAge] = useState('');
-    const [gender, setGender] = useState('male');
     const [bmiResult, setBmiResult] = useState(null);
-    const [currentBMIPoint, setCurrentBMIPoint] = useState(null);
 
     // Thêm hàm kiểm tra form hợp lệ
     const isFormValid = () => {
         return weight !== '' && 
                height !== '' && 
-               age !== '' && 
                Number(weight) > 0 && 
-               Number(height) > 0 && 
-               Number(age) >= 0 && 
-               Number(age) <= 18;
+               Number(height) > 0;
     };
 
     const calculateBMI = () => {
@@ -54,9 +48,6 @@ export const Projects = () => {
         const heightInMeters = height / 100;
         const bmi = weight / (heightInMeters * heightInMeters);
         
-        // Cập nhật điểm BMI hiện tại
-        setCurrentBMIPoint(parseFloat(bmi.toFixed(1)));
-
         let category = '';
         let message = '';
 
@@ -97,10 +88,7 @@ export const Projects = () => {
     const resetForm = () => {
         setWeight('');
         setHeight('');
-        setAge('');
-        setGender('male');
         setBmiResult(null);
-        setCurrentBMIPoint(null);
     };
 
     // Data cho biểu đồ BMI theo tuổi (0-18 tuổi) - Nam
@@ -128,15 +116,6 @@ export const Projects = () => {
                 backgroundColor: 'rgba(53, 162, 235, 0.2)',
                 fill: false
             },
-            ...(currentBMIPoint && age ? [{
-                label: 'BMI hiện tại',
-                data: Array(10).fill(null).map((_, i) => i * 2 === parseInt(age) ? currentBMIPoint : null),
-                pointBackgroundColor: 'rgba(255, 0, 0, 1)',
-                pointBorderColor: 'rgba(255, 0, 0, 1)',
-                pointRadius: 8,
-                pointHoverRadius: 10,
-                showLine: false
-            }] : [])
         ],
     };
 
@@ -165,15 +144,6 @@ export const Projects = () => {
                 backgroundColor: 'rgba(53, 162, 235, 0.2)',
                 fill: false
             },
-            ...(currentBMIPoint && age ? [{
-                label: 'BMI hiện tại',
-                data: Array(10).fill(null).map((_, i) => i * 2 === parseInt(age) ? currentBMIPoint : null),
-                pointBackgroundColor: 'rgba(255, 0, 0, 1)',
-                pointBorderColor: 'rgba(255, 0, 0, 1)',
-                pointRadius: 8,
-                pointHoverRadius: 10,
-                showLine: false
-            }] : [])
         ],
     };
 
@@ -236,11 +206,10 @@ export const Projects = () => {
                 <div className="absolute inset-0 bg-black/60"></div>
                 <div className="relative z-10 max-w-7xl mx-auto text-center">
                     <h1 className="text-5xl font-bold text-white mb-6">
-                        Dự án Sức khỏe Nhi khoa
+                        Tính chỉ số BMI
                     </h1>
                     <p className="text-xl text-gray-200 max-w-4xl mx-auto">
-                        Theo dõi và đánh giá sự phát triển của trẻ em từ 0-18 tuổi
-                        thông qua các chỉ số sức khỏe quan trọng
+                        Công cụ tính chỉ số khối cơ thể (BMI) để đánh giá tình trạng cân nặng
                     </p>
                 </div>
             </section>
@@ -249,9 +218,6 @@ export const Projects = () => {
                 {/* BMI Calculator Section */}
                 <section className="py-12 bg-white">
                     <div className="max-w-3xl mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
-                            Tính chỉ số BMI
-                        </h2>
                         <div className="bg-gray-50 p-6 rounded-lg shadow-md">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div>
@@ -274,27 +240,6 @@ export const Projects = () => {
                                         placeholder="Ví dụ: 170"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-gray-700 mb-2">Tuổi</label>
-                                    <input
-                                        type="number"
-                                        value={age}
-                                        onChange={(e) => setAge(e.target.value)}
-                                        className="w-full p-2 border rounded text-gray-700"
-                                        placeholder="Ví dụ: 25"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-700 mb-2">Giới tính</label>
-                                    <select
-                                        value={gender}
-                                        onChange={(e) => setGender(e.target.value)}
-                                        className="w-full p-2 border rounded text-gray-700"
-                                    >
-                                        <option value="male">Nam</option>
-                                        <option value="female">Nữ</option>
-                                    </select>
-                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <button
@@ -309,23 +254,23 @@ export const Projects = () => {
                                 </button>
                                 <button
                                     onClick={resetForm}
-                                    className="w-full bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition duration-200"
+                                    className="w-full py-2 px-4 bg-gray-500 hover:bg-gray-600 text-white rounded transition duration-200"
                                 >
-                                    Làm mới
+                                    Đặt lại
                                 </button>
                             </div>
 
+                            {/* Hiển thị kết quả BMI */}
                             {bmiResult && (
                                 <div className="mt-6 p-4 bg-white rounded-lg border">
-                                    <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                                        Kết quả BMI: {bmiResult.bmi}
-                                    </h3>
-                                    <p className="text-lg font-medium text-gray-700 mb-2">
-                                        Phân loại: {bmiResult.category}
-                                    </p>
-                                    <p className="text-gray-600">
-                                        {bmiResult.message}
-                                    </p>
+                                    <h3 className="text-xl font-semibold text-gray-800 mb-2">Kết quả BMI của bạn</h3>
+                                    <div className="text-lg text-gray-700 mb-2">
+                                        Chỉ số BMI: <span className="font-bold">{bmiResult.bmi}</span>
+                                    </div>
+                                    <div className="text-lg text-gray-700 mb-2">
+                                        Phân loại: <span className="font-bold">{bmiResult.category}</span>
+                                    </div>
+                                    <p className="text-gray-600 mt-2">{bmiResult.message}</p>
                                 </div>
                             )}
                         </div>
@@ -348,7 +293,7 @@ export const Projects = () => {
                                         giúp phát hiện sớm các vấn đề về cân nặng và chiều cao.
                                     </p>
                                     <div className="bg-gray-50 p-4 rounded-lg">
-                                        <Line options={options} data={gender === 'male' ? bmiBoyData : bmiGirlData} />
+                                        <Line options={options} data={bmiBoyData} />
                                     </div>
                                 </div>
                             </div>
@@ -365,7 +310,7 @@ export const Projects = () => {
                                         đảm bảo sự phát triển cân đối và khỏe mạnh.
                                     </p>
                                     <div className="bg-gray-50 p-4 rounded-lg">
-                                        <Line options={options} data={gender === 'female' ? bmiGirlData : bmiBoyData} />
+                                        <Line options={options} data={bmiGirlData} />
                                     </div>
                                 </div>
                             </div>
