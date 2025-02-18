@@ -60,7 +60,7 @@ export const Login = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
-                const response = await api.post('auth/login', {
+                const response = await api.post('/api/Auth/login', {
                     email: formData.email,
                     password: formData.password
                 });
