@@ -9,43 +9,42 @@ import api from "../components/Utils/Axios";
 const backgroundImage = '/Images/background.jpg';
 
 export const Login = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
+    
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         rememberMe: false
     });
 
-    const [errors, setErrors] = useState({});
+    const [notification, setNotification] = useState({
+        show: false,
+        message: '',
+        type: ''
+    });
+
     const [showPassword, setShowPassword] = useState(false);
+    const [errors, setErrors] = useState({});
     const [touched, setTouched] = useState({
         email: false,
         password: false
     });
-
-    const [notification, setNotification] = useState({
-        show: false,
-        message: '',
-        type: '' // 'success' hoặc 'error'
-    });
-
-    const { login } = useAuth();
 
     const validateForm = () => {
         let tempErrors = {};
         const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 
         if (!formData.email) {
-            tempErrors.email = 'Email là bắt buộc';
+            tempErrors.email = "Email là bắt buộc";
         } else if (!emailRegex.test(formData.email)) {
-            tempErrors.email = 'Email không hợp lệ';
+            tempErrors.email = "Email không hợp lệ";
         }
 
         if (!formData.password) {
-            tempErrors.password = 'Mật khẩu là bắt buộc';
+            tempErrors.password = "Mật khẩu là bắt buộc";
         } else if (formData.password.length < 6) {
-            tempErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+            tempErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
         }
 
         setErrors(tempErrors);
@@ -60,26 +59,40 @@ export const Login = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
-                const response = await api.post('/api/Auth/login', {
+
+                const response = await api.post('api/Auth/login', {
                     email: formData.email,
                     password: formData.password
                 });
-                login(response.data.token);
-                setIsAuthenticated(true);
-                setNotification({
-                    show: true,
-                    message: 'Đăng nhập thành công!',
-                    type: 'success'
-                });
-                setTimeout(() => {
-                    navigate("/");
-                }, 1000);
+
+                if (response.data.status) {
+                    const token = response.data.jwt;
+                    localStorage.setItem('token', token);
+                    if (formData.rememberMe) {
+                        localStorage.setItem('rememberMe', 'true');
+                    }
+                    
+                    login(token);
+                    
+                    setNotification({
+                        show: true,
+                        message: 'Đăng nhập thành công!',
+                        type: 'success'
+                    });
+
+                    setTimeout(() => {
+                        navigate('/profile');
+                    }, 1000);
+                } else {
+                    throw new Error(response.data.message || 'Đăng nhập thất bại');
+                }
             } catch (error) {
                 setNotification({
                     show: true,
-                    message: 'Email hoặc mật khẩu không chính xác!',
+                    message: error.response?.data?.message || 'Email hoặc mật khẩu không chính xác',
                     type: 'error'
                 });
+                
                 setTimeout(() => {
                     setNotification(prev => ({ ...prev, show: false }));
                 }, 3000);
@@ -106,7 +119,7 @@ export const Login = () => {
         <div className="h-370 flex flex-col">
             <Header />
             
-            {/* Thêm thông báo popup */}
+            {/* Notification Popup */}
             {notification.show && (
                 <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
                     notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'
@@ -172,7 +185,9 @@ export const Login = () => {
                                         placeholder="Địa chỉ email"
                                     />
                                 </div>
-                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${touched.email && errors.email ? 'opacity-100' : 'opacity-0'}`}>
+                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${
+                                    touched.email && errors.email ? 'opacity-100' : 'opacity-0'
+                                }`}>
                                     {errors.email || 'Email là bắt buộc'}
                                 </p>
                             </div>
@@ -206,7 +221,9 @@ export const Login = () => {
                                         )}
                                     </button>
                                 </div>
-                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${touched.password && errors.password ? 'opacity-100' : 'opacity-0'}`}>
+                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${
+                                    touched.password && errors.password ? 'opacity-100' : 'opacity-0'
+                                }`}>
                                     {errors.password || 'Mật khẩu là bắt buộc'}
                                 </p>
                             </div>
