@@ -15,6 +15,7 @@ import { AuthProvider } from './components/Utils/AuthContext'
 import { ProtectedRoute } from './components/Utils/ProtectedRoute'
 import { FamilyProfileManagement } from './components/FamilyProfileManagement'
 import { DetailFamilyProfile } from './components/DetailFamilyProfile'
+import { OTPVerification } from './components/OTPVerification'
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -44,6 +45,7 @@ function App() {
                   />
                 } 
               />
+              <Route path="/verify-otp" element={<OTPVerification />} />
               {/* <Route 
                 path="/family-profile" 
                 element={
