@@ -24,6 +24,7 @@ import { ProductManagement } from './components/protection_page/Doctor/ProductMa
 import { RequestManagement } from './components/protection_page/Doctor/RequestManagement';
 import AppointmentManagement from './components/protection_page/Doctor/AppointmentManagement';
 import FeedbackManagement from './components/protection_page/Doctor/FeedbackManagement';
+import AdminDashboard from './components/protection_page/Admin/AdminDashboard';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -115,6 +116,56 @@ function App() {
                 element={
                   //<ProtectedRoute>
                   <ConsultationDetail />
+                  //</ProtectedRoute>
+                }
+              />
+
+              //Admin
+              <Route
+                path="/admin-dashboard"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/users"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/doctors"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/services"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/statistics"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/settings"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
                   //</ProtectedRoute>
                 }
               />
