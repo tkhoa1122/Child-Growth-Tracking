@@ -116,7 +116,7 @@ export const RegisterPage = () => {
             // Chuyển hướng đến trang OTP với email
             setTimeout(() => {
                 navigate(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
-            }, 1000);
+            }, 500);
 
         } catch (error) {
             // Log chi tiết lỗi
@@ -134,7 +134,7 @@ export const RegisterPage = () => {
 
             setTimeout(() => {
                 setNotification(prev => ({ ...prev, show: false }));
-            }, 2000);
+            }, 1000);
         }
     } else {
         console.log("Form validation failed:", errors);
