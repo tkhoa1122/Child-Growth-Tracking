@@ -8,7 +8,7 @@ import { Contact } from './components/sections/Contact'
 import { Projects } from './components/sections/Projects'
 import { Login } from './components/Login'
 import { RegisterPage } from './components/RegisterPage'
-import { Navbar } from './components/sections/Navbar'
+// import { Navbar } from './components/sections/Navbar'
 import "./index.css"
 import Profile from './components/protection_page/Profile'
 import { AuthProvider } from './components/Utils/AuthContext'
