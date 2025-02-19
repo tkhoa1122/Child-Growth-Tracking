@@ -59,10 +59,19 @@ export const Login = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
-                const response = await api.post('api/Auth/login', {
+                // Log dữ liệu trước khi gửi request
+                console.log("Sending login data:", {
                     email: formData.email,
                     password: formData.password
                 });
+
+                const response = await api.post('Auth/login', {
+                    email: formData.email.trim(),
+                    password: formData.password
+                });
+
+                // Log response từ server
+                console.log("Login response:", response);
 
                 if (response.data.status) {
                     const token = response.data.jwt;
@@ -80,12 +89,19 @@ export const Login = () => {
                     });
 
                     setTimeout(() => {
-                        navigate('/profile');
+                        navigate('/home');
                     }, 1000);
                 } else {
                     throw new Error(response.data.message || 'Đăng nhập thất bại');
                 }
             } catch (error) {
+                // Log chi tiết lỗi
+                console.error("Login error:", {
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    message: error.response?.data?.message
+                });
+
                 setNotification({
                     show: true,
                     message: error.response?.data?.message || 'Email hoặc mật khẩu không chính xác',

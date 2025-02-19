@@ -7,7 +7,7 @@ import { About } from './components/sections/About'
 import { Contact } from './components/sections/Contact'
 import { Projects } from './components/sections/Projects'
 import { Login } from './components/Login'
-import {RegisterPage} from './components/RegisterPage'
+import { RegisterPage } from './components/RegisterPage'
 import { Navbar } from './components/sections/Navbar'
 import "./index.css"
 import Profile from './components/protection_page/Profile'
@@ -17,6 +17,14 @@ import { FamilyProfileManagement } from './components/protection_page/FamilyProf
 import { DetailFamilyProfile } from './components/protection_page/DetailFamilyProfile'
 import { Product } from './components/Product'
 
+import { OTPVerification } from './components/OTPVerification'
+import DoctorDashboard from './components/protection_page/Doctor/DoctorDashBoard'
+import { ConsultationDetail } from './components/protection_page/Doctor/ConsultationDetail'
+import { ProductManagement } from './components/protection_page/Doctor/ProductManagement';
+import { RequestManagement } from './components/protection_page/Doctor/RequestManagement';
+import AppointmentManagement from './components/protection_page/Doctor/AppointmentManagement';
+import FeedbackManagement from './components/protection_page/Doctor/FeedbackManagement';
+import AdminDashboard from './components/protection_page/Admin/AdminDashboard';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -26,7 +34,6 @@ function App() {
         <>
           {!isLoaded && <LoadingScreen onComplete={() => setIsLoaded(true)} />}
           <div className={`min-h-screen transition-opacity duration-600 ${isLoaded ? "opacity-100" : "opacity-0"} bg-[rgba(3, 3, 3, 0.8)] text-gray-100`}>
-            <Navbar />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />} />
@@ -36,30 +43,133 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/products" element={<Product />} />
-              <Route 
-                path="/profile" 
+              <Route
+                path="/profile"
                 element={
                   <ProtectedRoute>
                     <Profile />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/family-profile" 
+              <Route path="/verify-otp" element={<OTPVerification />} />
+
+              //Family
+              <Route
+                path="/family-profile"
                 element={
                   <ProtectedRoute>
                     <FamilyProfileManagement />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/detail-family" 
+              <Route
+                path="/detail-family"
                 element={
                   <ProtectedRoute>
                     <DetailFamilyProfile />
                   </ProtectedRoute>
-                } 
+                }
               />
+
+              //Doctor
+              <Route
+                path="/doctor-dashboard"
+                element={
+                  //<ProtectedRoute>
+                  <DoctorDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor-dashboard/products"
+                element={
+                  //<ProtectedRoute>
+                  <ProductManagement />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor-dashboard/requests"
+                element={
+                  //<ProtectedRoute>
+                  <RequestManagement />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor-dashboard/appointments"
+                element={
+                  //<ProtectedRoute>
+                  <AppointmentManagement />
+                  //</ProtectedRoute>
+                } />
+              <Route
+                path="/doctor-dashboard/feedback"
+                element={
+                  // <ProtectedRoute>
+                  <FeedbackManagement />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/consultation-detail"
+                element={
+                  //<ProtectedRoute>
+                  <ConsultationDetail />
+                  //</ProtectedRoute>
+                }
+              />
+
+              //Admin
+              <Route
+                path="/admin-dashboard"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/users"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/doctors"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/services"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/statistics"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard/settings"
+                element={
+                  //<ProtectedRoute>
+                    <AdminDashboard />
+                  //</ProtectedRoute>
+                }
+              />
+
               <Route path="*" element={
                 <div className="flex items-center justify-center min-h-screen">
                   <div className="text-center">

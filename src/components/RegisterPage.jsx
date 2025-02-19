@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser } from "react-icons/fa";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
@@ -10,10 +10,11 @@ export const RegisterPage = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    phoneNumber: "",
+    address: ""
   });
 
   const backgroundImage = '/Images/background.jpg';
@@ -23,10 +24,11 @@ export const RegisterPage = () => {
   const [touched, setTouched] = useState({
     firstName: false,
     lastName: false,
-    username: false,
     email: false,
     password: false,
     confirmPassword: false,
+    phoneNumber: false,
+    address: false,
   });
 
   const [notification, setNotification] = useState({
@@ -35,113 +37,110 @@ export const RegisterPage = () => {
     type: "success"
   });
 
+  const navigate = useNavigate();
+
   const validateForm = () => {
     let tempErrors = {};
     const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
 
-    // Validate First Name
-    if (!formData.firstName.trim()) {
+    if (!formData.firstName || formData.firstName.trim() === "") {
       tempErrors.firstName = "Họ là bắt buộc";
     }
 
-    // Validate Last Name
-    if (!formData.lastName.trim()) {
+    if (!formData.lastName || formData.lastName.trim() === "") {
       tempErrors.lastName = "Tên là bắt buộc";
     }
 
-    // Validate Username
-    if (!formData.username) {
-      tempErrors.username = "Username là bắt buộc";
-    } else if (!usernameRegex.test(formData.username)) {
-      tempErrors.username =
-        "Username chỉ được chứa chữ cái, số và dấu gạch dưới, độ dài 3-20 ký tự";
-    }
-
-    // Validate Email
-    if (!formData.email) {
+    if (!formData.email || formData.email.trim() === "") {
       tempErrors.email = "Email là bắt buộc";
     } else if (!emailRegex.test(formData.email)) {
       tempErrors.email = "Email không hợp lệ";
     }
 
-    // Validate Password
-    if (!formData.password) {
+    if (!formData.password || formData.password.trim() === "") {
       tempErrors.password = "Mật khẩu là bắt buộc";
     } else if (formData.password.length < 6) {
       tempErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
     }
 
-    // Validate Confirm Password
-    if (!formData.confirmPassword) {
+    if (!formData.confirmPassword || formData.confirmPassword.trim() === "") {
       tempErrors.confirmPassword = "Xác nhận mật khẩu là bắt buộc";
     } else if (formData.confirmPassword !== formData.password) {
       tempErrors.confirmPassword = "Mật khẩu không khớp";
+    }
+
+    if (!formData.phoneNumber || formData.phoneNumber.trim() === "") {
+      tempErrors.phoneNumber = "Số điện thoại là bắt buộc";
+    } else if (!/^\d{10,11}$/.test(formData.phoneNumber)) {
+      tempErrors.phoneNumber = "Số điện thoại không hợp lệ";
+    }
+
+    if (!formData.address || formData.address.trim() === "") {
+      tempErrors.address = "Địa chỉ là bắt buộc";
     }
 
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const allFieldsTouched = Object.keys(touched).every((key) => touched[key]);
-
-    if (!allFieldsTouched) {
-      setTouched(
-        Object.keys(touched).reduce((acc, key) => ({ ...acc, [key]: true }), {})
-      );
-    }
-
     if (validateForm()) {
-      console.log("Form submitted:", formData);
-      // // Xử lý đăng ký ở đây
-      // localStorage.setItem(
-      //   "user",
-      //   JSON.stringify({
-      //     firstName: formData.firstName,
-      //     lastName: formData.lastName,
-      //     email: formData.email,
-      //     password: formData.password,
-      //   })
-      // );
         try {
-            // Gửi request đăng ký đến backend
-            const response = await api.post('api/Auth/register', {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                username: formData.username,
-                email: formData.email,
-                password: formData.password
-            });
+            // Tạo object data theo đúng format API yêu cầu
+            const registerData = {
+                email: formData.email.trim(),
+                password: formData.password,
+                firstName: formData.firstName.trim(),
+                lastName: formData.lastName.trim(),
+                phoneNumber: formData.phoneNumber.trim(),
+                address: formData.address.trim()
+            };
 
-            // Hiển thị thông báo thành công
+            // Log data trước khi gửi request
+            console.log("Sending registration data:", registerData);
+
+            // Gửi request đến API endpoint
+            const response = await api.post("Auth/register", registerData);
+            
+            // Log response từ server
+            console.log("Server response:", response);
+
             setNotification({
                 show: true,
-                message: 'Đăng ký thành công!',
-                type: 'success'
+                message: response.data.message || "Đăng ký thành công! Vui lòng kiểm tra email để nhập mã OTP",
+                type: "success"
             });
 
-            // Chuyển hướng đến trang đăng nhập sau 1 giây
+            // Chuyển hướng đến trang OTP với email
             setTimeout(() => {
-                window.location.href = "/login";
-            }, 1000);
+                navigate(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
+            }, 500);
 
         } catch (error) {
-            // Xử lý lỗi từ backend
+            // Log chi tiết lỗi
+            console.error("Registration error:", {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.response?.data?.message
+            });
+
             setNotification({
                 show: true,
-                message: error.response?.data || 'Đăng ký thất bại!',
-                type: 'error'
+                message: error.response?.data?.message || "Đăng ký thất bại! Vui lòng thử lại.",
+                type: "error"
             });
-            
-            // Tự động ẩn thông báo lỗi sau 3 giây
+
             setTimeout(() => {
                 setNotification(prev => ({ ...prev, show: false }));
-            }, 3000);
+            }, 1000);
         }
+    } else {
+        console.log("Form validation failed:", errors);
     }
   };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -203,9 +202,8 @@ export const RegisterPage = () => {
                     value={formData.firstName}
                     onChange={handleChange}
                     onBlur={() => handleBlur('firstName')}
-                    className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${
-                      touched.firstName && errors.firstName ? 'border-red-500' : 'border-gray-300'
-                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                    className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${touched.firstName && errors.firstName ? 'border-red-500' : 'border-gray-300'
+                      } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
                     placeholder="Họ"
                   />
                 </div>
@@ -221,9 +219,8 @@ export const RegisterPage = () => {
                     value={formData.lastName}
                     onChange={handleChange}
                     onBlur={() => handleBlur('lastName')}
-                    className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${
-                      touched.lastName && errors.lastName ? 'border-red-500' : 'border-gray-300'
-                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                    className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${touched.lastName && errors.lastName ? 'border-red-500' : 'border-gray-300'
+                      } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
                     placeholder="Tên"
                   />
                 </div>
@@ -232,28 +229,44 @@ export const RegisterPage = () => {
                 )}
               </div>
             </div>
-            {/* Username Field */}
+            {/* Phone Number Field */}
             <div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="h-5 w-5 text-gray-400" />
-                </div>
                 <input
                   type="text"
-                  name="username"
-                  value={formData.username}
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
                   onChange={handleChange}
-                  onBlur={() => handleBlur('username')}
-                  className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${
-                    touched.username && errors.username ? 'border-red-500' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
-                  placeholder="Tên đăng nhập"
+                  onBlur={() => handleBlur('phoneNumber')}
+                  className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${touched.phoneNumber && errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                  placeholder="Số điện thoại"
                 />
               </div>
-              {touched.username && errors.username && (
-                <p className="mt-2 text-sm text-red-600">{errors.username}</p>
+              {touched.phoneNumber && errors.phoneNumber && (
+                <p className="mt-2 text-sm text-red-600">{errors.phoneNumber}</p>
               )}
             </div>
+
+            {/* Address Field */}
+            <div>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur('address')}
+                  className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${touched.address && errors.address ? 'border-red-500' : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                  placeholder="Địa chỉ"
+                />
+              </div>
+              {touched.address && errors.address && (
+                <p className="mt-2 text-sm text-red-600">{errors.address}</p>
+              )}
+            </div>
+
 
             {/* Email Field */}
             <div>
@@ -267,9 +280,8 @@ export const RegisterPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={() => handleBlur('email')}
-                  className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${
-                    touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                  className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
                   placeholder="Email"
                 />
               </div>
@@ -291,9 +303,8 @@ export const RegisterPage = () => {
                     value={formData.password}
                     onChange={handleChange}
                     onBlur={() => handleBlur('password')}
-                    className={`appearance-none rounded-lg relative block w-full pl-10 pr-10 py-2 border ${
-                      touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
-                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                    className={`appearance-none rounded-lg relative block w-full pl-10 pr-10 py-2 border ${touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
+                      } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
                     placeholder="Mật khẩu"
                   />
                   <button
@@ -324,9 +335,8 @@ export const RegisterPage = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     onBlur={() => handleBlur('confirmPassword')}
-                    className={`appearance-none rounded-lg relative block w-full pl-10 pr-10 py-2 border ${
-                      touched.confirmPassword && errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                    className={`appearance-none rounded-lg relative block w-full pl-10 pr-10 py-2 border ${touched.confirmPassword && errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                      } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
                     placeholder="Xác nhận mật khẩu"
                   />
                   <button
