@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser } from "react-icons/fa";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
@@ -36,6 +36,8 @@ export const RegisterPage = () => {
     message: "",
     type: "success"
   });
+
+  const navigate = useNavigate();
 
   const validateForm = () => {
     let tempErrors = {};
@@ -84,7 +86,6 @@ export const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (validateForm()) {
         try {
             // Tạo object data theo đúng format API yêu cầu
@@ -108,14 +109,14 @@ export const RegisterPage = () => {
 
             setNotification({
                 show: true,
-                message: response.data.message || "Đăng ký thành công!",
+                message: response.data.message || "Đăng ký thành công! Vui lòng kiểm tra email để nhập mã OTP",
                 type: "success"
             });
 
-            // Chuyển hướng sau khi đăng ký thành công
+            // Chuyển hướng đến trang OTP với email
             setTimeout(() => {
-                window.location.href = "/login";
-            }, 1000);
+                navigate(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
+            }, 500);
 
         } catch (error) {
             // Log chi tiết lỗi
@@ -133,7 +134,7 @@ export const RegisterPage = () => {
 
             setTimeout(() => {
                 setNotification(prev => ({ ...prev, show: false }));
-            }, 3000);
+            }, 1000);
         }
     } else {
         console.log("Form validation failed:", errors);

@@ -11,12 +11,26 @@ export const Header = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     // Lấy thông tin user từ token nếu đã đăng nhập
-    let userEmail = '';
+    let userInfo = {
+        firstName: '',
+        lastName: ''
+    };
+
     if (isAuthenticated) {
         const token = localStorage.getItem('token');
         try {
             const decoded = jwtDecode(token);
-            userEmail = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+            console.log('Decoded token:', decoded);
+            
+            // Lấy name từ claim và tách thành firstName và lastName
+            const fullName = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+            if (fullName) {
+                const [firstName, lastName] = fullName.split('-');
+                userInfo = {
+                    firstName: firstName || '',
+                    lastName: lastName || ''
+                };
+            }
         } catch (error) {
             console.error('Error decoding token:', error);
         }
@@ -77,7 +91,9 @@ export const Header = () => {
                                     className="flex items-center space-x-2 text-gray-700 hover:text-blue-500 transition-colors"
                                 >
                                     <FaUserCircle className="w-6 h-6" />
-                                    <span className="text-sm">{userEmail}</span>
+                                    <span className="text-sm">
+                                        {userInfo.firstName} {userInfo.lastName}
+                                    </span>
                                 </button>
                                 
                                 {/* Dropdown Menu */}

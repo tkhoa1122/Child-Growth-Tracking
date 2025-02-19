@@ -17,6 +17,7 @@ import { FamilyProfileManagement } from './components/protection_page/FamilyProf
 import { DetailFamilyProfile } from './components/protection_page/DetailFamilyProfile'
 import { Product } from './components/Product'
 
+import { OTPVerification } from './components/OTPVerification'
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -44,6 +45,7 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/verify-otp" element={<OTPVerification />} />
               <Route 
                 path="/family-profile" 
                 element={
