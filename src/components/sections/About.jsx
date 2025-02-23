@@ -137,7 +137,8 @@ export const About = () => {
     const fetchServices = async () => {
         try {
             const response = await api.get('service/list-service');
-            setServices(response.data);
+            const activeServices = response.data.filter(service => service.isActive);
+            setServices(activeServices);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching services:', error);

@@ -32,6 +32,7 @@ import { ProtectedRouteByRole } from './components/Utils/ProtectedRoute'
 import { AdminLayout } from './components/layouts/AdminLayout'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { UpdateService } from './components/protection_page/Admin/UpdateService';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -204,7 +205,7 @@ function App() {
                   <Route index element={<AdminDashboard />} />
                   <Route path="services" element={<ServiceManagement />} />
                   <Route path="services/create" element={<CreateService />} />
-                  {/* Add other admin routes here */}
+                  <Route path="services/edit/:id" element={<UpdateService />} />
                 </Route>
 
                 {/* 404 Route */}

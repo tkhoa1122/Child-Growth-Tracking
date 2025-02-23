@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from "../../Utils/Axios";
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaStop, FaPlus } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -70,14 +70,15 @@ export const ServiceManagement = () => {
         }
     };
 
-    const handleDeleteService = async (serviceId) => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa dịch vụ này?')) {
+    const handleSoftRemove = async (serviceId) => {
+        if (window.confirm('Bạn có chắc chắn muốn ngưng cung cấp dịch vụ này?')) {
             try {
-                await api.delete(`/service/delete-service/${serviceId}`);
+                await api.put(`/service/soft-remove/${serviceId}`);
+                toast.success('Đã ngưng cung cấp dịch vụ thành công');
                 fetchServices();
             } catch (error) {
-                console.error('Error deleting service:', error);
-                setError('Không thể xóa dịch vụ');
+                console.error('Error soft removing service:', error);
+                toast.error('Không thể ngưng cung cấp dịch vụ');
             }
         }
     };
@@ -92,6 +93,10 @@ export const ServiceManagement = () => {
             isActive: service.isActive
         });
         setShowEditModal(true);
+    };
+
+    const handleEdit = (serviceId) => {
+        navigate(`/admin/services/edit/${serviceId}`);
     };
 
     if (loading) return (
@@ -179,16 +184,16 @@ export const ServiceManagement = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <button
-                                            onClick={() => openEditModal(service)}
+                                            onClick={() => handleEdit(service.serviceId)}
                                             className="text-indigo-600 hover:text-indigo-900 mr-4"
                                         >
                                             <FaEdit className="inline-block" /> Sửa
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteService(service.serviceId)}
+                                            onClick={() => handleSoftRemove(service.serviceId)}
                                             className="text-red-600 hover:text-red-900"
                                         >
-                                            <FaTrash className="inline-block" /> Xóa
+                                            <FaStop className="inline-block" /> Ngưng cung cấp
                                         </button>
                                     </td>
                                 </tr>
