@@ -1,91 +1,104 @@
-import { Link, useLocation } from 'react-router-dom';
-import { FaUserShield, FaUsers, FaUserMd, FaClipboardList, FaChartBar, FaCog } from 'react-icons/fa';
-import { Header } from '../Header';
-import { Footer } from '../Footer';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { FaHome, FaUsers, FaUserMd, FaClipboardList, FaChartBar, FaCog, FaSignOutAlt } from 'react-icons/fa';
 
-export const AdminLayout = ({ children }) => {
+export const AdminLayout = () => {
+    const navigate = useNavigate();
     const location = useLocation();
+
+    const isActive = (path) => {
+        return location.pathname === path;
+    };
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <Header />
-            
-            <div className="flex pt-16">
-                {/* Sidebar Menu */}
-                <div className="w-64 bg-gray-800 min-h-screen p-4 fixed">
-                    <div className="space-y-4">
-                        <Link
-                            to="/admin-dashboard"
-                            className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
-                                location.pathname === '/admin-dashboard'
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300 hover:bg-gray-700'
-                            }`}
-                        >
-                            <FaUserShield />
-                            <span>Thông tin Admin</span>
-                        </Link>
-                        <Link
-                            to="/admin-dashboard/users"
-                            className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
-                                location.pathname === '/admin-dashboard/users'
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300 hover:bg-gray-700'
-                            }`}
-                        >
-                            <FaUsers />
-                            <span>Quản lý người dùng</span>
-                        </Link>
-                        <Link
-                            to="/admin-dashboard/doctors"
-                            className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
-                                location.pathname === '/admin-dashboard/doctors'
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300 hover:bg-gray-700'
-                            }`}
-                        >
-                            <FaUserMd />
-                            <span>Quản lý bác sĩ</span>
-                        </Link>
-                        <Link
-                            to="/admin-dashboard/services"
-                            className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
-                                location.pathname === '/admin-dashboard/services'
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300 hover:bg-gray-700'
-                            }`}
-                        >
-                            <FaClipboardList />
-                            <span>Quản lý dịch vụ</span>
-                        </Link>
-                        <Link
-                            to="/admin-dashboard/statistics"
-                            className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
-                                location.pathname === '/admin-dashboard/statistics'
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300 hover:bg-gray-700'
-                            }`}
-                        >
-                            <FaChartBar />
-                            <span>Thống kê</span>
-                        </Link>
-                        <Link
-                            to="/admin-dashboard/settings"
-                            className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
-                                location.pathname === '/admin-dashboard/settings'
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300 hover:bg-gray-700'
-                            }`}
-                        >
-                            <FaCog />
-                            <span>Cài đặt hệ thống</span>
-                        </Link>
+            <div className="flex">
+                {/* Sidebar */}
+                <div className="w-64 min-h-screen bg-white shadow-lg fixed">
+                    <div className="p-6 border-b">
+                        <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
                     </div>
+                    <nav className="mt-6">
+                        <div className="px-4 space-y-3">
+                            <button
+                                onClick={() => navigate('/admin')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    isActive('/admin') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaHome className="text-xl" />
+                                <span className="font-medium">Tổng quan</span>
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/admin/services')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/services') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaClipboardList className="text-xl" />
+                                <span className="font-medium">Quản lý Dịch vụ</span>
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/admin/users')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/users') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaUsers className="text-xl" />
+                                <span className="font-medium">Quản lý Người dùng</span>
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/admin/doctors')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/doctors') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaUserMd className="text-xl" />
+                                <span className="font-medium">Quản lý Bác sĩ</span>
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/admin/statistics')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/statistics') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaChartBar className="text-xl" />
+                                <span className="font-medium">Thống kê</span>
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/admin/settings')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/settings') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaCog className="text-xl" />
+                                <span className="font-medium">Cài đặt</span>
+                            </button>
+                        </div>
+                    </nav>
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 ml-64 p-8">
-                    {children}
+                <div className="flex-1 ml-64">
+                    <div className="p-8">
+                        <Outlet />
+                    </div>
                 </div>
             </div>
         </div>
