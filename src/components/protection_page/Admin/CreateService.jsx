@@ -105,9 +105,10 @@ export const CreateService = () => {
                         type="text"
                         value={formData.serviceName}
                         onChange={(e) => setFormData({...formData, serviceName: e.target.value})}
-                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 ${
                             errors.serviceName ? 'border-red-500' : 'border-gray-300'
                         }`}
+                        placeholder="Nhập tên dịch vụ"
                     />
                     {errors.serviceName && (
                         <p className="mt-1 text-sm text-red-500">{errors.serviceName}</p>
@@ -122,9 +123,10 @@ export const CreateService = () => {
                         type="number"
                         value={formData.servicePrice}
                         onChange={(e) => setFormData({...formData, servicePrice: e.target.value})}
-                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 ${
                             errors.servicePrice ? 'border-red-500' : 'border-gray-300'
                         }`}
+                        placeholder="Nhập giá dịch vụ"
                     />
                     {errors.servicePrice && (
                         <p className="mt-1 text-sm text-red-500">{errors.servicePrice}</p>
@@ -139,9 +141,10 @@ export const CreateService = () => {
                         type="number"
                         value={formData.serviceDuration}
                         onChange={(e) => setFormData({...formData, serviceDuration: e.target.value})}
-                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 ${
                             errors.serviceDuration ? 'border-red-500' : 'border-gray-300'
                         }`}
+                        placeholder="Nhập số ngày"
                     />
                     {errors.serviceDuration && (
                         <p className="mt-1 text-sm text-red-500">{errors.serviceDuration}</p>
@@ -156,9 +159,10 @@ export const CreateService = () => {
                         value={formData.serviceDescription}
                         onChange={(e) => setFormData({...formData, serviceDescription: e.target.value})}
                         rows="4"
-                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 ${
                             errors.serviceDescription ? 'border-red-500' : 'border-gray-300'
                         }`}
+                        placeholder="Nhập mô tả dịch vụ"
                     />
                     {errors.serviceDescription && (
                         <p className="mt-1 text-sm text-red-500">{errors.serviceDescription}</p>
