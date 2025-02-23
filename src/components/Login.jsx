@@ -5,6 +5,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { useAuth } from './Utils/AuthContext';
 import api from "../components/Utils/Axios";
+import { jwtDecode } from 'jwt-decode';
 
 const backgroundImage = '/Images/background.jpg';
 
@@ -33,12 +34,13 @@ export const Login = () => {
 
     const validateForm = () => {
         let tempErrors = {};
-        const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+        // Email regex cho phép cả email thông thường và email FPT
+        const emailRegex = /^[A-Za-z0-9._%+-]+@((fpt\.edu\.vn)|([A-Za-z0-9.-]+\.[A-Za-z]{2,}))$/;
 
         if (!formData.email) {
             tempErrors.email = "Email là bắt buộc";
         } else if (!emailRegex.test(formData.email)) {
-            tempErrors.email = "Email không hợp lệ";
+            tempErrors.email = "Email không hợp lệ. Vui lòng sử dụng email cá nhân hoặc email FPT (@fpt.edu.vn)";
         }
 
         if (!formData.password) {
@@ -80,6 +82,10 @@ export const Login = () => {
                         localStorage.setItem('rememberMe', 'true');
                     }
                     
+                    // Lấy role từ token
+                    const decoded = jwtDecode(token);
+                    const userRole = decoded.role;
+                    
                     login(token);
                     
                     setNotification({
@@ -88,8 +94,19 @@ export const Login = () => {
                         type: 'success'
                     });
 
+                    // Điều hướng dựa vào role
                     setTimeout(() => {
-                        navigate('/home');
+                        switch (userRole) {
+                            case 'Manager':
+                                navigate('/admin-dashboard');
+                                break;
+                            case 'Doctor':
+                                navigate('/doctor-dashboard');
+                                break;
+                            default:
+                                navigate('/home');
+                                break;
+                        }
                     }, 1000);
                 } else {
                     throw new Error(response.data.message || 'Đăng nhập thất bại');

@@ -1,5 +1,6 @@
 import { Header } from '../Header';
 import { Footer } from '../Footer';
+import { Navbar } from './Navbar';
 import { Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -223,249 +224,253 @@ export const Projects = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-gray-100">
             <Header />
-            {/* Hero Section */}
-            <section
-                className="relative pt-32 pb-20 px-4"
-                style={{
-                    backgroundImage: `url(${backgroundImageUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundAttachment: 'fixed'
-                }}
-            >
-                <div className="absolute inset-0 bg-black/60"></div>
-                <div className="relative z-10 max-w-7xl mx-auto text-center">
-                    <h1 className="text-5xl font-bold text-white mb-6">
-                        Dự án Sức khỏe Nhi khoa
-                    </h1>
-                    <p className="text-xl text-gray-200 max-w-4xl mx-auto">
-                        Theo dõi và đánh giá sự phát triển của trẻ em từ 0-18 tuổi
-                        thông qua các chỉ số sức khỏe quan trọng
-                    </p>
-                </div>
-            </section>
+            <Navbar />
 
-            {/* BMI Calculator Section */}
-            <section className="py-16 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="grid md:grid-cols-2 gap-12 items-start">
-                        {/* Calculator Form */}
-                        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                            <div className="p-8">
-                                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                                    Tính Chỉ Số BMI
-                                </h2>
-                                <form onSubmit={calculateBMI} className="space-y-6">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                                Cân nặng (kg)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={weight}
-                                                onChange={(e) => setWeight(e.target.value)}
-                                                className="w-full p-2 border rounded text-gray-700"
-                                                placeholder="Ví dụ: 60"
-                                            />
+            <main className="flex-grow">
+                {/* Hero Section */}
+                <section
+                    className="relative pt-32 pb-20 px-4"
+                    style={{
+                        backgroundImage: `url(${backgroundImageUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundAttachment: 'fixed'
+                    }}
+                >
+                    <div className="absolute inset-0 bg-black/60"></div>
+                    <div className="relative z-10 max-w-7xl mx-auto text-center">
+                        <h1 className="text-5xl font-bold text-white mb-6">
+                            Dự án Sức khỏe Nhi khoa
+                        </h1>
+                        <p className="text-xl text-gray-200 max-w-4xl mx-auto">
+                            Theo dõi và đánh giá sự phát triển của trẻ em từ 0-18 tuổi
+                            thông qua các chỉ số sức khỏe quan trọng
+                        </p>
+                    </div>
+                </section>
+
+                {/* BMI Calculator Section */}
+                <section className="py-16 bg-gray-50">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="grid md:grid-cols-2 gap-12 items-start">
+                            {/* Calculator Form */}
+                            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                                <div className="p-8">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                                        Tính Chỉ Số BMI
+                                    </h2>
+                                    <form onSubmit={calculateBMI} className="space-y-6">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">
+                                                    Cân nặng (kg)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={weight}
+                                                    onChange={(e) => setWeight(e.target.value)}
+                                                    className="w-full p-2 border rounded text-gray-700"
+                                                    placeholder="Ví dụ: 60"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">
+                                                    Chiều cao (cm)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={height}
+                                                    onChange={(e) => setHeight(e.target.value)}
+                                                    className="w-full p-2 border rounded text-gray-700"
+                                                    placeholder="Ví dụ: 170"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">
+                                                    Tuổi
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={age}
+                                                    onChange={(e) => setAge(e.target.value)}
+                                                    className="w-full p-2 border rounded text-gray-700"
+                                                    placeholder="Ví dụ: 15"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-gray-700 mb-2">Giới tính</label>
+                                                <select
+                                                    value={gender}
+                                                    onChange={(e) => setGender(e.target.value)}
+                                                    className="w-full p-2 border rounded text-gray-700"
+                                                >
+                                                    <option value="male">Nam</option>
+                                                    <option value="female">Nữ</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                                Chiều cao (cm)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={height}
-                                                onChange={(e) => setHeight(e.target.value)}
-                                                className="w-full p-2 border rounded text-gray-700"
-                                                placeholder="Ví dụ: 170"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                                Tuổi
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={age}
-                                                onChange={(e) => setAge(e.target.value)}
-                                                className="w-full p-2 border rounded text-gray-700"
-                                                placeholder="Ví dụ: 15"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-gray-700 mb-2">Giới tính</label>
-                                            <select
-                                                value={gender}
-                                                onChange={(e) => setGender(e.target.value)}
-                                                className="w-full p-2 border rounded text-gray-700"
+                                        <div className="flex gap-4">
+                                            <button
+                                                type="submit"
+                                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
                                             >
-                                                <option value="male">Nam</option>
-                                                <option value="female">Nữ</option>
-                                            </select>
+                                                Tính BMI
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={resetForm}
+                                                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-200"
+                                            >
+                                                Làm mới
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            {/* BMI Result and Blog */}
+                            <div className="space-y-8">
+                                {bmiResult && (
+                                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                                        <div className="bg-gradient-to-r from-blue-600 to-blue-400 px-6 py-4">
+                                            <h3 className="text-xl font-semibold text-white">
+                                                Kết Quả BMI
+                                            </h3>
+                                        </div>
+                                        <div className="p-6">
+                                            <div className="text-center mb-6">
+                                                <div className="text-4xl font-bold text-blue-600 mb-2">
+                                                    {bmiResult.bmi}
+                                                </div>
+                                                <div className="text-lg font-medium text-gray-600">
+                                                    {bmiResult.category}
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-600 text-center">
+                                                {bmiResult.message}
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="flex gap-4">
-                                        <button
-                                            type="submit"
-                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
-                                        >
-                                            Tính BMI
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={resetForm}
-                                            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-200"
-                                        >
-                                            Làm mới
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+                                )}
 
-                        {/* BMI Result and Blog */}
-                        <div className="space-y-8">
-                            {bmiResult && (
-                                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                                    <div className="bg-gradient-to-r from-blue-600 to-blue-400 px-6 py-4">
-                                        <h3 className="text-xl font-semibold text-white">
-                                            Kết Quả BMI
-                                        </h3>
-                                    </div>
-                                    <div className="p-6">
-                                        <div className="text-center mb-6">
-                                            <div className="text-4xl font-bold text-blue-600 mb-2">
-                                                {bmiResult.bmi}
-                                            </div>
-                                            <div className="text-lg font-medium text-gray-600">
-                                                {bmiResult.category}
-                                            </div>
-                                        </div>
-                                        <p className="text-gray-600 text-center">
-                                            {bmiResult.message}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Hiển thị BMI Blog khi có kết quả */}
-                            {bmiResult && <BMIBlog bmiValue={parseFloat(bmiResult.bmi)} />}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* BMI Categories Section */}
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-4">
-                    <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
-                        Phân Loại BMI
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div className="bg-yellow-50 rounded-xl p-6">
-                            <h3 className="text-lg font-semibold text-yellow-700 mb-2">Thiếu cân</h3>
-                            <p className="text-yellow-600">BMI {'<'} 18.5</p>
-                        </div>
-                        <div className="bg-green-50 rounded-xl p-6">
-                            <h3 className="text-lg font-semibold text-green-700 mb-2">Bình thường</h3>
-                            <p className="text-green-600">BMI 18.5 - 24.9</p>
-                        </div>
-                        <div className="bg-orange-50 rounded-xl p-6">
-                            <h3 className="text-lg font-semibold text-orange-700 mb-2">Thừa cân</h3>
-                            <p className="text-orange-600">BMI 25 - 29.9</p>
-                        </div>
-                        <div className="bg-red-50 rounded-xl p-6">
-                            <h3 className="text-lg font-semibold text-red-700 mb-2">Béo phì</h3>
-                            <p className="text-red-600">BMI ≥ 30</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* BMI Chart Section - Luôn hiển thị ở dưới cùng */}
-            {/* Projects Grid */}
-            <section className="py-20">
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Project 1: BMI Tracker */}
-                        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                            <div className="p-6">
-                                <div className="flex items-center mb-4">
-                                    <FaChartLine className="text-blue-700 text-3xl mr-4" />
-                                    <h3 className="text-2xl text-blue-700 font-bold">BMI Tracker cho bé trai</h3>
-                                </div>
-                                <p className="text-gray-600 mb-6">
-                                    Theo dõi chỉ số BMI cho bé trai từ 0-18 tuổi,
-                                    giúp phát hiện sớm các vấn đề về cân nặng và chiều cao.
-                                </p>
-                                <div className="bg-gray-50 p-4 rounded-lg">
-                                    <Line options={options} data={gender === 'male' ? bmiBoyData : bmiGirlData} />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Project 2: BMI Tracker for Girls */}
-                        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                            <div className="p-6">
-                                <div className="flex items-center mb-4">
-                                    <FaChartLine className="text-pink-500 text-3xl mr-4" />
-                                    <h3 className="text-2xl text-pink-500 font-bold">BMI Tracker cho bé gái</h3>
-                                </div>
-                                <p className="text-gray-600 mb-6">
-                                    Theo dõi chỉ số BMI cho bé gái từ 0-18 tuổi,
-                                    đảm bảo sự phát triển cân đối và khỏe mạnh.
-                                </p>
-                                <div className="bg-gray-50 p-4 rounded-lg">
-                                    <Line options={options} data={gender === 'female' ? bmiGirlData : bmiBoyData} />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Project 3: Dinh dưỡng theo độ tuổi */}
-                        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                            <div className="p-6">
-                                <div className="flex items-center mb-4">
-                                    <FaHeartbeat className="text-green-500 text-3xl mr-4" />
-                                    <h3 className="text-2xl text-green-500 font-bold">Dinh dưỡng theo độ tuổi</h3>
-                                </div>
-                                <p className="text-gray-600 mb-6">
-                                    Hướng dẫn chi tiết về chế độ dinh dưỡng phù hợp cho từng độ tuổi,
-                                    giúp trẻ phát triển toàn diện.
-                                </p>
-                                <ul className="list-disc list-inside text-gray-600 space-y-2">
-                                    <li>Sơ sinh - 12 tháng: Chế độ bú mẹ và ăn dặm</li>
-                                    <li>1-3 tuổi: Thực đơn đa dạng, giàu dinh dưỡng</li>
-                                    <li>4-10 tuổi: Bữa ăn cân bằng, tăng cường vận động</li>
-                                    <li>11-18 tuổi: Dinh dưỡng cho giai đoạn phát triển</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        {/* Project 4: Phát triển trí tuệ */}
-                        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                            <div className="p-6">
-                                <div className="flex items-center mb-4">
-                                    <FaBrain className="text-purple-500 text-3xl mr-4" />
-                                    <h3 className="text-2xl text-purple-500 font-bold">Phát triển trí tuệ</h3>
-                                </div>
-                                <p className="text-gray-600 mb-6">
-                                    Theo dõi và hỗ trợ phát triển trí tuệ của trẻ qua các giai đoạn,
-                                    kèm theo các hoạt động kích thích phát triển.
-                                </p>
-                                <ul className="list-disc list-inside text-gray-600 space-y-2">
-                                    <li>0-2 tuổi: Phát triển giác quan cơ bản</li>
-                                    <li>2-6 tuổi: Phát triển ngôn ngữ và tư duy</li>
-                                    <li>6-12 tuổi: Kỹ năng học tập và sáng tạo</li>
-                                    <li>12-18 tuổi: Tư duy trừu tượng và logic</li>
-                                </ul>
+                                {/* Hiển thị BMI Blog khi có kết quả */}
+                                {bmiResult && <BMIBlog bmiValue={parseFloat(bmiResult.bmi)} />}
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+
+                {/* BMI Categories Section */}
+                <section className="py-16 bg-white">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
+                            Phân Loại BMI
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="bg-yellow-50 rounded-xl p-6">
+                                <h3 className="text-lg font-semibold text-yellow-700 mb-2">Thiếu cân</h3>
+                                <p className="text-yellow-600">BMI {'<'} 18.5</p>
+                            </div>
+                            <div className="bg-green-50 rounded-xl p-6">
+                                <h3 className="text-lg font-semibold text-green-700 mb-2">Bình thường</h3>
+                                <p className="text-green-600">BMI 18.5 - 24.9</p>
+                            </div>
+                            <div className="bg-orange-50 rounded-xl p-6">
+                                <h3 className="text-lg font-semibold text-orange-700 mb-2">Thừa cân</h3>
+                                <p className="text-orange-600">BMI 25 - 29.9</p>
+                            </div>
+                            <div className="bg-red-50 rounded-xl p-6">
+                                <h3 className="text-lg font-semibold text-red-700 mb-2">Béo phì</h3>
+                                <p className="text-red-600">BMI ≥ 30</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* BMI Chart Section - Luôn hiển thị ở dưới cùng */}
+                {/* Projects Grid */}
+                <section className="py-20">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Project 1: BMI Tracker */}
+                            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div className="p-6">
+                                    <div className="flex items-center mb-4">
+                                        <FaChartLine className="text-blue-700 text-3xl mr-4" />
+                                        <h3 className="text-2xl text-blue-700 font-bold">BMI Tracker cho bé trai</h3>
+                                    </div>
+                                    <p className="text-gray-600 mb-6">
+                                        Theo dõi chỉ số BMI cho bé trai từ 0-18 tuổi,
+                                        giúp phát hiện sớm các vấn đề về cân nặng và chiều cao.
+                                    </p>
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <Line options={options} data={gender === 'male' ? bmiBoyData : bmiGirlData} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Project 2: BMI Tracker for Girls */}
+                            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div className="p-6">
+                                    <div className="flex items-center mb-4">
+                                        <FaChartLine className="text-pink-500 text-3xl mr-4" />
+                                        <h3 className="text-2xl text-pink-500 font-bold">BMI Tracker cho bé gái</h3>
+                                    </div>
+                                    <p className="text-gray-600 mb-6">
+                                        Theo dõi chỉ số BMI cho bé gái từ 0-18 tuổi,
+                                        đảm bảo sự phát triển cân đối và khỏe mạnh.
+                                    </p>
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <Line options={options} data={gender === 'female' ? bmiGirlData : bmiBoyData} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Project 3: Dinh dưỡng theo độ tuổi */}
+                            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div className="p-6">
+                                    <div className="flex items-center mb-4">
+                                        <FaHeartbeat className="text-green-500 text-3xl mr-4" />
+                                        <h3 className="text-2xl text-green-500 font-bold">Dinh dưỡng theo độ tuổi</h3>
+                                    </div>
+                                    <p className="text-gray-600 mb-6">
+                                        Hướng dẫn chi tiết về chế độ dinh dưỡng phù hợp cho từng độ tuổi,
+                                        giúp trẻ phát triển toàn diện.
+                                    </p>
+                                    <ul className="list-disc list-inside text-gray-600 space-y-2">
+                                        <li>Sơ sinh - 12 tháng: Chế độ bú mẹ và ăn dặm</li>
+                                        <li>1-3 tuổi: Thực đơn đa dạng, giàu dinh dưỡng</li>
+                                        <li>4-10 tuổi: Bữa ăn cân bằng, tăng cường vận động</li>
+                                        <li>11-18 tuổi: Dinh dưỡng cho giai đoạn phát triển</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Project 4: Phát triển trí tuệ */}
+                            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div className="p-6">
+                                    <div className="flex items-center mb-4">
+                                        <FaBrain className="text-purple-500 text-3xl mr-4" />
+                                        <h3 className="text-2xl text-purple-500 font-bold">Phát triển trí tuệ</h3>
+                                    </div>
+                                    <p className="text-gray-600 mb-6">
+                                        Theo dõi và hỗ trợ phát triển trí tuệ của trẻ qua các giai đoạn,
+                                        kèm theo các hoạt động kích thích phát triển.
+                                    </p>
+                                    <ul className="list-disc list-inside text-gray-600 space-y-2">
+                                        <li>0-2 tuổi: Phát triển giác quan cơ bản</li>
+                                        <li>2-6 tuổi: Phát triển ngôn ngữ và tư duy</li>
+                                        <li>6-12 tuổi: Kỹ năng học tập và sáng tạo</li>
+                                        <li>12-18 tuổi: Tư duy trừu tượng và logic</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
 
             <Footer />
         </div>

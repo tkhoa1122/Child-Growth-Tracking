@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { Navbar } from './sections/Navbar';
 import background from '../../public/Images/background.jpg';
 import { FaSearch, FaFilter } from 'react-icons/fa';
 
@@ -160,6 +161,7 @@ export const Product = () => {
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
+            <Navbar />
             
             <main className="flex-grow">
                 {/* Hero Section */}

@@ -41,7 +41,7 @@ export const RegisterPage = () => {
 
   const validateForm = () => {
     let tempErrors = {};
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    const emailRegex = /^[A-Za-z0-9._%+-]+@((fpt\.edu\.vn)|([A-Za-z0-9.-]+\.[A-Za-z]{2,}))$/;
 
     if (!formData.firstName || formData.firstName.trim() === "") {
       tempErrors.firstName = "Họ là bắt buộc";
@@ -54,7 +54,7 @@ export const RegisterPage = () => {
     if (!formData.email || formData.email.trim() === "") {
       tempErrors.email = "Email là bắt buộc";
     } else if (!emailRegex.test(formData.email)) {
-      tempErrors.email = "Email không hợp lệ";
+      tempErrors.email = "Email không hợp lệ. Vui lòng sử dụng email cá nhân hoặc email FPT (@fpt.edu.vn)";
     }
 
     if (!formData.password || formData.password.trim() === "") {
@@ -88,7 +88,6 @@ export const RegisterPage = () => {
     e.preventDefault();
     if (validateForm()) {
         try {
-            // Tạo object data theo đúng format API yêu cầu
             const registerData = {
                 email: formData.email.trim(),
                 password: formData.password,
@@ -98,13 +97,10 @@ export const RegisterPage = () => {
                 address: formData.address.trim()
             };
 
-            // Log data trước khi gửi request
             console.log("Sending registration data:", registerData);
 
-            // Gửi request đến API endpoint
             const response = await api.post("Auth/register", registerData);
             
-            // Log response từ server
             console.log("Server response:", response);
 
             setNotification({
@@ -113,18 +109,24 @@ export const RegisterPage = () => {
                 type: "success"
             });
 
-            // Chuyển hướng đến trang OTP với email
             setTimeout(() => {
                 navigate(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
             }, 500);
 
         } catch (error) {
-            // Log chi tiết lỗi
-            console.error("Registration error:", {
-                status: error.response?.status,
-                data: error.response?.data,
-                message: error.response?.data?.message
-            });
+            console.error("Registration error:", error);
+
+            // Xử lý lỗi 400 - Email đã tồn tại
+            if (error.response?.status === 400) {
+                setErrors(prev => ({
+                    ...prev,
+                    email: error.response.data.message || "Email đã được sử dụng"
+                }));
+                setTouched(prev => ({
+                    ...prev,
+                    email: true
+                }));
+            }
 
             setNotification({
                 show: true,
@@ -134,7 +136,7 @@ export const RegisterPage = () => {
 
             setTimeout(() => {
                 setNotification(prev => ({ ...prev, show: false }));
-            }, 1000);
+            }, 3000);
         }
     } else {
         console.log("Form validation failed:", errors);

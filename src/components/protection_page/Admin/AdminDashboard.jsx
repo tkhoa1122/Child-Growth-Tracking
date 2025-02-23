@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
 import { FaUserShield, FaUsers, FaUserMd, FaCalendarCheck, FaChartLine } from 'react-icons/fa';
+import DoctorManagement from './DoctorManagement';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ activeTab: initialActiveTab = 'dashboard' }) => {
+    const [activeTab, setActiveTab] = useState(initialActiveTab);
+
     const adminInfo = {
         name: "Admin System",
         email: "admin@system.com",
@@ -18,13 +22,13 @@ const AdminDashboard = () => {
         totalConsultations: 850
     };
 
-    return (
-        <AdminLayout>
+    const renderDashboardContent = () => (
+        <>
             {/* Admin Info Card */}
             <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">{adminInfo.name}</h2>
+                        <h2 className="text-2xl font-bold text-gray-800">{adminInfo.name}</h2>
                         <p className="text-gray-600">{adminInfo.role}</p>
                         <p className="text-gray-500 text-sm mt-2">Last login: {adminInfo.lastLogin}</p>
                     </div>
@@ -88,6 +92,45 @@ const AdminDashboard = () => {
                         <span className="text-sm text-gray-700">Xem báo cáo</span>
                     </button>
                 </div>
+            </div>
+        </>
+    );
+
+    return (
+        <AdminLayout>
+            {/* Tab Navigation */}
+            <div className="mb-6 bg-white rounded-lg shadow p-4">
+                <div className="flex space-x-4">
+                    <button
+                        onClick={() => setActiveTab('dashboard')}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                            activeTab === 'dashboard' 
+                                ? 'bg-blue-500 text-white' 
+                                : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                    >
+                        Tổng quan
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('doctors')}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                            activeTab === 'doctors' 
+                                ? 'bg-blue-500 text-white' 
+                                : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                    >
+                        Quản lý bác sĩ
+                    </button>
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="bg-gray-100 rounded-lg">
+                {activeTab === 'doctors' ? (
+                    <DoctorManagement />
+                ) : (
+                    renderDashboardContent()
+                )}
             </div>
         </AdminLayout>
     );

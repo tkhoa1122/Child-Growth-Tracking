@@ -1,9 +1,31 @@
 import { Header } from '../Header';
 import { Footer } from '../Footer';
-import { FaUsers, FaLightbulb, FaHandshake, FaChartLine, FaCalendar, FaUser, FaArrowRight } from 'react-icons/fa';
+import { Navbar } from '../sections/Navbar';
+import { FaUsers, FaLightbulb, FaHandshake, FaChartLine, FaCalendar, FaUser, FaArrowRight, FaCalendarAlt, FaClock, FaCheckCircle, FaArrowLeft } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import api from '../Utils/Axios';
+import Slider from 'react-slick';
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 const backgroundImageUrl = '/Images/background.jpg';
 
+const CustomArrow = ({ direction, onClick }) => (
+    <button
+        onClick={onClick}
+        className={`absolute top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-blue-500 
+            hover:text-blue-600 rounded-full p-3 shadow-lg transition-all duration-300 
+            ${direction === 'left' ? '-left-4' : '-right-4'}`}
+    >
+        {direction === 'left' ? <FaArrowLeft size={20} /> : <FaArrowRight size={20} />}
+    </button>
+);
+
 export const About = () => {
+    const [services, setServices] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const teamMembers = [
         {
             name: "TS. Nguyễn Văn A",
@@ -108,9 +130,52 @@ export const About = () => {
         }
     ];
 
+    useEffect(() => {
+        fetchServices();
+    }, []);
+
+    const fetchServices = async () => {
+        try {
+            const response = await api.get('service/list-service');
+            setServices(response.data);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching services:', error);
+            setError('Không thể tải danh sách dịch vụ');
+            setLoading(false);
+        }
+    };
+
+    const sliderSettings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        prevArrow: <CustomArrow direction="left" />,
+        nextArrow: <CustomArrow direction="right" />,
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                }
+            },
+            {
+                breakpoint: 640,
+                settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                }
+            }
+        ]
+    };
+
     return (
         <div className="flex flex-col min-h-screen bg-gray-100">
             <Header />
+            <Navbar />
 
             {/* Hero Section */}
             <section
@@ -202,8 +267,80 @@ export const About = () => {
                 </div>
             </section>
 
-            {/* Health Blog Section */}
+            {/* Service Packages Section - Updated with Carousel */}
             <section className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-12"> {/* Increased padding for arrows */}
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
+                        Gói Dịch Vụ
+                    </h2>
+                    <p className="text-gray-600 text-center mb-12 max-w-4xl mx-auto">
+                        Chúng tôi cung cấp các gói dịch vụ chăm sóc sức khỏe chất lượng cao,
+                        phù hợp với nhu cầu của từng gia đình
+                    </p>
+
+                    {loading ? (
+                        <div className="flex justify-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                        </div>
+                    ) : error ? (
+                        <div className="text-center text-red-500">{error}</div>
+                    ) : (
+                        <div className="relative">
+                            <Slider {...sliderSettings}>
+                                {services.map((service) => (
+                                    <div key={service.serviceId} className="px-3"> {/* Added padding between slides */}
+                                        <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                            <div className="relative h-48">
+                                                <img
+                                                    src="/Images/blog-nutrition.jpg"
+                                                    alt={service.serviceName}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                                <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+                                                    {service.serviceDuration} ngày
+                                                </div>
+                                            </div>
+
+                                            <div className="p-6">
+                                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                                    {service.serviceName}
+                                                </h3>
+                                                <div className="flex items-center text-gray-600 mb-4">
+                                                    <FaCalendarAlt className="mr-2" />
+                                                    <span>Ngày tạo: {new Date(service.serviceCreateDate).toLocaleDateString('vi-VN')}</span>
+                                                </div>
+                                                <div className="text-2xl font-bold text-blue-500 mb-4">
+                                                    {new Intl.NumberFormat('vi-VN', { 
+                                                        style: 'currency', 
+                                                        currency: 'VND' 
+                                                    }).format(service.servicePrice)}
+                                                </div>
+                                                <p className="text-gray-600 mb-6 line-clamp-2">
+                                                    {service.serviceDescription}
+                                                </p>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center text-green-500">
+                                                        <FaCheckCircle className="mr-2" />
+                                                        <span>{service.isActive ? 'Đang hoạt động' : 'Tạm ngưng'}</span>
+                                                    </div>
+                                                    <button className="flex items-center text-blue-500 hover:text-blue-600 transition-colors">
+                                                        Chi tiết
+                                                        <FaArrowRight className="ml-2" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </Slider>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* Health Blog Section */}
+            <section className="py-20 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4">
                     <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
                         Kiến Thức Y Tế
@@ -253,79 +390,75 @@ export const About = () => {
                             <FaArrowRight className="ml-2" />
                         </button>
                     </div>
+                </div>
+            </section>
 
-                    {/* Team Section */}
-                    <section className="py-20 bg-white">
-                        <div className="max-w-7xl mx-auto px-4">
-                            <h2 className="text-3xl font-bold text-center text-gray-900 mb-16">
-                                Đội ngũ chuyên gia
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                {teamMembers.map((member, index) => (
-                                    <div key={index} className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                                        <div className="mb-6">
-                                            <img
-                                                src={member.image}
-                                                alt={member.name}
-                                                className="w-32 h-32 rounded-full mx-auto object-cover"
-                                            />
-                                        </div>
-                                        <h3 className="text-xl font-semibold text-center text-blue-500 mb-2">
-                                            {member.name}
-                                        </h3>
-                                        <div className="text-blue-500 text-center mb-4">
-                                            {member.role}
-                                        </div>
-                                        <p className="text-gray-600 text-center mb-4">
-                                            {member.description}
-                                        </p>
-                                        <div className="space-y-2">
-                                            <div className="text-sm font-semibold text-gray-500">
-                                                Chuyên môn:
-                                            </div>
-                                            <ul className="list-disc list-inside text-gray-600">
-                                                {member.specialties.map((specialty, idx) => (
-                                                    <li key={idx}>{specialty}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
+            {/* Team Section */}
+            <section className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-16">
+                        Đội ngũ chuyên gia
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {teamMembers.map((member, index) => (
+                            <div key={index} className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                                <div className="mb-6">
+                                    <img
+                                        src={member.image}
+                                        alt={member.name}
+                                        className="w-32 h-32 rounded-full mx-auto object-cover"
+                                    />
+                                </div>
+                                <h3 className="text-xl font-semibold text-center text-blue-500 mb-2">
+                                    {member.name}
+                                </h3>
+                                <div className="text-blue-500 text-center mb-4">
+                                    {member.role}
+                                </div>
+                                <p className="text-gray-600 text-center mb-4">
+                                    {member.description}
+                                </p>
+                                <div className="space-y-2">
+                                    <div className="text-sm font-semibold text-gray-500">
+                                        Chuyên môn:
                                     </div>
-                                ))}
+                                    <ul className="list-disc list-inside text-gray-600">
+                                        {member.specialties.map((specialty, idx) => (
+                                            <li key={idx}>{specialty}</li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    </section>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
-                    {/* Milestones */}
-                    <section className="py-20 bg-gray-50">
-                        <div className="max-w-7xl mx-auto px-4">
-                            <h2 className="text-3xl font-bold text-center text-gray-900 mb-16">
-                                Chặng đường phát triển
-                            </h2>
-                            <div className="space-y-12">
-                                {milestones.map((milestone, index) => (
-                                    <div key={index} className="flex flex-col md:flex-row items-center gap-8">
-                                        <div className="w-full md:w-1/4 text-center md:text-right">
-                                            <div className="text-3xl font-bold text-blue-500">
-                                                {milestone.year}
-                                            </div>
-                                        </div>
-                                        <div className="w-full md:w-3/4">
-                                            <h3 className="text-xl font-semibold text-blue-500 mb-2">
-                                                {milestone.title}
-                                            </h3>
-                                            <p className="text-gray-600">
-                                                {milestone.description}
-                                            </p>
-                                        </div>
+            {/* Milestones */}
+            <section className="py-20 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-16">
+                        Chặng đường phát triển
+                    </h2>
+                    <div className="space-y-12">
+                        {milestones.map((milestone, index) => (
+                            <div key={index} className="flex flex-col md:flex-row items-center gap-8">
+                                <div className="w-full md:w-1/4 text-center md:text-right">
+                                    <div className="text-3xl font-bold text-blue-500">
+                                        {milestone.year}
                                     </div>
-                                ))}
+                                </div>
+                                <div className="w-full md:w-3/4">
+                                    <h3 className="text-xl font-semibold text-blue-500 mb-2">
+                                        {milestone.title}
+                                    </h3>
+                                    <p className="text-gray-600">
+                                        {milestone.description}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </section>
-
-
-
-                 
+                        ))}
+                    </div>
                 </div>
             </section>
 
