@@ -25,16 +25,19 @@ import { RequestManagement } from './components/protection_page/Doctor/RequestMa
 import AppointmentManagement from './components/protection_page/Doctor/AppointmentManagement';
 import FeedbackManagement from './components/protection_page/Doctor/FeedbackManagement';
 import AdminDashboard from './components/protection_page/Admin/AdminDashboard';
+import { ProtectedRouteByRole } from './components/Utils/ProtectedRoute'
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
+  
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <>
           {!isLoaded && <LoadingScreen onComplete={() => setIsLoaded(true)} />}
           <div className={`min-h-screen transition-opacity duration-600 ${isLoaded ? "opacity-100" : "opacity-0"} bg-[rgba(3, 3, 3, 0.8)] text-gray-100`}>
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />} />
               <Route path="/about" element={<About />} />
@@ -43,133 +46,137 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/products" element={<Product />} />
+              <Route path="/verify-otp" element={<OTPVerification />} />
+
+              {/* Protected Routes for All Authenticated Users */}
               <Route
                 path="/profile"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['User', 'Doctor', 'Manager']}>
                     <Profile />
-                  </ProtectedRoute>
+                  </ProtectedRouteByRole>
                 }
               />
-              <Route path="/verify-otp" element={<OTPVerification />} />
 
-              //Family
+              {/* Protected Routes for Users */}
               <Route
                 path="/family-profile"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['User']}>
                     <FamilyProfileManagement />
-                  </ProtectedRoute>
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/detail-family"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['User']}>
                     <DetailFamilyProfile />
-                  </ProtectedRoute>
+                  </ProtectedRouteByRole>
                 }
               />
 
-              //Doctor
+              {/* Protected Routes for Doctors */}
               <Route
                 path="/doctor-dashboard"
                 element={
-                  //<ProtectedRoute>
-                  <DoctorDashboard />
-                  //</ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Doctor']}>
+                    <DoctorDashboard />
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/doctor-dashboard/products"
                 element={
-                  //<ProtectedRoute>
-                  <ProductManagement />
-                  //</ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Doctor']}>
+                    <ProductManagement />
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/doctor-dashboard/requests"
                 element={
-                  //<ProtectedRoute>
-                  <RequestManagement />
-                  //</ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Doctor']}>
+                    <RequestManagement />
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/doctor-dashboard/appointments"
                 element={
-                  //<ProtectedRoute>
-                  <AppointmentManagement />
-                  //</ProtectedRoute>
-                } />
+                  <ProtectedRouteByRole allowedRoles={['Doctor']}>
+                    <AppointmentManagement />
+                  </ProtectedRouteByRole>
+                }
+              />
               <Route
                 path="/doctor-dashboard/feedback"
                 element={
-                  // <ProtectedRoute>
-                  <FeedbackManagement />
-                  //</ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Doctor']}>
+                    <FeedbackManagement />
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/consultation-detail"
                 element={
-                  //<ProtectedRoute>
-                  <ConsultationDetail />
-                  //</ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Doctor']}>
+                    <ConsultationDetail />
+                  </ProtectedRouteByRole>
                 }
               />
 
-              //Admin
+              {/* Protected Routes for Managers/Admin */}
               <Route
-                path="/admin-dashboard"
+                path="/admin-dashboard/*"
                 element={
-                  //<ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Manager']}>
                     <AdminDashboard />
-                  //</ProtectedRoute>
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/admin-dashboard/users"
                 element={
-                  //<ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Manager']}>
                     <AdminDashboard />
-                  //</ProtectedRoute>
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/admin-dashboard/doctors"
                 element={
-                  //<ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Manager']}>
                     <AdminDashboard />
-                  //</ProtectedRoute>
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/admin-dashboard/services"
                 element={
-                  //<ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Manager']}>
                     <AdminDashboard />
-                  //</ProtectedRoute>
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/admin-dashboard/statistics"
                 element={
-                  //<ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Manager']}>
                     <AdminDashboard />
-                  //</ProtectedRoute>
+                  </ProtectedRouteByRole>
                 }
               />
               <Route
                 path="/admin-dashboard/settings"
                 element={
-                  //<ProtectedRoute>
+                  <ProtectedRouteByRole allowedRoles={['Manager']}>
                     <AdminDashboard />
-                  //</ProtectedRoute>
+                  </ProtectedRouteByRole>
                 }
               />
 
+              {/* 404 Route */}
               <Route path="*" element={
                 <div className="flex items-center justify-center min-h-screen">
                   <div className="text-center">
@@ -181,8 +188,8 @@ function App() {
             </Routes>
           </div>
         </>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   )
 }
 

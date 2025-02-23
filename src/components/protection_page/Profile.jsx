@@ -1,6 +1,7 @@
 import React from 'react';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
+import { Navbar } from '../sections/Navbar';
 import { FaUser, FaEnvelope, FaKey, FaEdit, FaUserCircle, FaUsers } from 'react-icons/fa';
 import { useAuth } from '../Utils/AuthContext';
 import { jwtDecode } from 'jwt-decode';
@@ -18,7 +19,7 @@ const Profile = () => {
             const decoded = jwtDecode(token);
             userInfo = {
                 email: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-                role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+                role: decoded['role'],
                 userId: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
             };
         } catch (error) {
