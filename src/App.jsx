@@ -25,6 +25,7 @@ import { RequestManagement } from './components/protection_page/Doctor/RequestMa
 import AppointmentManagement from './components/protection_page/Doctor/AppointmentManagement';
 import FeedbackManagement from './components/protection_page/Doctor/FeedbackManagement';
 import AdminDashboard from './components/protection_page/Admin/AdminDashboard';
+import DoctorManagement from './components/protection_page/Admin/DoctorManagement';
 import { ProtectedRouteByRole } from './components/Utils/ProtectedRoute'
 
 function App() {
@@ -78,7 +79,7 @@ function App() {
 
               {/* Protected Routes for Doctors */}
               <Route
-                path="/doctor-dashboard"
+                path="/doctor-dashboard/*"
                 element={
                   <ProtectedRouteByRole allowedRoles={['Doctor']}>
                     <DoctorDashboard />
@@ -128,7 +129,7 @@ function App() {
 
               {/* Protected Routes for Managers/Admin */}
               <Route
-                path="/admin-dashboard/*"
+                path="/admin-dashboard"
                 element={
                   <ProtectedRouteByRole allowedRoles={['Manager']}>
                     <AdminDashboard />
@@ -147,7 +148,7 @@ function App() {
                 path="/admin-dashboard/doctors"
                 element={
                   <ProtectedRouteByRole allowedRoles={['Manager']}>
-                    <AdminDashboard />
+                    <AdminDashboard activeTab="doctors" />
                   </ProtectedRouteByRole>
                 }
               />
@@ -172,6 +173,14 @@ function App() {
                 element={
                   <ProtectedRouteByRole allowedRoles={['Manager']}>
                     <AdminDashboard />
+                  </ProtectedRouteByRole>
+                }
+              />
+              <Route
+                path="/admin-dashboard/doctor-management"
+                element={
+                  <ProtectedRouteByRole allowedRoles={['Manager']}>
+                    <DoctorManagement />
                   </ProtectedRouteByRole>
                 }
               />
