@@ -1,5 +1,6 @@
 import { FaStar, FaEdit } from 'react-icons/fa';
 import { DoctorLayout } from '../../layouts/DoctorLayout';
+import {OwnHeader} from '../../layouts/OwnHeader';
 
 const DoctorDashboard = () => {
     const doctorInfo = {
@@ -18,6 +19,7 @@ const DoctorDashboard = () => {
     };
 
     return (
+        
         <DoctorLayout>
             <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex items-start gap-8">

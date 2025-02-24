@@ -32,9 +32,8 @@ const AdminDashboard = ({ activeTab: initialActiveTab = 'dashboard' }) => {
                         <p className="text-gray-600">{adminInfo.role}</p>
                         <p className="text-gray-500 text-sm mt-2">Last login: {adminInfo.lastLogin}</p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                        adminInfo.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-sm ${adminInfo.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
                         {adminInfo.status}
                     </span>
                 </div>
@@ -103,21 +102,19 @@ const AdminDashboard = ({ activeTab: initialActiveTab = 'dashboard' }) => {
                 <div className="flex space-x-4">
                     <button
                         onClick={() => setActiveTab('dashboard')}
-                        className={`px-4 py-2 rounded-lg transition-colors ${
-                            activeTab === 'dashboard' 
-                                ? 'bg-blue-500 text-white' 
-                                : 'text-gray-600 hover:bg-gray-100'
-                        }`}
+                        className={`px-4 py-2 rounded-lg transition-colors ${activeTab === 'dashboard'
+                            ? 'bg-blue-500 text-white'
+                            : 'text-gray-600 hover:bg-gray-100'
+                            }`}
                     >
                         Tổng quan
                     </button>
                     <button
                         onClick={() => setActiveTab('doctors')}
-                        className={`px-4 py-2 rounded-lg transition-colors ${
-                            activeTab === 'doctors' 
-                                ? 'bg-blue-500 text-white' 
-                                : 'text-gray-600 hover:bg-gray-100'
-                        }`}
+                        className={`px-4 py-2 rounded-lg transition-colors ${activeTab === 'doctors'
+                            ? 'bg-blue-500 text-white'
+                            : 'text-gray-600 hover:bg-gray-100'
+                            }`}
                     >
                         Quản lý bác sĩ
                     </button>

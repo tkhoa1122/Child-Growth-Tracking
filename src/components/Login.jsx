@@ -12,7 +12,7 @@ const backgroundImage = '/Images/background.jpg';
 export const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
-    
+
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -76,18 +76,20 @@ export const Login = () => {
                 console.log("Login response:", response);
 
                 if (response.data.status) {
-                    const token = response.data.jwt;
-                    localStorage.setItem('token', token);
                     if (formData.rememberMe) {
                         localStorage.setItem('rememberMe', 'true');
                     }
-                    
+
+                    const token = response.data.jwt;
+                    const firstName = response.data.firstName; // Lấy firstName từ response
+                    const lastName = response.data.lastName; // Lấy lastName từ response
+
                     // Lấy role từ token
                     const decoded = jwtDecode(token);
                     const userRole = decoded.role;
-                    
-                    login(token);
-                    
+
+                    login(token, firstName, lastName);
+
                     setNotification({
                         show: true,
                         message: 'Đăng nhập thành công!',
@@ -124,7 +126,7 @@ export const Login = () => {
                     message: error.response?.data?.message || 'Email hoặc mật khẩu không chính xác',
                     type: 'error'
                 });
-                
+
                 setTimeout(() => {
                     setNotification(prev => ({ ...prev, show: false }));
                 }, 3000);
@@ -150,27 +152,25 @@ export const Login = () => {
     return (
         <div className="h-370 flex flex-col">
             <Header />
-            
+
             {/* Notification Popup */}
             {notification.show && (
-                <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
-                    notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'
-                }`}>
+                <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+                    }`}>
                     {notification.type === 'success' ? (
                         <FaCheckCircle className="w-6 h-6 text-green-500 mr-2" />
                     ) : (
                         <FaTimesCircle className="w-6 h-6 text-red-500 mr-2" />
                     )}
-                    <span className={`font-medium ${
-                        notification.type === 'success' ? 'text-green-700' : 'text-red-700'
-                    }`}>
+                    <span className={`font-medium ${notification.type === 'success' ? 'text-green-700' : 'text-red-700'
+                        }`}>
                         {notification.message}
                     </span>
                 </div>
             )}
 
             {/* Main Content */}
-            <main 
+            <main
                 className="flex-grow flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8 relative"
                 style={{
                     backgroundImage: `url(${backgroundImage})`,
@@ -211,15 +211,13 @@ export const Login = () => {
                                         value={formData.email}
                                         onChange={handleChange}
                                         onBlur={() => handleBlur('email')}
-                                        className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${
-                                            touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
-                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                        className={`appearance-none rounded-lg w-full pl-10 pr-3 py-3 border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
+                                            } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                         placeholder="Địa chỉ email"
                                     />
                                 </div>
-                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${
-                                    touched.email && errors.email ? 'opacity-100' : 'opacity-0'
-                                }`}>
+                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${touched.email && errors.email ? 'opacity-100' : 'opacity-0'
+                                    }`}>
                                     {errors.email || 'Email là bắt buộc'}
                                 </p>
                             </div>
@@ -236,9 +234,8 @@ export const Login = () => {
                                         value={formData.password}
                                         onChange={handleChange}
                                         onBlur={() => handleBlur('password')}
-                                        className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${
-                                            touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
-                                        } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                                        className={`appearance-none rounded-lg w-full pl-10 pr-10 py-3 border ${touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
+                                            } bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                                         placeholder="Mật khẩu"
                                     />
                                     <button
@@ -253,9 +250,8 @@ export const Login = () => {
                                         )}
                                     </button>
                                 </div>
-                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${
-                                    touched.password && errors.password ? 'opacity-100' : 'opacity-0'
-                                }`}>
+                                <p className={`mt-2 text-sm text-red-600 transition-opacity duration-300 ${touched.password && errors.password ? 'opacity-100' : 'opacity-0'
+                                    }`}>
                                     {errors.password || 'Mật khẩu là bắt buộc'}
                                 </p>
                             </div>
