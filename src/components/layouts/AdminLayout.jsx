@@ -1,5 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { FaHome, FaUsers, FaUserMd, FaClipboardList, FaChartBar, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import {OwnHeader} from '../layouts/OwnHeader';
 
 export const AdminLayout = () => {
     const navigate = useNavigate();
@@ -10,7 +11,8 @@ export const AdminLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-100 pt-15">
+            <OwnHeader/>
             <div className="flex">
                 {/* Sidebar */}
                 <div className="w-64 min-h-screen bg-white shadow-lg fixed">

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaUserMd, FaCalendarAlt, FaPlus, FaBell, FaComments } from 'react-icons/fa';
-import { Header } from '../Header';
+import {OwnHeader} from '../layouts/OwnHeader';
 import { Footer } from '../Footer';
 
 export const DoctorLayout = ({ children }) => {
@@ -9,7 +9,7 @@ export const DoctorLayout = ({ children }) => {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <Header />
+            <OwnHeader />
             
             <div className="flex pt-16">
                 {/* Sidebar Menu */}

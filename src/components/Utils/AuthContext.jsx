@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userInfo, setUserInfo] = useState({ firstName: '', lastName: '', role: '' });
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
@@ -14,13 +15,15 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const validateToken = () => {
             const token = localStorage.getItem('token');
-            if (token) {
+            const storedUser = localStorage.getItem('userInfo');
+            if (token && storedUser) {
                 try {
                     const decoded = jwtDecode(token);
                     const currentTime = Date.now() / 1000;
                     
                     if (decoded.exp > currentTime) {
                         setIsAuthenticated(true);
+                        setUserInfo(JSON.parse(storedUser)); // Lấy thông tin user từ localStorage
                         setUser(decoded);
                         
                         // Kiểm tra URL hiện tại có phù hợp với role không
@@ -50,15 +53,18 @@ export const AuthProvider = ({ children }) => {
         return () => clearInterval(intervalId);
     }, [navigate, location]);
 
-    const login = (token) => {
+    const login = (token, firstName, lastName, role) => {
         try {
             const decoded = jwtDecode(token);
             localStorage.setItem('token', token);
             setIsAuthenticated(true);
             setUser(decoded);
+            setUserInfo({ firstName, lastName, role });
+
+            const userRole = decoded.role;
+            localStorage.setItem('userInfo', JSON.stringify({ firstName, lastName, userRole }));
 
             // Điều hướng dựa vào role sau khi đăng nhập
-            const userRole = decoded.role;
             const from = location.state?.from?.pathname || '/';
 
             switch (userRole) {
@@ -90,6 +96,7 @@ export const AuthProvider = ({ children }) => {
             isAuthenticated, 
             user, 
             login, 
+            userInfo, 
             logout: handleLogout 
         }}>
             {children}
