@@ -4,6 +4,7 @@ import api from '../../Utils/Axios';
 
 const AdminDashboard = () => {
     const [adminInfo, setAdminInfo] = useState({
+        userId: "",
         firstName: "",
         lastName: "",
         email: "",
@@ -24,14 +25,19 @@ const AdminDashboard = () => {
         const fetchUserInfo = () => {
             try {
                 const token = localStorage.getItem('token');
+                const userId = localStorage.getItem('userId');
+                const firstName = localStorage.getItem('firstName');
+                const lastName = localStorage.getItem('lastName');
+
                 if (token) {
                     const cleanToken = token.replace(/^"|"$/g, '');
                     const decoded = jwtDecode(cleanToken);
                     console.log("Decoded token:", decoded);
 
                     setAdminInfo({
-                        firstName: decoded.firstName || "",
-                        lastName: decoded.lastName || "",
+                        userId: userId || "",
+                        firstName: firstName || "",
+                        lastName: lastName || "",
                         email: decoded.email || "",
                         role: decoded.role || "",
                         exp: decoded.exp ? new Date(decoded.exp * 1000).toLocaleString() : null,
@@ -100,6 +106,10 @@ const AdminDashboard = () => {
                         <div>
                             <h3 className="text-lg font-semibold text-gray-700">Thông tin cá nhân</h3>
                             <div className="mt-2 space-y-2">
+                                <p className="text-gray-600">
+                                    <span className="font-medium">ID:</span>{' '}
+                                    {adminInfo.userId}
+                                </p>
                                 <p className="text-gray-600">
                                     <span className="font-medium">Họ và tên:</span>{' '}
                                     {`${adminInfo.firstName} ${adminInfo.lastName}`}
