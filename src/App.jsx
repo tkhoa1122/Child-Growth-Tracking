@@ -218,6 +218,7 @@ function App() {
                   <Route path="services" element={<ServiceManagement />} />
                   <Route path="services/create" element={<CreateService />} />
                   <Route path="services/edit/:id" element={<UpdateService />} />
+                  <Route path="doctors" element={<DoctorManagement />} />
                 </Route>
 
                 {/* 404 Route */}

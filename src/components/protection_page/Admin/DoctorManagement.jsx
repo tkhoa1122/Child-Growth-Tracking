@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from "../../Utils/Axios";
+import pictureDoc from "../../../../public/Images/doctor.png"
 import { FaUserMd, FaStar, FaPhone, FaEnvelope, FaHospital, FaBriefcase } from 'react-icons/fa';
 
 const DoctorManagement = () => {
@@ -13,7 +14,13 @@ const DoctorManagement = () => {
 
     const fetchDoctors = async () => {
         try {
-            const response = await api.get('Doctor/get-all');
+            const token = localStorage.getItem("token");
+            console.log("Token:", token); // Kiểm tra token
+            const response = await api.get('Manager/doctors', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setDoctors(response.data);
             setLoading(false);
         } catch (error) {
@@ -55,43 +62,27 @@ const DoctorManagement = () => {
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center space-x-4">
                                     <div className="relative">
-                                        {doctor.imageUrl ? (
-                                            <img 
-                                                src={doctor.imageUrl} 
-                                                alt={doctor.fullName}
-                                                className="w-16 h-16 rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <FaUserMd className="w-16 h-16 text-gray-400" />
-                                        )}
+                                        <img 
+                                            className="w-16 h-16 rounded-full object-cover" 
+                                            src={doctor.imageUrl || '/Images/doctor.png'} 
+                                            alt={doctor.fullName}
+                                            onError={(e) => {
+                                                e.target.src = '/Images/doctor.png'; // Đặt hình ảnh mặc định nếu có lỗi
+                                            }}
+                                        />
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-semibold text-gray-800">{doctor.fullName}</h3>
                                         <p className="text-blue-600 font-medium">{doctor.specialization}</p>
+                                        <p className="text-gray-600">{doctor.email}</p>
+                                        <p className="text-gray-600">{doctor.phoneNumber}</p>
+                                        <p className="text-gray-600">{doctor.hospitalAddressWork}</p>
+                                        <p className="text-gray-600">{doctor.experienceYears} năm kinh nghiệm</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center">
                                     <FaStar className="text-yellow-400" />
                                     <span className="ml-1 text-gray-600">{doctor.starRating}</span>
-                                </div>
-                            </div>
-
-                            <div className="mt-4 space-y-2">
-                                <div className="flex items-center text-gray-600">
-                                    <FaEnvelope className="w-4 h-4 mr-2" />
-                                    <span>{doctor.email}</span>
-                                </div>
-                                <div className="flex items-center text-gray-600">
-                                    <FaPhone className="w-4 h-4 mr-2" />
-                                    <span>{doctor.phoneNumber}</span>
-                                </div>
-                                <div className="flex items-center text-gray-600">
-                                    <FaHospital className="w-4 h-4 mr-2" />
-                                    <span>{doctor.hospitalAddressWork}</span>
-                                </div>
-                                <div className="flex items-center text-gray-600">
-                                    <FaBriefcase className="w-4 h-4 mr-2" />
-                                    <span>{doctor.experienceYears} năm kinh nghiệm</span>
                                 </div>
                             </div>
 

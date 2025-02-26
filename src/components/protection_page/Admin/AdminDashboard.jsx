@@ -28,6 +28,8 @@ const AdminDashboard = () => {
                 const userId = localStorage.getItem('userId');
                 const firstName = localStorage.getItem('firstName');
                 const lastName = localStorage.getItem('lastName');
+                const email = localStorage.getItem('email');
+                const role = localStorage.getItem('role');
 
                 if (token) {
                     const cleanToken = token.replace(/^"|"$/g, '');
@@ -38,8 +40,8 @@ const AdminDashboard = () => {
                         userId: userId || "",
                         firstName: firstName || "",
                         lastName: lastName || "",
-                        email: decoded.email || "",
-                        role: decoded.role || "",
+                        email: email || decoded.email || "",
+                        role: role || decoded.role || "",
                         exp: decoded.exp ? new Date(decoded.exp * 1000).toLocaleString() : null,
                         iat: decoded.iat ? new Date(decoded.iat * 1000).toLocaleString() : null,
                         sub: decoded.sub || "",
