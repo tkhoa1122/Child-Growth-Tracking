@@ -1,25 +1,52 @@
+import React, { useEffect, useState } from 'react';
 import { FaStar, FaEdit } from 'react-icons/fa';
 import { DoctorLayout } from '../../layouts/DoctorLayout';
-import {OwnHeader} from '../../layouts/OwnHeader';
+import axios from '../../Utils/Axios';
 
 const DoctorDashboard = () => {
-    const doctorInfo = {
-        name: "Dr. Jackson Santos",
-        specialty: "Dermatologist",
-        hospital: "Texas Hospital",
-        rating: 4.8,
-        totalReviews: 256,
-        experience: "15 years",
-        email: "dr.jackson@hospital.com",
-        phone: "+1 234 567 890",
-        address: "123 Medical Center, Texas",
-        education: "MD - Dermatology, Texas Medical University",
-        certifications: ["Board Certified in Dermatology", "Advanced Pediatric Care"],
-        bio: "Specialized in pediatric dermatology with 15 years of experience in treating various skin conditions in children."
-    };
+    const [doctorInfo, setDoctorInfo] = useState({
+        name: "",
+        specialty: "",
+        hospital: "",
+        rating: 0,
+        totalReviews: 0,
+        experience: "",
+        email: "",
+        phone: "",
+        address: "",
+        education: "",
+        certifications: [],
+        bio: "",
+        imageUrl: ""
+    });
+
+    useEffect(() => {
+        const fetchDoctorData = async () => {
+            try {
+                const response = await axios.get('Doctor/get-all');
+                const data = response.data[0]; // Giả sử API trả về một mảng, lấy phần tử đầu tiên
+
+                setDoctorInfo({
+                    name: `${data.firstName} ${data.lastName}`,
+                    specialty: data.specialization,
+                    hospital: data.hospitalAddressWork,
+                    rating: data.starRating,
+                    experience: `${data.experienceYears} years`,
+                    email: data.email,
+                    phone: data.phoneNumber,
+                    address: data.hospitalAddressWork,
+                    imageUrl: data.imageUrl,
+                    certifications: data.certifications || [] // Đảm bảo certifications là một mảng
+                });
+            } catch (error) {
+                console.error('Error fetching doctor data:', error);
+            }
+        };
+
+        fetchDoctorData();
+    }, []);
 
     return (
-        
         <DoctorLayout>
             <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex items-start gap-8">
@@ -27,7 +54,7 @@ const DoctorDashboard = () => {
                     <div className="w-1/3">
                         <div className="relative">
                             <img
-                                src="/Images/avatar.jpg"
+                                src={doctorInfo.imageUrl || "/Images/avatar.jpg"}
                                 alt="Doctor"
                                 className="w-full h-auto max-h-64 object-contain rounded-lg shadow"
                             />
@@ -37,8 +64,32 @@ const DoctorDashboard = () => {
                         </div>
                         <div className="mt-4 bg-white p-4 rounded-lg shadow">
                             <div className="flex items-center justify-center gap-2">
-                                <FaStar className="text-yellow-400 text-xl" />
-                                <span className="text-2xl font-bold">{doctorInfo.rating}</span>
+                                {/* Hiển thị sao đánh giá */}
+                                {[...Array(5)].map((_, index) => {
+                                    const starValue = index + 1;
+                                    const rating = doctorInfo.rating || 0; // Đảm bảo rating có giá trị mặc định
+                                    const isFullStar = starValue <= Math.floor(rating); // Kiểm tra sao vàng đầy đủ
+                                    const isHalfStar = starValue > Math.floor(rating) && starValue <= rating; // Hiển thị 1 nửa sau nếu giá trị thực tại index lớn hơn index
+                                    const isGrayStar = starValue > rating; // Kiểm tra sao mờ
+
+                                    return (
+                                        <div key={index} className="relative">
+                                            {/* Sao mờ (nền) */}
+                                            <FaStar className={`text-gray-300 text-xl ${isGrayStar ? 'opacity-100' : 'opacity-0'}`} />
+                                            {/* Sao vàng (phần hiển thị) */}
+                                            {isFullStar && (
+                                                <FaStar className="text-yellow-400 text-xl absolute top-0 left-0" />
+                                            )}
+                                            {/* Sao nửa vàng */}
+                                            {isHalfStar && (
+                                                <div className="absolute top-0 left-0" style={{ width: `${(rating - Math.floor(rating)) * 100}%`, overflow: 'hidden' }}>
+                                                    <FaStar className="text-yellow-400 text-xl" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                                <span className="text-2xl font-bold text-gray-600">{doctorInfo.rating}</span>
                                 <span className="text-gray-500">({doctorInfo.totalReviews} đánh giá)</span>
                             </div>
                         </div>
@@ -66,10 +117,9 @@ const DoctorDashboard = () => {
                                 </div>
                             </div>
                             <div>
-                                <h3 className="font-semibold text-gray-700 mb-2">Chuyên môn</h3>
+                                <h3 className="font-semibold text-2xl text-gray-900 mb-2">Chuyên môn</h3>
                                 <div className="space-y-2 text-gray-600">
                                     <p><span className="font-medium">Kinh nghiệm:</span> {doctorInfo.experience}</p>
-                                    <p><span className="font-medium">Học vấn:</span> {doctorInfo.education}</p>
                                 </div>
                             </div>
                         </div>
@@ -77,17 +127,12 @@ const DoctorDashboard = () => {
                         <div className="mt-6">
                             <h3 className="font-semibold text-gray-700 mb-2">Chứng chỉ</h3>
                             <div className="flex flex-wrap gap-2">
-                                {doctorInfo.certifications.map((cert, index) => (
+                                {Array.isArray(doctorInfo.certifications) && doctorInfo.certifications.map((cert, index) => (
                                     <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
                                         {cert}
                                     </span>
                                 ))}
                             </div>
-                        </div>
-
-                        <div className="mt-6">
-                            <h3 className="font-semibold text-gray-700 mb-2">Giới thiệu</h3>
-                            <p className="text-gray-600">{doctorInfo.bio}</p>
                         </div>
                     </div>
                 </div>
