@@ -33,6 +33,7 @@ import { AdminLayout } from './components/layouts/AdminLayout'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { UpdateService } from './components/protection_page/Admin/UpdateService';
+import { UnauthorizedPage } from './components/Utils/ProtectedRoute';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -135,7 +136,7 @@ function App() {
                 />
 
                 {/* Protected Routes for Managers/Admin */}
-                <Route
+                {/* <Route
                   path="/admin-dashboard"
                   element={
                     //<ProtectedRouteByRole allowedRoles={['Manager']}>
@@ -198,10 +199,21 @@ function App() {
                       <CreateService />
                     </ProtectedRouteByRole>
                   }
-                />
+                /> */}
+
+                {/* Unauthorized Route */}
+                <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                 {/* Admin Routes */}
-                <Route path="/admin" element={<AdminLayout />}>
+                <Route 
+                  path="/admin" 
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['Manager']}>
+                      <AdminLayout />
+                    </ProtectedRouteByRole>
+                  }
+                >
+                  {/* Tất cả các route con sẽ được bảo vệ bởi ProtectedRouteByRole của route cha */}
                   <Route index element={<AdminDashboard />} />
                   <Route path="services" element={<ServiceManagement />} />
                   <Route path="services/create" element={<CreateService />} />
