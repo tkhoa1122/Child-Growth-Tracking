@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from "../../Utils/Axios";
-import pictureDoc from "../../../../public/Images/doctor.png"
 import { FaUserMd, FaStar, FaPhone, FaEnvelope, FaHospital, FaBriefcase } from 'react-icons/fa';
 
 const DoctorManagement = () => {
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [notification, setNotification] = useState({ show: false, message: '', type: '' });
 
     useEffect(() => {
         fetchDoctors();
@@ -30,6 +30,22 @@ const DoctorManagement = () => {
         }
     };
 
+    const deleteDoctor = async (doctorId) => {
+        try {
+            const token = localStorage.getItem("token");
+            await api.delete(`Manager/doctors/${doctorId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setDoctors(doctors.filter(doctor => doctor.doctorId !== doctorId));
+            setNotification({ show: true, message: 'Xóa bác sĩ thành công!', type: 'success' });
+        } catch (error) {
+            console.error('Error deleting doctor:', error);
+            setNotification({ show: true, message: 'Xóa bác sĩ thất bại. Vui lòng thử lại.', type: 'error' });
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -48,6 +64,13 @@ const DoctorManagement = () => {
 
     return (
         <div className="p-6">
+            {notification.show && (
+                <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'}`}>
+                    <span className={`font-medium ${notification.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                        {notification.message}
+                    </span>
+                </div>
+            )}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Quản lý bác sĩ</h2>
                 <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
@@ -73,11 +96,14 @@ const DoctorManagement = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-semibold text-gray-800">{doctor.fullName}</h3>
+                                        <p className="text-gray-600 text-sm">Account ID: {doctor.accountId}</p>
+                                        <p className="text-gray-600 text-sm">Doctor ID: {doctor.doctorId}</p>
                                         <p className="text-blue-600 font-medium">{doctor.specialization}</p>
                                         <p className="text-gray-600">{doctor.email}</p>
                                         <p className="text-gray-600">{doctor.phoneNumber}</p>
                                         <p className="text-gray-600">{doctor.hospitalAddressWork}</p>
                                         <p className="text-gray-600">{doctor.experienceYears} năm kinh nghiệm</p>
+                                       
                                     </div>
                                 </div>
                                 <div className="flex items-center">
@@ -90,7 +116,10 @@ const DoctorManagement = () => {
                                 <button className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg transition-colors">
                                     Chỉnh sửa
                                 </button>
-                                <button className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg transition-colors">
+                                <button 
+                                    className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg transition-colors"
+                                    onClick={() => deleteDoctor(doctor.doctorId)}
+                                >
                                     Xóa
                                 </button>
                             </div>
