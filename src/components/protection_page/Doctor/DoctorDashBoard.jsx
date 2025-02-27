@@ -112,6 +112,11 @@ const DoctorDashboard = () => {
         }
     };
 
+    const handleChangePassword = () => {
+        // Logic to handle password change
+        alert("Chức năng đổi mật khẩu chưa được triển khai.");
+    };
+
     return (
         <DoctorLayout>
             <div className="bg-white rounded-lg shadow-lg p-6">
@@ -168,6 +173,12 @@ const DoctorDashboard = () => {
                                     className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                                 >
                                     Cập nhật thông tin
+                                </button>
+                                <button
+                                    onClick={handleChangePassword}
+                                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                                >
+                                    Đổi mật khẩu
                                 </button>
                                 <button
                                     onClick={handleDeleteAccount}
