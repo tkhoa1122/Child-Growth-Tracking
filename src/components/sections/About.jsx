@@ -293,7 +293,7 @@ export const About = () => {
                                         <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                                             <div className="relative h-48">
                                                 <img
-                                                    src="/Images/blog-nutrition.jpg"
+                                                    src="/Images/information.png"
                                                     alt={service.serviceName}
                                                     className="w-full h-full object-cover"
                                                 />
