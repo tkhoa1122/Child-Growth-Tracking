@@ -16,26 +16,27 @@ export const Header = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                const cleanToken = token.replace(/^"|"$/g, '');
-                const decoded = jwtDecode(cleanToken);
-                setUserInfo({
-                    firstName: decoded.firstName || '',
-                    lastName: decoded.lastName || '',
-                    role: decoded.role || ''
-                });
-            } catch (error) {
-                console.error("Lỗi khi giải mã token:", error);
-                setUserInfo({
-                    firstName: '',
-                    lastName: '',
-                    role: ''
-                });
+        const getUserInfo = () => {
+            const token = localStorage.getItem('token');
+            if (token && isAuthenticated) {
+                // Lấy thông tin từ localStorage thay vì decode token
+                const storedUser = {
+                    firstName: localStorage.getItem('firstName') || '',
+                    lastName: localStorage.getItem('lastName') || '',
+                    role: localStorage.getItem('role') || '',
+                    email: localStorage.getItem('email') || ''
+                };
+                console.log(storedUser);
+                setUserInfo(storedUser);
             }
-        }
+        };
+
+        getUserInfo();
     }, [isAuthenticated]);
+
+    useEffect(() => {
+        console.log("userInfo đã cập nhật:", userInfo);
+    }, [userInfo]);
 
     const getProfilePath = () => {
         switch (userInfo.role) {

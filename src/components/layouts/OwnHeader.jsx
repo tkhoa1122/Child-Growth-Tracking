@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '../Utils/AuthContext';
-import { jwtDecode } from 'jwt-decode';
 
 export const OwnHeader = () => {
     const navigate = useNavigate();
@@ -27,7 +26,7 @@ export const OwnHeader = () => {
                     role: localStorage.getItem('role') || '',
                     email: localStorage.getItem('email') || ''
                 };
-                
+                console.log(storedUser);
                 setUserInfo(storedUser);
             }
         };

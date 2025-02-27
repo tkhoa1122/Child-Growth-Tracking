@@ -65,6 +65,7 @@ export const Login = () => {
                     email: formData.email.trim(),
                     password: formData.password
                 });
+                console.log(response);
 
                 if (response.data.status) {
                     if (formData.rememberMe) {
@@ -79,7 +80,7 @@ export const Login = () => {
                     const decoded = jwtDecode(token);
                     const userRole = decoded.role;
 
-                    login(token, firstName, lastName);
+                    login(token);
 
                     localStorage.setItem('firstName', firstName);
                     localStorage.setItem('lastName', lastName);
