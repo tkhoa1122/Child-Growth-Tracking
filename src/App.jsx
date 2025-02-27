@@ -34,6 +34,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { UpdateService } from './components/protection_page/Admin/UpdateService';
 import { UnauthorizedPage } from './components/Utils/ProtectedRoute';
+import DetailDoctor from './components/protection_page/Admin/DetailDoctor';
+// import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -219,6 +221,8 @@ function App() {
                   <Route path="services/create" element={<CreateService />} />
                   <Route path="services/edit/:id" element={<UpdateService />} />
                   <Route path="doctors" element={<DoctorManagement />} />
+                  <Route path="doctors/:accountId" element={<DetailDoctor />} />
+                  {/* <Route path="doctors/edit/:accountId" element={<EditDoctor />} /> */}
                 </Route>
 
                 {/* 404 Route */}
@@ -235,7 +239,17 @@ function App() {
           </>
         </AuthProvider>
       </Router>
-      <ToastContainer />
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </>
   )
 }

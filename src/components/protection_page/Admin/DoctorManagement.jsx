@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import api from "../../Utils/Axios";
 import { FaUserMd, FaStar, FaPhone, FaEnvelope, FaHospital, FaBriefcase } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const DoctorManagement = () => {
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchDoctors();
@@ -93,7 +95,11 @@ const DoctorManagement = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {doctors.map((doctor) => (
-                    <div key={doctor.doctorId} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    <div 
+                        key={doctor.doctorId} 
+                        className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                        onClick={() => navigate(`/admin/doctors/${doctor.accountId}`)}
+                    >
                         <div className="p-6">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center space-x-4">
@@ -123,18 +129,6 @@ const DoctorManagement = () => {
                                     <FaStar className="text-yellow-400" />
                                     <span className="ml-1 text-gray-600">{doctor.starRating}</span>
                                 </div>
-                            </div>
-
-                            <div className="mt-6 flex space-x-3">
-                                <button className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg transition-colors">
-                                    Chỉnh sửa
-                                </button>
-                                <button 
-                                    className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg transition-colors"
-                                    onClick={() => deleteDoctor(doctor.accountId)}
-                                >
-                                    Xóa
-                                </button>
                             </div>
                         </div>
                     </div>
