@@ -61,19 +61,10 @@ export const Login = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
-                // Log dữ liệu trước khi gửi request
-                console.log("Sending login data:", {
-                    email: formData.email,
-                    password: formData.password
-                });
-
                 const response = await api.post('Auth/login', {
                     email: formData.email.trim(),
                     password: formData.password
                 });
-
-                // Log response từ server
-                console.log("Login response:", response);
 
                 if (response.data.status) {
                     if (formData.rememberMe) {
@@ -81,14 +72,19 @@ export const Login = () => {
                     }
 
                     const token = response.data.jwt;
-                    const firstName = response.data.firstName; // Lấy firstName từ response
-                    const lastName = response.data.lastName; // Lấy lastName từ response
+                    const firstName = response.data.firstName;
+                    const lastName = response.data.lastName;
 
-                    // Lấy role từ token
+                    // Giải mã token để lấy role
                     const decoded = jwtDecode(token);
                     const userRole = decoded.role;
 
                     login(token, firstName, lastName);
+
+                    localStorage.setItem('firstName', firstName);
+                    localStorage.setItem('lastName', lastName);
+                    localStorage.setItem('role', userRole);
+                    localStorage.setItem('email', formData.email);
 
                     setNotification({
                         show: true,
@@ -100,10 +96,13 @@ export const Login = () => {
                     setTimeout(() => {
                         switch (userRole) {
                             case 'Manager':
-                                navigate('/admin-dashboard');
+                                navigate('/admin');
                                 break;
                             case 'Doctor':
                                 navigate('/doctor-dashboard');
+                                break;
+                            case 'User':
+                                navigate('/home');
                                 break;
                             default:
                                 navigate('/home');
@@ -114,13 +113,7 @@ export const Login = () => {
                     throw new Error(response.data.message || 'Đăng nhập thất bại');
                 }
             } catch (error) {
-                // Log chi tiết lỗi
-                console.error("Login error:", {
-                    status: error.response?.status,
-                    data: error.response?.data,
-                    message: error.response?.data?.message
-                });
-
+                console.error("Login error:", error);
                 setNotification({
                     show: true,
                     message: error.response?.data?.message || 'Email hoặc mật khẩu không chính xác',

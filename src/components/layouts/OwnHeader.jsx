@@ -1,18 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '../Utils/AuthContext';
+import { jwtDecode } from 'jwt-decode';
 
 export const OwnHeader = () => {
     const navigate = useNavigate();
-    const { isAuthenticated, logout, userInfo } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
     const [searchQuery, setSearchQuery] = useState('');
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [userInfo, setUserInfo] = useState({
+        firstName: '',
+        lastName: '',
+        role: '',
+        email: ''
+    });
+
+    useEffect(() => {
+        const getUserInfo = () => {
+            const token = localStorage.getItem('token');
+            if (token && isAuthenticated) {
+                // Lấy thông tin từ localStorage thay vì decode token
+                const storedUser = {
+                    firstName: localStorage.getItem('firstName') || '',
+                    lastName: localStorage.getItem('lastName') || '',
+                    role: localStorage.getItem('role') || '',
+                    email: localStorage.getItem('email') || ''
+                };
+                
+                setUserInfo(storedUser);
+            }
+        };
+
+        getUserInfo();
+    }, [isAuthenticated]);
 
     const getProfilePath = () => {
-        switch (userInfo.userRole) {
+        const role = userInfo.role;
+        switch (role) {
             case 'Manager':
-                return '/admin-dashboard';
+                return '/admin';
             case 'Doctor':
                 return '/doctor-dashboard';
             default:
@@ -26,12 +53,14 @@ export const OwnHeader = () => {
     };
 
     const handleLogout = () => {
-        // Gọi hàm logout từ AuthContext
-        logout();
-        // Đóng menu user nếu đang mở
         setShowUserMenu(false);
-        // Chuyển về trang chủ
+        logout();
         navigate('/');
+    };
+
+    const renderUserInfo = () => {
+        // Hiển thị trực tiếp từ state
+        return `${userInfo.firstName} ${userInfo.lastName}`.trim() || "Tài khoản";
     };
 
     return (
@@ -59,7 +88,7 @@ export const OwnHeader = () => {
                                 >
                                     <FaUserCircle className="w-6 h-6" />
                                     <span className="text-sm">
-                                        {userInfo.firstName} {userInfo.lastName}
+                                        {renderUserInfo()}
                                     </span>
                                 </button>
 
@@ -104,3 +133,5 @@ export const OwnHeader = () => {
         </header>
     );
 };
+
+export default OwnHeader;

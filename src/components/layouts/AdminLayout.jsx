@@ -30,7 +30,7 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaHome className="text-xl" />
-                                <span className="font-medium">Tổng quan</span>
+                                <span className="font-medium">Dash Board</span>
                             </button>
 
                             <button
@@ -42,19 +42,7 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaClipboardList className="text-xl" />
-                                <span className="font-medium">Quản lý Dịch vụ</span>
-                            </button>
-
-                            <button
-                                onClick={() => navigate('/admin/users')}
-                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
-                                    location.pathname.includes('/admin/users') 
-                                        ? 'bg-blue-500 text-white' 
-                                        : 'text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                                <FaUsers className="text-xl" />
-                                <span className="font-medium">Quản lý Người dùng</span>
+                                <span className="font-medium">Service Management</span>
                             </button>
 
                             <button
@@ -66,8 +54,22 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaUserMd className="text-xl" />
-                                <span className="font-medium">Quản lý Bác sĩ</span>
+                                <span className="font-medium">Doctor Management</span>
                             </button>
+
+                            <button
+                                onClick={() => navigate('/admin/users')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/users') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaUsers className="text-xl" />
+                                <span className="font-medium">User Management</span>
+                            </button>
+
+                            
 
                             <button
                                 onClick={() => navigate('/admin/statistics')}
@@ -78,10 +80,10 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaChartBar className="text-xl" />
-                                <span className="font-medium">Thống kê</span>
+                                <span className="font-medium">Statistic</span>
                             </button>
 
-                            <button
+                            {/* <button
                                 onClick={() => navigate('/admin/settings')}
                                 className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
                                     location.pathname.includes('/admin/settings') 
@@ -91,7 +93,7 @@ export const AdminLayout = () => {
                             >
                                 <FaCog className="text-xl" />
                                 <span className="font-medium">Cài đặt</span>
-                            </button>
+                            </button> */}
                         </div>
                     </nav>
                 </div>
