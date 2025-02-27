@@ -30,19 +30,32 @@ const DoctorManagement = () => {
         }
     };
 
-    const deleteDoctor = async (doctorId) => {
+    const deleteDoctor = async (accountId) => {
         try {
             const token = localStorage.getItem("token");
-            await api.delete(`Manager/doctors/${doctorId}`, {
+            
+            // Gọi API với accountId thay vì doctorId
+            await api.delete(`Manager/doctors/${accountId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            setDoctors(doctors.filter(doctor => doctor.doctorId !== doctorId));
-            setNotification({ show: true, message: 'Xóa bác sĩ thành công!', type: 'success' });
+
+            // Cập nhật state bằng accountId
+            setDoctors(prev => prev.filter(doctor => doctor.accountId !== accountId));
+            setNotification({ 
+                show: true, 
+                message: 'Xóa bác sĩ thành công!', 
+                type: 'success' 
+            });
+
         } catch (error) {
-            console.error('Error deleting doctor:', error);
-            setNotification({ show: true, message: 'Xóa bác sĩ thất bại. Vui lòng thử lại.', type: 'error' });
+            console.error('Lỗi xóa bác sĩ:', error);
+            setNotification({ 
+                show: true, 
+                message: error.response?.data?.message || 'Xóa bác sĩ thất bại. Vui lòng thử lại.', 
+                type: 'error' 
+            });
         }
     };
 
@@ -118,7 +131,7 @@ const DoctorManagement = () => {
                                 </button>
                                 <button 
                                     className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg transition-colors"
-                                    onClick={() => deleteDoctor(doctor.doctorId)}
+                                    onClick={() => deleteDoctor(doctor.accountId)}
                                 >
                                     Xóa
                                 </button>
