@@ -81,6 +81,11 @@ export const Login = () => {
 
                     login(token, firstName, lastName);
 
+                    localStorage.setItem('firstName', firstName);
+                    localStorage.setItem('lastName', lastName);
+                    localStorage.setItem('role', userRole);
+                    localStorage.setItem('email', formData.email);
+
                     setNotification({
                         show: true,
                         message: 'Đăng nhập thành công!',

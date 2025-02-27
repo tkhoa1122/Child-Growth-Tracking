@@ -17,38 +17,23 @@ export const OwnHeader = () => {
     });
 
     useEffect(() => {
-        const getUserInfoFromToken = () => {
+        const getUserInfo = () => {
             const token = localStorage.getItem('token');
             if (token && isAuthenticated) {
-                try {
-                    // Xử lý token có dấu ngoặc kép
-                    const cleanToken = token.replace(/^"|"$/g, '');
-                    const decoded = jwtDecode(cleanToken);
-                    
-                    // Log để debug
-                    console.log("Decoded token:", decoded);
-                    
-                    setUserInfo({
-                        firstName: decoded.firstName || '',
-                        lastName: decoded.lastName || '',
-                        role: decoded.role || '',
-                        email: decoded.email || ''
-                    });
-                } catch (error) {
-                    console.error("Error decoding token:", error);
-                    // Reset user info nếu có lỗi
-                    setUserInfo({
-                        firstName: '',
-                        lastName: '',
-                        role: '',
-                        email: ''
-                    });
-                }
+                // Lấy thông tin từ localStorage thay vì decode token
+                const storedUser = {
+                    firstName: localStorage.getItem('firstName') || '',
+                    lastName: localStorage.getItem('lastName') || '',
+                    role: localStorage.getItem('role') || '',
+                    email: localStorage.getItem('email') || ''
+                };
+                
+                setUserInfo(storedUser);
             }
         };
 
-        getUserInfoFromToken();
-    }, [isAuthenticated]); // Chạy lại khi trạng thái đăng nhập thay đổi
+        getUserInfo();
+    }, [isAuthenticated]);
 
     const getProfilePath = () => {
         const role = userInfo.role;
@@ -73,12 +58,9 @@ export const OwnHeader = () => {
         navigate('/');
     };
 
-    // Render có điều kiện để tránh lỗi undefined
     const renderUserInfo = () => {
-        if (!userInfo.firstName && !userInfo.lastName) {
-            return "Loading..."; // Hoặc có thể return null hoặc một placeholder khác
-        }
-        return `${userInfo.firstName} ${userInfo.lastName}`;
+        // Hiển thị trực tiếp từ state
+        return `${userInfo.firstName} ${userInfo.lastName}`.trim() || "Tài khoản";
     };
 
     return (
