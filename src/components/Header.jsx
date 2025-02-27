@@ -1,16 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from './Utils/AuthContext';
+import { jwtDecode } from 'jwt-decode';
 
 export const Header = () => {
     const navigate = useNavigate();
-    const { isAuthenticated, logout, userInfo } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
+    const [userInfo, setUserInfo] = useState({
+        firstName: '',
+        lastName: '',
+        role: ''
+    });
     const [searchQuery, setSearchQuery] = useState('');
     const [showUserMenu, setShowUserMenu] = useState(false);
 
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const cleanToken = token.replace(/^"|"$/g, '');
+                const decoded = jwtDecode(cleanToken);
+                setUserInfo({
+                    firstName: decoded.firstName || '',
+                    lastName: decoded.lastName || '',
+                    role: decoded.role || ''
+                });
+            } catch (error) {
+                console.error("Lỗi khi giải mã token:", error);
+                setUserInfo({
+                    firstName: '',
+                    lastName: '',
+                    role: ''
+                });
+            }
+        }
+    }, [isAuthenticated]);
+
     const getProfilePath = () => {
-        switch (userInfo.userRole) {
+        switch (userInfo.role) {
             case 'Manager':
                 return '/admin-dashboard';
             case 'Doctor':
@@ -26,11 +54,8 @@ export const Header = () => {
     };
 
     const handleLogout = () => {
-        // Gọi hàm logout từ AuthContext
         logout();
-        // Đóng menu user nếu đang mở
         setShowUserMenu(false);
-        // Chuyển về trang chủ
         navigate('/');
     };
 
