@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 
 export const Header = () => {
     const navigate = useNavigate();
-    const { isAuthenticated, logout } = useAuth();
+    const { isAuthenticated, logout, login } = useAuth();
     const [userInfo, setUserInfo] = useState({
         firstName: '',
         lastName: '',
@@ -16,25 +16,15 @@ export const Header = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                const cleanToken = token.replace(/^"|"$/g, '');
-                const decoded = jwtDecode(cleanToken);
-                setUserInfo({
-                    firstName: decoded.firstName || '',
-                    lastName: decoded.lastName || '',
-                    role: decoded.role || ''
-                });
-            } catch (error) {
-                console.error("Lỗi khi giải mã token:", error);
-                setUserInfo({
-                    firstName: '',
-                    lastName: '',
-                    role: ''
-                });
-            }
-        }
+        const firstName = localStorage.getItem('firstName');
+        const lastName = localStorage.getItem('lastName');
+        const role = localStorage.getItem('role');
+        
+        setUserInfo({
+            firstName: firstName || '',
+            lastName: lastName || '',
+            role: role || ''
+        });
     }, [isAuthenticated]);
 
     const getProfilePath = () => {
@@ -101,7 +91,9 @@ export const Header = () => {
                                 >
                                     <FaUserCircle className="w-6 h-6" />
                                     <span className="text-sm">
-                                        {userInfo.firstName} {userInfo.lastName}
+                                        {userInfo.firstName || userInfo.lastName 
+                                            ? [userInfo.firstName, userInfo.lastName].filter(Boolean).join(' ')
+                                            : 'Tài khoản'}
                                     </span>
                                 </button>
                                 

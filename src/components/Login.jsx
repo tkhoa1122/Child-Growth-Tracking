@@ -59,71 +59,47 @@ export const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            try {
-                const response = await api.post('Auth/login', {
-                    email: formData.email.trim(),
-                    password: formData.password
-                });
+        try {
+            const response = await api.post('Auth/login', {
+                email: formData.email.trim(),
+                password: formData.password
+            });
 
-                if (response.data.status) {
-                    if (formData.rememberMe) {
-                        localStorage.setItem('rememberMe', 'true');
-                    }
+            // Lưu thông tin user từ response
+            const { jwt, firstName, lastName } = response.data;
+            
+            // Cập nhật localStorage
+            localStorage.setItem('token', jwt);
+            localStorage.setItem('firstName', firstName);
+            localStorage.setItem('lastName', lastName);
+            localStorage.setItem('userInfo', JSON.stringify({
+                firstName,
+                lastName,
+                role: response.data.role // Giả sử role có trong response
+            }));
 
-                    const token = response.data.jwt;
-                    const firstName = response.data.firstName;
-                    const lastName = response.data.lastName;
+            // Cập nhật Auth Context
+            login(jwt, firstName, lastName);
 
-                    // Giải mã token để lấy role
-                    const decoded = jwtDecode(token);
-                    const userRole = decoded.role;
+            // Chuyển hướng
+            setNotification({
+                show: true,
+                message: 'Đăng nhập thành công!',
+                type: 'success'
+            });
+            setTimeout(() => navigate('/home'), 1000);
 
-                    login(token, firstName, lastName);
+        } catch (error) {
+            console.error('Login Error:', error.response?.data);
+            setNotification({
+                show: true,
+                message: error.response?.data?.message || 'Đăng nhập thất bại',
+                type: 'error'
+            });
 
-                    localStorage.setItem('firstName', firstName);
-                    localStorage.setItem('lastName', lastName);
-                    localStorage.setItem('role', userRole);
-                    localStorage.setItem('email', formData.email);
-
-                    setNotification({
-                        show: true,
-                        message: 'Đăng nhập thành công!',
-                        type: 'success'
-                    });
-
-                    // Điều hướng dựa vào role
-                    setTimeout(() => {
-                        switch (userRole) {
-                            case 'Manager':
-                                navigate('/admin');
-                                break;
-                            case 'Doctor':
-                                navigate('/doctor-dashboard');
-                                break;
-                            case 'User':
-                                navigate('/home');
-                                break;
-                            default:
-                                navigate('/home');
-                                break;
-                        }
-                    }, 1000);
-                } else {
-                    throw new Error(response.data.message || 'Đăng nhập thất bại');
-                }
-            } catch (error) {
-                console.error("Login error:", error);
-                setNotification({
-                    show: true,
-                    message: error.response?.data?.message || 'Email hoặc mật khẩu không chính xác',
-                    type: 'error'
-                });
-
-                setTimeout(() => {
-                    setNotification(prev => ({ ...prev, show: false }));
-                }, 3000);
-            }
+            setTimeout(() => {
+                setNotification(prev => ({ ...prev, show: false }));
+            }, 3000);
         }
     };
 
