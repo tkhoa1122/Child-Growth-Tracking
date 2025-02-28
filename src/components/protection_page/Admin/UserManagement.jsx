@@ -245,7 +245,7 @@ const UserManagement = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <button 
                                             onClick={() => handleDeleteChild(child.childId)}
-                                            className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200"
+                                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-200 transition-colors duration-200"
                                         >
                                             Xóa
                                         </button>
