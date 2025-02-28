@@ -66,37 +66,52 @@ export const Login = () => {
                     email: formData.email.trim(),
                     password: formData.password
                 });
-                console.log(response);
 
+                const { jwt: token, userId, firstName, lastName } = response.data;
+                
+                // Giải mã JWT để lấy role
+                const decodedToken = jwtDecode(token);
+                const userRole = decodedToken.role;
 
-            // Lưu thông tin user từ response
-            const { jwt, firstName, lastName } = response.data;
+                // Lưu thông tin vào localStorage
+                localStorage.setItem('token', token);
+                localStorage.setItem('userId', userId);
+                localStorage.setItem('firstName', firstName);
+                localStorage.setItem('lastName', lastName);
+                localStorage.setItem('userRole', userRole);
+
+                // Cập nhật Auth Context
+                login(token, userId, firstName, lastName, userRole);
+
+                // Điều hướng theo role
+                let redirectPath = '/';
+                switch(userRole) {
+                    case 'Doctor':
+                        redirectPath = '/doctor-dashboard';
+                        break;
+                    case 'Manager':
+                        redirectPath = '/admin';
+                        break;
+                    default:
+                        redirectPath = '/';
+                }
+
+                setNotification({
+                    show: true,
+                    message: 'Đăng nhập thành công!',
+                    type: 'success'
+                });
+                setTimeout(() => navigate(redirectPath), 1000);
+
+            } catch (error) {
+                // Xử lý lỗi
+                setNotification({
+                    show: true,
+                    message: error.response?.data?.message || 'Đăng nhập thất bại',
+                    type: 'error'
+                });
+            }
             
-            // Cập nhật localStorage
-            localStorage.setItem('token', jwt);
-            localStorage.setItem('firstName', firstName);
-            localStorage.setItem('lastName', lastName);
-            localStorage.setItem('userInfo', JSON.stringify({
-                firstName,
-                lastName,
-                role: response.data.role // Giả sử role có trong response
-            }));
-
-            // Cập nhật Auth Context
-            login(jwt, firstName, lastName);
-
-            // Chuyển hướng
-            setNotification({
-                show: true,
-                message: 'Đăng nhập thành công!',
-                type: 'success'
-            });
-            setTimeout(() => navigate('/home'), 1000);
-
-
-                    login(token);
-
-
             setTimeout(() => {
                 setNotification(prev => ({ ...prev, show: false }));
             }, 3000);
