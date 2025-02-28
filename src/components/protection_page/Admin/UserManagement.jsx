@@ -11,6 +11,11 @@ const UserManagement = () => {
         children: true
     });
     const [error, setError] = useState(null);
+    const [filters, setFilters] = useState({
+        gender: '',
+        dobSort: '',
+        ageGroup: ''
+    });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -44,6 +49,17 @@ const UserManagement = () => {
         return new Date(dateString).toLocaleDateString('vi-VN', options);
     };
 
+    const calculateAge = (dob) => {
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
     const handleDeleteChild = async (childId) => {
         if (!window.confirm('Bạn có chắc chắn muốn xóa trẻ này?')) return;
         
@@ -59,6 +75,33 @@ const UserManagement = () => {
             alert('Xóa thất bại: ' + error.message);
         }
     };
+
+    const checkAgeGroup = (age, group) => {
+        switch(group) {
+            case 'toddler': return age >= 1 && age <= 5;
+            case 'kids': return age > 5 && age <= 13;
+            case 'teen': return age > 13 && age <= 18;
+            default: return true;
+        }
+    };
+
+    const filteredChildren = children
+        .filter(child => {
+            const age = calculateAge(child.dob);
+            return (
+                (!filters.gender || child.gender === filters.gender) &&
+                checkAgeGroup(age, filters.ageGroup)
+            );
+        })
+        .sort((a, b) => {
+            if (filters.dobSort === 'asc') {
+                return new Date(a.dob) - new Date(b.dob);
+            }
+            if (filters.dobSort === 'desc') {
+                return new Date(b.dob) - new Date(a.dob);
+            }
+            return 0;
+        });
 
     if (loading.users || loading.children) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
@@ -104,13 +147,61 @@ const UserManagement = () => {
 
             {/* Children Management Table */}
             <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-black">Children Management</h2>
+                <div className="flex justify-between items-center">
+                    <h2 className="text-2xl font-bold text-black">Children Management</h2>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        {/* Gender Filter */}
+                        <select 
+                            className="px-4 py-2 border rounded-lg text-black"
+                            value={filters.gender}
+                            onChange={(e) => setFilters(prev => ({...prev, gender: e.target.value}))}
+                        >
+                            <option value="">Tất cả giới tính</option>
+                            <option value="Male">Nam</option>
+                            <option value="Female">Nữ</option>
+                        </select>
+
+                        {/* Age Group Filter */}
+                        <select
+                            className="px-3 py-2 border rounded-lg text-sm text-black"
+                            value={filters.ageGroup}
+                            onChange={(e) => setFilters({...filters, ageGroup: e.target.value})}
+                        >
+                            <option value="">Tất cả độ tuổi</option>
+                            <option value="toddler">Trẻ mới biết đi (1-5 tuổi)</option>
+                            <option value="kids">Trẻ em (6-13 tuổi)</option>
+                            <option value="teen">Vị thành niên (13-18 tuổi)</option>
+                        </select>
+
+                        {/* Date of Birth Sort */}
+                        <select 
+                            className="px-4 py-2 border rounded-lg text-black"
+                            value={filters.dobSort}
+                            onChange={(e) => setFilters(prev => ({...prev, dobSort: e.target.value}))}
+                        >
+                            <option value="">Sắp xếp ngày sinh</option>
+                            <option value="asc">Cũ nhất → Mới nhất</option>
+                            <option value="desc">Mới nhất → Cũ nhất</option>
+                        </select>
+
+                        <button
+                            onClick={() => setFilters({
+                                gender: '',
+                                dobSort: '',
+                                ageGroup: ''
+                            })}
+                            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            Reset Filter
+                        </button>
+                    </div>
+                </div>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
                                 {['STT', 'Parent ID', 'Child ID', 'Image', 'First Name', 
-                                'Last Name', 'Gender', 'Date Of Birth', 'Create Time', 
+                                'Last Name', 'Gender', 'Age', 'Date Of Birth', 'Create Time', 
                                 'Update Time', 'Action'].map((header, idx) => (
                                     <th key={idx} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                         {header}
@@ -119,7 +210,7 @@ const UserManagement = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {children.map((child, index) => (
+                            {filteredChildren.map((child, index) => (
                                 <tr key={child.childId}>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{child.parentId}</td>
@@ -139,6 +230,9 @@ const UserManagement = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{child.firstName}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{child.lastName}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{child.gender}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {calculateAge(child.dob)}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {formatDate(child.dob)}
                                     </td>
