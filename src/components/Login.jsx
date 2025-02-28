@@ -59,11 +59,15 @@ export const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const response = await api.post('Auth/login', {
-                email: formData.email.trim(),
-                password: formData.password
-            });
+
+        if (validateForm()) {
+            try {
+                const response = await api.post('Auth/login', {
+                    email: formData.email.trim(),
+                    password: formData.password
+                });
+                console.log(response);
+
 
             // Lưu thông tin user từ response
             const { jwt, firstName, lastName } = response.data;
@@ -89,13 +93,9 @@ export const Login = () => {
             });
             setTimeout(() => navigate('/home'), 1000);
 
-        } catch (error) {
-            console.error('Login Error:', error.response?.data);
-            setNotification({
-                show: true,
-                message: error.response?.data?.message || 'Đăng nhập thất bại',
-                type: 'error'
-            });
+
+                    login(token);
+
 
             setTimeout(() => {
                 setNotification(prev => ({ ...prev, show: false }));

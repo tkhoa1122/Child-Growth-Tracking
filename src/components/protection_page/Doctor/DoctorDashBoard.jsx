@@ -13,7 +13,7 @@ const DoctorDashboard = () => {
         starRating: 0,
         experienceYears: "",
         email: "",
-        phone: "",
+        phoneNumber: "",
         address: "",
         imageUrl: "",
         firstName: "",
@@ -41,7 +41,7 @@ const DoctorDashboard = () => {
                     starRating: data.starRating,
                     experienceYears: data.experienceYears,
                     email: data.email,
-                    phone: data.phoneNumber,
+                    phoneNumber: data.phoneNumber,
                     address: data.hospitalAddressWork,
                     imageUrl: data.imageUrl,
                 });
@@ -77,7 +77,7 @@ const DoctorDashboard = () => {
             firstName: doctorInfo.firstName,
             lastName: doctorInfo.lastName,
             email: doctorInfo.email,
-            phone: doctorInfo.phone,
+            phoneNumber: doctorInfo.phoneNumber,
             specialization: doctorInfo.specialization,
             experienceYears: doctorInfo.experienceYears,
             hospitalAddressWork: doctorInfo.hospitalAddressWork,
@@ -95,7 +95,7 @@ const DoctorDashboard = () => {
 
     const handleUpdateSubmit = async () => {
         // Kiểm tra các trường cần thiết
-        if (!updatedInfo.firstName || !updatedInfo.lastName || !updatedInfo.hospitalAddressWork || !updatedInfo.specialization || !updatedInfo.experienceYears || !updatedInfo.email || !updatedInfo.phone) {
+        if (!updatedInfo.firstName || !updatedInfo.lastName || !updatedInfo.hospitalAddressWork || !updatedInfo.specialization || !updatedInfo.experienceYears || !updatedInfo.email || !updatedInfo.phoneNumber) {
             alert("Vui lòng điền đầy đủ thông tin.");
             return;
         }
@@ -110,6 +110,11 @@ const DoctorDashboard = () => {
             console.error('Lỗi khi cập nhật thông tin:', error);
             alert("Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại.");
         }
+    };
+
+    const handleChangePassword = () => {
+        // Logic to handle password change
+        alert("Chức năng đổi mật khẩu chưa được triển khai.");
     };
 
     return (
@@ -170,6 +175,12 @@ const DoctorDashboard = () => {
                                     Cập nhật thông tin
                                 </button>
                                 <button
+                                    onClick={handleChangePassword}
+                                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                                >
+                                    Đổi mật khẩu
+                                </button>
+                                <button
                                     onClick={handleDeleteAccount}
                                     className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
                                 >
@@ -183,7 +194,7 @@ const DoctorDashboard = () => {
                                 <h3 className="font-semibold text-2xl text-gray-700 mb-3 underline">📌 Thông Tin Liên Hệ:</h3>
                                 <div className="space-y-3 text-gray-600 text-base">
                                     <p><span className="font-medium">📧 Email:</span> {doctorInfo.email}</p>
-                                    <p><span className="font-medium">📞 Điện Thoại:</span> {doctorInfo.phone}</p>
+                                    <p><span className="font-medium">📞 Điện Thoại:</span> {doctorInfo.phoneNumber}</p>
                                     <p><span className="font-medium">📍 Địa Chỉ:</span> {doctorInfo.address}</p>
                                 </div>
                             </div>
@@ -307,7 +318,7 @@ const DoctorDashboard = () => {
                                         <input
                                             type="text"
                                             name="phone"
-                                            value={updatedInfo.phone}
+                                            value={updatedInfo.phoneNumber}
                                             onChange={handleInputChange}
                                             className="border text-gray-500 border-gray-300 rounded-lg p-2 w-full"
                                         />

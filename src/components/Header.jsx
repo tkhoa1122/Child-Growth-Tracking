@@ -16,16 +16,29 @@ export const Header = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     useEffect(() => {
-        const firstName = localStorage.getItem('firstName');
-        const lastName = localStorage.getItem('lastName');
-        const role = localStorage.getItem('role');
-        
-        setUserInfo({
-            firstName: firstName || '',
-            lastName: lastName || '',
-            role: role || ''
-        });
+
+        const getUserInfo = () => {
+            const token = localStorage.getItem('token');
+            if (token && isAuthenticated) {
+                // Lấy thông tin từ localStorage thay vì decode token
+                const storedUser = {
+                    firstName: localStorage.getItem('firstName') || '',
+                    lastName: localStorage.getItem('lastName') || '',
+                    role: localStorage.getItem('role') || '',
+                    email: localStorage.getItem('email') || ''
+                };
+                console.log(storedUser);
+                setUserInfo(storedUser);
+            }
+        };
+
+        getUserInfo();
+
     }, [isAuthenticated]);
+
+    useEffect(() => {
+        console.log("userInfo đã cập nhật:", userInfo);
+    }, [userInfo]);
 
     const getProfilePath = () => {
         switch (userInfo.role) {
