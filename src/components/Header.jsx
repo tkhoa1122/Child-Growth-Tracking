@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 
 export const Header = () => {
     const navigate = useNavigate();
-    const { isAuthenticated, logout } = useAuth();
+    const { isAuthenticated, logout, login } = useAuth();
     const [userInfo, setUserInfo] = useState({
         firstName: '',
         lastName: '',
@@ -16,6 +16,7 @@ export const Header = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     useEffect(() => {
+
         const getUserInfo = () => {
             const token = localStorage.getItem('token');
             if (token && isAuthenticated) {
@@ -32,6 +33,7 @@ export const Header = () => {
         };
 
         getUserInfo();
+
     }, [isAuthenticated]);
 
     useEffect(() => {
@@ -102,7 +104,9 @@ export const Header = () => {
                                 >
                                     <FaUserCircle className="w-6 h-6" />
                                     <span className="text-sm">
-                                        {userInfo.firstName} {userInfo.lastName}
+                                        {userInfo.firstName || userInfo.lastName 
+                                            ? [userInfo.firstName, userInfo.lastName].filter(Boolean).join(' ')
+                                            : 'Tài khoản'}
                                     </span>
                                 </button>
                                 
