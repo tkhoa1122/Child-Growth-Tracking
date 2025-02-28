@@ -179,7 +179,7 @@ const DoctorManagement = () => {
                                     <div className="relative">
                                         <img 
                                             className="w-16 h-16 rounded-full object-cover" 
-                                            src={doctor.imageUrl || '/Images/doctor.png'} 
+                                            src={'/Images/doctor.png'} 
                                             alt={doctor.fullName}
                                             onError={(e) => {
                                                 e.target.src = '/Images/doctor.png'; // Đặt hình ảnh mặc định nếu có lỗi

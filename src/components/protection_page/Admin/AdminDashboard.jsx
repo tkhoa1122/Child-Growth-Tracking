@@ -201,7 +201,7 @@ const AdminDashboard = () => {
                                             <div className="h-10 w-10 flex-shrink-0">
                                                 <img 
                                                     className="h-10 w-10 rounded-full object-cover" 
-                                                    src={doctor.imageUrl || '/Images/doctor.png'} 
+                                                    src={'/Images/doctor.png'} 
                                                     alt={doctor.fullName}
                                                     onError={(e) => {
                                                         e.target.src = '/Images/doctor.png';
@@ -302,7 +302,9 @@ const AdminDashboard = () => {
                                             <div className="h-10 w-10 flex-shrink-0">
                                                 <img 
                                                     className="h-10 w-10 rounded-full object-cover" 
-                                                    src={child.imageUrl || '/Images/boy.png'} 
+                                                    src={child.gender === 'Female' 
+                                                        ? '/Images/girl.png' 
+                                                        : '/Images/boy.png'} 
                                                     alt={`${child.firstName} ${child.lastName}`}
                                                     onError={(e) => {
                                                         e.target.src = '/Images/boy.png';
