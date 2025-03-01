@@ -36,6 +36,7 @@ import { UpdateService } from './components/protection_page/Admin/UpdateService'
 import { UnauthorizedPage } from './components/Utils/ProtectedRoute';
 import DetailDoctor from './components/protection_page/Admin/DetailDoctor';
 import UserManagement from './components/protection_page/Admin/UserManagement';
+import ProductManagementForAdmin from './components/protection_page/Admin/ProductManagement';
 // import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
 
 function App() {
@@ -224,6 +225,7 @@ function App() {
                   <Route path="doctors" element={<DoctorManagement />} />
                   <Route path="doctors/:accountId" element={<DetailDoctor />} />
                   <Route path="users" element={<UserManagement />} />
+                  <Route path="products" element={<ProductManagementForAdmin />} />
                   {/* <Route path="doctors/edit/:accountId" element={<EditDoctor />} /> */}
                 </Route>
 

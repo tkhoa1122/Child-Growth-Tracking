@@ -69,7 +69,17 @@ export const AdminLayout = () => {
                                 <span className="font-medium">User Management</span>
                             </button>
 
-                            
+                            <button
+                                onClick={() => navigate('/admin/products')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/products') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaClipboardList className="text-xl" />
+                                <span className="font-medium">Product Management</span>
+                            </button>
 
                             <button
                                 onClick={() => navigate('/admin/statistics')}
