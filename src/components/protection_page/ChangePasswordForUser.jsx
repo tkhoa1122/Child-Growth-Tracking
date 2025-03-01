@@ -37,7 +37,7 @@ const ChangePasswordForUser = () => {
                     type: 'success', 
                     content: 'Đổi mật khẩu thành công!'
                 });
-                setTimeout(() => navigate('/profile'), 2000);
+                setTimeout(() => navigate('/home'), 2000);
             }
         } catch (error) {
             const errorMsg = error.response?.data?.title || 'Lỗi khi đổi mật khẩu';

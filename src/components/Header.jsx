@@ -6,8 +6,9 @@ import { jwtDecode } from 'jwt-decode';
 
 export const Header = () => {
     const navigate = useNavigate();
-    const { isAuthenticated, logout, login } = useAuth();
+    const { isAuthenticated, logout, login, userId } = useAuth();
     const [userInfo, setUserInfo] = useState({
+        userId: '',
         firstName: '',
         lastName: '',
         role: ''
@@ -22,6 +23,7 @@ export const Header = () => {
             if (token && isAuthenticated) {
                 // Lấy thông tin từ localStorage thay vì decode token
                 const storedUser = {
+                    userId: localStorage.getItem('userId') || '',
                     firstName: localStorage.getItem('firstName') || '',
                     lastName: localStorage.getItem('lastName') || '',
                     role: localStorage.getItem('role') || '',
@@ -109,6 +111,13 @@ export const Header = () => {
                                 {/* Dropdown Menu */}
                                 {showUserMenu && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                                        <Link
+                                            to={`/change-password/${userInfo.userId}`}
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
+                                            onClick={() => setShowUserMenu(false)}
+                                        >
+                                            Đổi mật khẩu
+                                        </Link>
                                         <Link
                                             to={getProfilePath()}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
