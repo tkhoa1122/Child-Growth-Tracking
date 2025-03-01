@@ -244,6 +244,16 @@ function App() {
                     </div>
                   </div>
                 } />
+
+                {/* New route for profile */}
+                <Route 
+                  path="/profile/:accountId" 
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } 
+                />
               </Routes>
             </div>
           </>

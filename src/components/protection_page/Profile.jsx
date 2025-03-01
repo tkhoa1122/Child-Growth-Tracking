@@ -1,184 +1,93 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import api from '../Utils/Axios';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
-import { Navbar } from '../sections/Navbar';
-import { FaUser, FaEnvelope, FaKey, FaEdit, FaUserCircle, FaUsers } from 'react-icons/fa';
-import { useAuth } from '../Utils/AuthContext';
-import { jwtDecode } from 'jwt-decode';
-import { Link } from 'react-router-dom';
-import api from '../Utils/Axios';
-
-const backgroundImage = '/Images/background.jpg';
 
 const Profile = () => {
-    const { isAuthenticated } = useAuth();
-    const [userInfo, setUserInfo] = useState(null);
+    const { accountId } = useParams();
+    const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchUserData = async () => {
+        const fetchProfile = async () => {
             try {
-                const token = localStorage.getItem('token');
-                if (!token) return;
-                
-                const decoded = jwtDecode(token);
-                const userId = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
-                
-                const response = await api.get(`/User/get-user/${userId}`);
-                if (response.status === 200) {
-                    setUserInfo({
-                        ...response.data,
-                        firstName: response.data.firstName || 'Chưa cập nhật',
-                        lastName: response.data.lastName || 'Chưa cập nhật',
-                        role: decoded['role']
-                    });
-                }
+                const response = await api.get(`/Parent/by-accountId/${accountId}`);
+                setProfileData(response.data);
             } catch (error) {
-                setError('Không thể tải thông tin người dùng');
+                console.error('Lỗi tải hồ sơ:', error);
             } finally {
                 setLoading(false);
             }
         };
+        
+        fetchProfile();
+    }, [accountId]);
 
-        if (isAuthenticated) {
-            fetchUserData();
-        }
-    }, [isAuthenticated]);
-
-    if (loading) return <div className="text-center py-8">Đang tải thông tin...</div>;
-    if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
-    if (!userInfo) return <div className="text-center py-8">Không tìm thấy thông tin người dùng</div>;
+    if (loading) return <div>Loading...</div>;
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="container mx-auto p-4 text-black">
             <Header />
-            <Navbar />
+            <h1 className="text-2xl font-bold mb-4 text-black">Thông tin hồ sơ</h1>
             
-            <main className="flex-grow relative pt-20">
-                {/* Background with overlay */}
-                <div 
-                    className="absolute inset-0 z-0"
-                    style={{
-                        backgroundImage: `url(${backgroundImage})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundAttachment: 'fixed'
-                    }}
-                >
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-                </div>
-
-                <div className="relative z-10 container mx-auto px-8 py-8">
-                    <div className="max-w-4xl mx-auto">
-                        {/* Profile Header */}
-                        <div className="bg-white/80 backdrop-blur-md rounded-t-2xl p-8 shadow-xl">
-                            <div className="flex flex-col md:flex-row items-center gap-6">
-                                <div className="relative">
-                                    <FaUserCircle className="w-32 h-32 text-blue-500" />
-                                    <button className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full text-white hover:bg-blue-600 transition-colors">
-                                        <FaEdit className="w-4 h-4" />
-                                    </button>
-                                </div>
-                                <div className="flex-1 text-center md:text-left">
-                                    <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                                        Thông tin tài khoản
-                                    </h1>
-                                    <p className="text-gray-600">
-                                        Quản lý thông tin cá nhân của bạn
-                                    </p>
-                                </div>
-                                <Link
-                                    to="/family-profile"
-                                    className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg"
-                                >
-                                    <FaUsers className="w-5 h-5" />
-                                    Quản lý gia đình
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Profile Information */}
-                        <div className="bg-white/90 backdrop-blur-md rounded-b-2xl p-8 shadow-xl">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* First Name Card */}
-                                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-                                    <div className="flex items-start gap-4">
-                                        <FaUser className="w-8 h-8" />
-                                        <div>
-                                            <p className="text-sm opacity-90">Họ</p>
-                                            <p className="font-semibold text-lg">{userInfo.lastName}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Last Name Card */}
-                                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
-                                    <div className="flex items-start gap-4">
-                                        <FaUser className="w-8 h-8" />
-                                        <div>
-                                            <p className="text-sm opacity-90">Tên</p>
-                                            <p className="font-semibold text-lg">{userInfo.firstName}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* User ID Card */}
-                                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-transform duration-300">
-                                    <div className="flex items-start gap-4">
-                                        <FaUser className="w-8 h-8 mt-1" />
-                                        <div>
-                                            <p className="text-blue-100 text-sm">ID người dùng</p>
-                                            <p className="font-semibold text-lg break-all">{userInfo.userId}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Email Card */}
-                                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-transform duration-300">
-                                    <div className="flex items-start gap-4">
-                                        <FaEnvelope className="w-8 h-8 mt-1" />
-                                        <div>
-                                            <p className="text-purple-100 text-sm">Email</p>
-                                            <p className="font-semibold text-lg break-all">{userInfo.email}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Role Card */}
-                                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-transform duration-300 md:col-span-2">
-                                    <div className="flex items-start gap-4">
-                                        <FaKey className="w-8 h-8 mt-1" />
-                                        <div>
-                                            <p className="text-green-100 text-sm">Vai trò</p>
-                                            <p className="font-semibold text-lg">{userInfo.role}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                                <button 
-                                    className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg"
-                                    onClick={() => {/* Thêm chức năng cập nhật thông tin */}}
-                                >
-                                    <FaEdit className="w-4 h-4" />
-                                    Cập nhật thông tin
-                                </button>
-                                <button 
-                                    className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg"
-                                    onClick={() => window.location.href = `/change-password/${userInfo.userId}`}
-                                >
-                                    <FaKey className="w-4 h-4" />
-                                    Đổi mật khẩu
-                                </button>
-                            </div>
-                        </div>
+            {/* Thông tin cơ bản */}
+            <div className="bg-white rounded-lg shadow p-6 mb-4 text-black">
+                <h2 className="text-xl font-semibold mb-4 text-gray-900">Thông tin tài khoản</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p className="font-medium text-gray-900">Họ và tên:</p>
+                        <p className="text-gray-800">{profileData.account.firstName} {profileData.account.lastName}</p>
+                    </div>
+                    <div>
+                        <p className="font-medium text-gray-900">Email:</p>
+                        <p className="text-gray-800">{profileData.account.email}</p>
+                    </div>
+                    <div>
+                        <p className="font-medium text-gray-900">Số điện thoại:</p>
+                        <p className="text-gray-800">{profileData.account.phoneNumber}</p>
+                    </div>
+                    <div>
+                        <p className="font-medium text-gray-900">Địa chỉ:</p>
+                        <p className="text-gray-800">{profileData.account.address}</p>
                     </div>
                 </div>
-            </main>
+            </div>
 
+            {/* Thông tin khác */}
+            <div className="bg-white rounded-lg shadow p-6 text-black">
+                <h2 className="text-xl font-semibold mb-4 text-gray-900">Thông tin bổ sung</h2>
+                <div className="space-y-2">
+                    <p className="text-gray-800">
+                        <span className="font-medium text-gray-900">Account ID:</span> {profileData.accountId}
+                    </p>
+                    <p className="text-gray-800">
+                        <span className="font-medium text-gray-900">Parent ID:</span> {profileData.parentId}
+                    </p>
+                    <p className="text-gray-800">
+                        <span className="font-medium text-gray-900">Vai trò:</span> {profileData.account.role === 1 ? 'Parent' : 'Khác'}
+                    </p>
+                    <p className="text-gray-800">
+                        <span className="font-medium text-gray-900">Ngày tạo:</span> {new Date(profileData.account.dateCreateAt).toLocaleDateString()}
+                    </p>
+                    <div className="pt-4">
+                        <h3 className="font-medium text-gray-900 mb-2">Service Orders:</h3>
+                        {profileData.serviceOrders ? (
+                            <div className="space-y-2">
+                                {profileData.serviceOrders.map((order, index) => (
+                                    <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                                        <p>Order ID: {order.orderId}</p>
+                                        <p>Status: {order.status}</p>
+                                        <p>Date: {new Date(order.orderDate).toLocaleDateString()}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-600">Không có service orders</p>
+                        )}
+                    </div>
+                </div>
+            </div>
             <Footer />
         </div>
     );
