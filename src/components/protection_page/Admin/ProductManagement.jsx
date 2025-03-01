@@ -37,7 +37,7 @@ const ProductManagement = () => {
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">Quản lý Sản phẩm</h1>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Product Management</h1>
             
             <div className="overflow-x-auto">
                 <table className="w-full table-auto">

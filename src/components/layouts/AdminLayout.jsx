@@ -32,31 +32,6 @@ export const AdminLayout = () => {
                                 <FaHome className="text-xl" />
                                 <span className="font-medium">Dash Board</span>
                             </button>
-
-                            <button
-                                onClick={() => navigate('/admin/services')}
-                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
-                                    location.pathname.includes('/admin/services') 
-                                        ? 'bg-blue-500 text-white' 
-                                        : 'text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                                <FaClipboardList className="text-xl" />
-                                <span className="font-medium">Service Management</span>
-                            </button>
-                            
-                            <button
-                                onClick={() => navigate('/admin/orders')}
-                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
-                                    location.pathname.includes('/admin/orders') 
-                                        ? 'bg-blue-500 text-white' 
-                                        : 'text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                                <FaList className="text-xl" />
-                                <span className="font-medium">Order Management</span>
-                            </button>
-
                             <button
                                 onClick={() => navigate('/admin/doctors')}
                                 className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
@@ -80,6 +55,32 @@ export const AdminLayout = () => {
                                 <FaUsers className="text-xl" />
                                 <span className="font-medium">User Management</span>
                             </button>
+
+                            <button
+                                onClick={() => navigate('/admin/services')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/services') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaClipboardList className="text-xl" />
+                                <span className="font-medium">Service Management</span>
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/admin/orders')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/orders') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaList className="text-xl" />
+                                <span className="font-medium">Order Management</span>
+                            </button>
+
+                           
 
                             <button
                                 onClick={() => navigate('/admin/products')}
