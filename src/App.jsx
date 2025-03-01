@@ -38,6 +38,7 @@ import DetailDoctor from './components/protection_page/Admin/DetailDoctor';
 import UserManagement from './components/protection_page/Admin/UserManagement';
 import ProductManagementForAdmin from './components/protection_page/Admin/ProductManagement';
 import OrderManagement from './components/protection_page/Admin/OrderManagement';
+import ChangePasswordForUser from './components/protection_page/ChangePasswordForUser';
 // import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
 
 function App() {
@@ -230,6 +231,9 @@ function App() {
                   <Route path="orders" element={<OrderManagement />} />
                   {/* <Route path="doctors/edit/:accountId" element={<EditDoctor />} /> */}
                 </Route>
+
+                {/* Change Password Route */}
+                <Route path="/change-password/:accountId" element={<ChangePasswordForUser />} />
 
                 {/* 404 Route */}
                 <Route path="*" element={

@@ -124,7 +124,7 @@ const Profile = () => {
                                     </button>
                                     <button 
                                         className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg"
-                                        onClick={() => {/* Thêm chức năng đổi mật khẩu */}}
+                                        onClick={() => window.location.href = `/change-password/${userInfo.userId}`}
                                     >
                                         <FaKey className="w-4 h-4" />
                                         Đổi mật khẩu
