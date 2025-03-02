@@ -40,6 +40,7 @@ import ProductManagementForAdmin from './components/protection_page/Admin/Produc
 import OrderManagement from './components/protection_page/Admin/OrderManagement';
 import ChangePasswordForUser from './components/protection_page/ChangePasswordForUser';
 import BuyServiceOrder from './components/protection_page/BuyServiceOrder';
+import HistoryBuyingOrderByParentId from './components/protection_page/HistoryBuyingOrderByParentId';
 // import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
 
 function App() {
@@ -98,6 +99,14 @@ function App() {
                       <BuyServiceOrder />
                     </ProtectedRouteByRole>
                   }
+                />
+                  <Route 
+                  path="/history-orders/:parentId" 
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['User']}>
+                      <HistoryBuyingOrderByParentId />
+                    </ProtectedRouteByRole>
+                  } 
                 />
 
 
@@ -266,7 +275,7 @@ function App() {
                   }
                 />
 
-
+              
 
               </Routes>
             </div>

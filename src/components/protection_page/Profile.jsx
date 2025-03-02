@@ -10,6 +10,8 @@ const Profile = () => {
     const [children, setChildren] = useState([]);
     const [loading, setLoading] = useState(true);
     const [childrenLoading, setChildrenLoading] = useState(true);
+    const [serviceOrder, setServiceOrder] = useState(null);
+    const [serviceOrderLoading, setServiceOrderLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -23,11 +25,18 @@ const Profile = () => {
                     const childrenResponse = await api.get(`/Parent/parents/${profileResponse.data.parentId}/children`);
                     setChildren(childrenResponse.data);
                 }
+
+                // Fetch service order
+                if (profileResponse.data.parentId) {
+                    const orderResponse = await api.get(`/serviceorder/GetLastestOrderByParentId/${profileResponse.data.parentId}`);
+                    setServiceOrder(orderResponse.data);
+                }
             } catch (error) {
                 console.error('Lỗi tải dữ liệu:', error);
             } finally {
                 setLoading(false);
                 setChildrenLoading(false);
+                setServiceOrderLoading(false);
             }
         };
 
@@ -84,22 +93,57 @@ const Profile = () => {
                         <div className="pt-4">
                             <div className="flex justify-between items-center mb-2">
                                 <p className="font-medium text-gray-900">Service Orders:</p>
-                                <Link 
-                                    to="/buy-service" 
-                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                                >
-                                    Buy Order
-                                </Link>
+                                <div className="space-x-2">
+                                    <Link 
+                                        to="/buy-service" 
+                                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
+                                    >
+                                        Buy Order
+                                    </Link>
+                                    <Link 
+                                        to={`/history-orders/${profileData.parentId}`} 
+                                        className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
+                                    >
+                                        History Order
+                                    </Link>
+                                </div>
                             </div>
-                            {profileData.serviceOrders ? (
-                                <div className="space-y-2">
-                                    {profileData.serviceOrders.map((order, index) => (
-                                        <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                                            <p>Order ID: {order.orderId}</p>
-                                            <p>Status: {order.status}</p>
-                                            <p>Date: {new Date(order.orderDate).toLocaleDateString()}</p>
-                                        </div>
-                                    ))}
+                            
+                            {serviceOrderLoading ? (
+                                <div className="flex justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                                </div>
+                            ) : serviceOrder ? (
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service ID</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Price</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buy Date</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200">
+                                            <tr>
+                                                <td className="px-6 py-4 text-sm text-gray-900">{serviceOrder.serviceOrderId}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-900">{serviceOrder.serviceId}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-900">
+                                                    {new Intl.NumberFormat('vi-VN', { 
+                                                        style: 'currency', 
+                                                        currency: 'VND' 
+                                                    }).format(serviceOrder.totalPrice)}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-900">
+                                                    {new Date(serviceOrder.createDate).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-900">
+                                                    {new Date(serviceOrder.endDate).toLocaleDateString()}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             ) : (
                                 <p className="text-gray-600">Không có service orders</p>
