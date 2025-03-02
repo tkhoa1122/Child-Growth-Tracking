@@ -116,7 +116,7 @@ const DoctorManagement = () => {
                 </div>
             )}
             <div className="mb-8 flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-gray-800">Danh sách bác sĩ</h1>
+                <h1 className="text-2xl font-bold text-gray-800">Doctor Management</h1>
                 <div className="flex gap-4">
                     <form onSubmit={handleSearchSubmit} className="flex gap-2">
                         <div className="relative">
@@ -179,7 +179,7 @@ const DoctorManagement = () => {
                                     <div className="relative">
                                         <img 
                                             className="w-16 h-16 rounded-full object-cover" 
-                                            src={doctor.imageUrl || '/Images/doctor.png'} 
+                                            src={'/Images/doctor.png'} 
                                             alt={doctor.fullName}
                                             onError={(e) => {
                                                 e.target.src = '/Images/doctor.png'; // Đặt hình ảnh mặc định nếu có lỗi

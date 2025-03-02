@@ -1,109 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { Navbar } from './sections/Navbar';
 import background from '../../public/Images/background.jpg';
-import { FaSearch, FaFilter } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaStar } from 'react-icons/fa';
+import api from './Utils/Axios';
 
 export const Product = () => {
-    const [products, setProducts] = useState([
-        {
-            id: 1,
-            name: "Sữa tăng chiều cao Kids Height",
-            image: "../../public/Images/pro1.jpg", // Thay bằng link ảnh thực
-            ageRange: "1-3 tuổi",
-            category: "Trẻ thiếu dinh dưỡng",
-            description: "Sản phẩm giúp bổ sung canxi và vitamin D cho trẻ"
-        },
-        {
-            id: 2,
-            name: "Ngũ cốc dinh dưỡng Baby Care",
-            image: "../../public/Images/pro2.jpg",
-            ageRange: "2-5 tuổi",
-            category: "Bữa ăn cân bằng",
-            description: "Bữa sáng dinh dưỡng cho trẻ"
-        },
-        {
-            id: 3,
-            name: "Vitamin tổng hợp Junior",
-            image: "../../public/Images/pro3.jpg",
-            ageRange: "6-12 tuổi",
-            category: "Trẻ thiếu dinh dưỡng",
-            description: "Bổ sung vitamin và khoáng chất thiết yếu"
-        },
-        {
-            id: 4,
-            name: "Bánh gạo lứt Fitness Kids",
-            image: "../../public/Images/pro2.jpg",
-            ageRange: "3-12 tuổi",
-            category: "Trẻ thừa cân",
-            description: "Snack lành mạnh ít calo"
-        },
-        {
-            id: 5,
-            name: "Sữa hạt dinh dưỡng GrowWell",
-            image: "../../public/Images/pro3.jpg",
-            ageRange: "1-18 tuổi",
-            category: "Bữa ăn cân bằng",
-            description: "Thức uống từ các loại hạt tự nhiên"
-        },
-        {
-            id: 6,
-            name: "Protein Bar Teen",
-            image: "../../public/Images/pro2.jpg",
-            ageRange: "12-18 tuổi",
-            category: "Trẻ thiếu dinh dưỡng",
-            description: "Thanh protein bổ sung dinh dưỡng"
-        },
-        {
-            id: 7,
-            name: "Bột rau củ Smart Kids",
-            image: "../../public/Images/pro1.jpg",
-            ageRange: "1-6 tuổi",
-            category: "Bữa ăn cân bằng",
-            description: "Bột rau củ tự nhiên cho bé"
-        },
-        {
-            id: 8,
-            name: "Sinh tố giảm cân Teen Fit",
-            image: "../../public/Images/pro3.jpg",
-            ageRange: "12-18 tuổi",
-            category: "Trẻ thừa cân",
-            description: "Thức uống hỗ trợ kiểm soát cân nặng"
-        },
-        {
-            id: 9,
-            name: "DHA Brain Boost",
-            image: "../../public/Images/pro2.jpg",
-            ageRange: "3-15 tuổi",
-            category: "Bữa ăn cân bằng",
-            description: "Bổ sung DHA cho phát triển não bộ"
-        },
-        {
-            id: 10,
-            name: "Bánh protein ít đường KidsFit",
-            image: "../../public/Images/pro1.jpg",
-            ageRange: "5-18 tuổi",
-            category: "Trẻ thừa cân",
-            description: "Bánh ăn nhẹ giàu protein, ít đường"
-        },
-        {
-            id: 11,
-            name: "Bánh protein nhiều đường KidsFit",
-            image: "../../public/Images/pro2.jpg",
-            ageRange: "5-18 tuổi",
-            category: "Trẻ thiếu dinh dưỡng",
-            description: "Bánh ăn giàu protein, nhiều đường"
-        },
-        {
-            id: 12,
-            name: "Bánh protein nhiều đường KidsFit",
-            image: "../../public/Images/pro3.jpg",
-            ageRange: "5-10 tuổi",
-            category: "Trẻ thiếu dinh dưỡng",
-            description: "Bánh ăn giàu protein, nhiều đường"
-        }
-    ]);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const [filters, setFilters] = useState({
         category: 'all',
@@ -118,16 +24,16 @@ export const Product = () => {
     const ageRanges = [
         { value: 'all', label: 'Tất cả độ tuổi' },
         { value: '1-3', label: '1-3 tuổi' },
-        { value: '4-6', label: '4-6 tuổi' },
-        { value: '7-12', label: '7-12 tuổi' },
+        { value: '3-5', label: '3-5 tuổi' },
+        { value: '6-12', label: '6-12 tuổi' },
         { value: '13-18', label: '13-18 tuổi' }
     ];
 
     const categories = [
         { value: 'all', label: 'Tất cả danh mục' },
-        { value: 'Trẻ thiếu dinh dưỡng', label: 'Trẻ thiếu dinh dưỡng' },
-        { value: 'Bữa ăn cân bằng', label: 'Bữa ăn cân bằng' },
-        { value: 'Trẻ thừa cân', label: 'Trẻ thừa cân' }
+        { value: '0', label: 'Trẻ thiếu dinh dưỡng' },
+        { value: '1', label: 'Bữa ăn cân bằng' },
+        { value: '2', label: 'Trẻ thừa cân' }
     ];
 
     const priceRanges = [
@@ -137,6 +43,39 @@ export const Product = () => {
         { value: '200-500', label: '200.000đ - 500.000đ' },
         { value: 'over-500', label: 'Trên 500.000đ' }
     ];
+
+    // Lấy dữ liệu từ API
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await api.get('/Product/get-all');
+                console.log('API Response Structure:', response.data); // Debug API structure
+                
+                // Sửa thành response.data nếu API trả về trực tiếp mảng sản phẩm
+                const productData = Array.isArray(response.data) 
+                    ? response.data 
+                    : response.data?.productList || [];
+                
+                setProducts(productData);
+            } catch (err) {
+                console.error('Lỗi API:', err);
+                setError('Không thể tải danh sách sản phẩm');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducts();
+    }, []);
+
+    // Xử lý hiển thị loại sản phẩn
+    const getProductTypeLabel = (type) => {
+        switch(type.toString()) {
+            case '0': return 'Thiếu cân';
+            case '1': return 'Cân bằng';
+            case '2': return 'Thừa cân';
+            default: return 'Không xác định';
+        }
+    };
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -148,15 +87,24 @@ export const Product = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        // Thực hiện tìm kiếm dựa trên filters
         const filteredProducts = products.filter(product => {
-            const matchesSearch = product.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
-            const matchesCategory = filters.category === 'all' || product.category === filters.category;
-            const matchesAge = filters.ageRange === 'all' || product.ageRange.includes(filters.ageRange);
+            const matchesSearch = product.productName.toLowerCase().includes(filters.searchTerm.toLowerCase());
+            const matchesCategory = filters.category === 'all' || product.productType === filters.category;
+            
+            // Xử lý filter độ tuổi
+            let matchesAge = true;
+            if (filters.ageRange !== 'all') {
+                const [min, max] = filters.ageRange.split('-').map(Number);
+                matchesAge = product.minAge <= max && product.maxAge >= min;
+            }
+            
             return matchesSearch && matchesCategory && matchesAge;
         });
         setProducts(filteredProducts);
     };
+
+    if (loading) return <div className="text-center py-8">Đang tải sản phẩm...</div>;
+    if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -286,29 +234,64 @@ export const Product = () => {
                 {/* Products Section */}
                 <section className="py-16">
                     <div className="max-w-7xl mx-auto px-4">
-                        {/* Products Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {products.map((product) => (
-                                <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                                    <div className="h-48 bg-gray-200">
-                                        <img 
-                                            src={product.image} 
-                                            alt={product.name}
-                                            className="w-full h-full object-cover"
-                                        />
+                        {products && products.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {products.map((product, index) => (
+                                    <div key={product.productListId} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                                        <div className="h-48 bg-gray-200">
+                                            <img 
+                                                src={`../../public/Images/pro${(index % 3) + 1}.jpg`}
+                                                alt={product.productName}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="p-6">
+                                            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                                {product.productName}
+                                            </h3>
+                                            
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-2xl font-bold text-red-600">
+                                                    {product.price.toLocaleString()}đ
+                                                </span>
+                                                <span className={`px-3 py-1 rounded-full text-sm ${
+                                                    product.productType === '0' ? 'bg-blue-100 text-blue-800' :
+                                                    product.productType === '1' ? 'bg-green-100 text-green-800' :
+                                                    'bg-orange-100 text-orange-800'
+                                                }`}>
+                                                    {getProductTypeLabel(product.productType)}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center mb-2">
+                                                <FaStar className="text-yellow-400" />
+                                                <span className="ml-1 text-gray-600">{product.rating}</span>
+                                            </div>
+
+                                            <div className="space-y-2 text-sm text-black">
+                                                <p><span className="font-medium">Độ tuổi:</span> {product.minAge} - {product.maxAge} tuổi</p>
+                                                <p><span className="font-medium">Thương hiệu:</span> {product.brand}</p>
+                                                <p><span className="font-medium">Khuyến nghị:</span> {product.recommendedBy}</p>
+                                            </div>
+
+                                            <div className="mt-4 border-t pt-4">
+                                                <p className="text-gray-600 text-sm">
+                                                    {product.productDescription}
+                                                </p>
+                                            </div>
+
+                                            <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors w-full">
+                                                Xem chi tiết
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">{product.name}</h3>
-                                        <p className="text-gray-600 mb-2">Độ tuổi: {product.ageRange}</p>
-                                        <p className="text-gray-600 mb-2">Phân loại: {product.category}</p>
-                                        <p className="text-gray-700">{product.description}</p>
-                                        <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors w-full">
-                                            Xem chi tiết
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-gray-500">
+                                Không có sản phẩm nào
+                            </div>
+                        )}
                     </div>
                 </section>
             </main>

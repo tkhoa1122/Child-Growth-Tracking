@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaUsers, FaUserMd, FaClipboardList, FaChartBar, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaUsers, FaUserMd, FaClipboardList, FaChartBar, FaCog, FaSignOutAlt, FaList } from 'react-icons/fa';
 import {OwnHeader} from '../layouts/OwnHeader';
 
 export const AdminLayout = () => {
@@ -32,19 +32,6 @@ export const AdminLayout = () => {
                                 <FaHome className="text-xl" />
                                 <span className="font-medium">Dash Board</span>
                             </button>
-
-                            <button
-                                onClick={() => navigate('/admin/services')}
-                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
-                                    location.pathname.includes('/admin/services') 
-                                        ? 'bg-blue-500 text-white' 
-                                        : 'text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                                <FaClipboardList className="text-xl" />
-                                <span className="font-medium">Service Management</span>
-                            </button>
-
                             <button
                                 onClick={() => navigate('/admin/doctors')}
                                 className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
@@ -69,7 +56,43 @@ export const AdminLayout = () => {
                                 <span className="font-medium">User Management</span>
                             </button>
 
-                            
+                            <button
+                                onClick={() => navigate('/admin/services')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/services') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaClipboardList className="text-xl" />
+                                <span className="font-medium">Service Management</span>
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/admin/orders')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/orders') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaList className="text-xl" />
+                                <span className="font-medium">Order Management</span>
+                            </button>
+
+                           
+
+                            <button
+                                onClick={() => navigate('/admin/products')}
+                                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname.includes('/admin/products') 
+                                        ? 'bg-blue-500 text-white' 
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <FaClipboardList className="text-xl" />
+                                <span className="font-medium">Product Management</span>
+                            </button>
 
                             <button
                                 onClick={() => navigate('/admin/statistics')}
@@ -82,6 +105,8 @@ export const AdminLayout = () => {
                                 <FaChartBar className="text-xl" />
                                 <span className="font-medium">Statistic</span>
                             </button>
+
+                            
 
                             {/* <button
                                 onClick={() => navigate('/admin/settings')}

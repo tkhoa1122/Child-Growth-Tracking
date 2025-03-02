@@ -12,18 +12,19 @@ export const OwnHeader = () => {
         firstName: '',
         lastName: '',
         role: '',
-        email: ''
+        email: '',
+        userId: ''
     });
 
     useEffect(() => {
         const getUserInfo = () => {
             const token = localStorage.getItem('token');
             if (token && isAuthenticated) {
-                // Lấy thông tin từ localStorage thay vì decode token
                 const storedUser = {
                     firstName: localStorage.getItem('firstName') || '',
                     lastName: localStorage.getItem('lastName') || '',
-                    role: localStorage.getItem('role') || '',
+                    role: localStorage.getItem('userRole') || '',
+                    userId: localStorage.getItem('userId') || '',
                     email: localStorage.getItem('email') || ''
                 };
                 console.log(storedUser);

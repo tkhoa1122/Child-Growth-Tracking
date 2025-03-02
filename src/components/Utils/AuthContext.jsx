@@ -24,8 +24,9 @@ export const AuthProvider = ({ children }) => {
                         setIsAuthenticated(true);
                         setUserRole(decoded.role);
                         
-                        // Điều hướng dựa vào role sau khi refresh
-                        if (window.location.pathname === '/login') {
+                        // Điều hướng tự động theo role
+                        const currentPath = window.location.pathname;
+                        if (currentPath === '/login') {
                             switch (decoded.role) {
                                 case 'Manager':
                                     navigate('/admin');
@@ -33,12 +34,8 @@ export const AuthProvider = ({ children }) => {
                                 case 'Doctor':
                                     navigate('/doctor-dashboard');
                                     break;
-                                case 'User':
-                                    navigate('/home');
-                                    break;
                                 default:
-                                    navigate('/home');
-                                    break;
+                                    navigate('/');
                             }
                         }
                     } else {
@@ -62,11 +59,15 @@ export const AuthProvider = ({ children }) => {
         initializeAuth();
     }, [navigate]);
 
-    const login = (token) => {
+    const login = (token, userId, firstName, lastName, role) => {
         localStorage.setItem('token', token);
-        const decoded = jwtDecode(token);
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('firstName', firstName);
+        localStorage.setItem('lastName', lastName);
+        localStorage.setItem('userRole', role);
+        
         setIsAuthenticated(true);
-        setUserRole(decoded.role);
+        setUserRole(role);
     };
 
     const logout = () => {
