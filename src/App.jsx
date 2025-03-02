@@ -39,11 +39,12 @@ import UserManagement from './components/protection_page/Admin/UserManagement';
 import ProductManagementForAdmin from './components/protection_page/Admin/ProductManagement';
 import OrderManagement from './components/protection_page/Admin/OrderManagement';
 import ChangePasswordForUser from './components/protection_page/ChangePasswordForUser';
+import BuyServiceOrder from './components/protection_page/BuyServiceOrder';
 // import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
-  
+
   return (
     <>
       <Router>
@@ -90,6 +91,16 @@ function App() {
                     </ProtectedRouteByRole>
                   }
                 />
+                <Route
+                  path="/buy-service"
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['User']}>
+                      <BuyServiceOrder />
+                    </ProtectedRouteByRole>
+                  }
+                />
+
+
 
                 {/* Protected Routes for Doctors */}
                 <Route
@@ -211,8 +222,8 @@ function App() {
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                 {/* Admin Routes */}
-                <Route 
-                  path="/admin" 
+                <Route
+                  path="/admin"
                   element={
                     <ProtectedRouteByRole allowedRoles={['Manager']}>
                       <AdminLayout />
@@ -246,20 +257,23 @@ function App() {
                 } />
 
                 {/* New route for profile */}
-                <Route 
-                  path="/profile/:accountId" 
+                <Route
+                  path="/profile/:accountId"
                   element={
                     <ProtectedRoute>
                       <Profile />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
+
+
+
               </Routes>
             </div>
           </>
         </AuthProvider>
       </Router>
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import api from '../Utils/Axios';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
@@ -82,7 +82,15 @@ const Profile = () => {
                             <span className="font-medium text-gray-900">Ngày tạo:</span> {new Date(profileData.account.dateCreateAt).toLocaleDateString()}
                         </p>
                         <div className="pt-4">
-                            <h3 className="font-medium text-gray-900 mb-2">Service Orders:</h3>
+                            <div className="flex justify-between items-center mb-2">
+                                <p className="font-medium text-gray-900">Service Orders:</p>
+                                <Link 
+                                    to="/buy-service" 
+                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+                                >
+                                    Buy Order
+                                </Link>
+                            </div>
                             {profileData.serviceOrders ? (
                                 <div className="space-y-2">
                                     {profileData.serviceOrders.map((order, index) => (
