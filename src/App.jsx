@@ -35,11 +35,17 @@ import 'react-toastify/dist/ReactToastify.css';
 import { UpdateService } from './components/protection_page/Admin/UpdateService';
 import { UnauthorizedPage } from './components/Utils/ProtectedRoute';
 import DetailDoctor from './components/protection_page/Admin/DetailDoctor';
+import UserManagement from './components/protection_page/Admin/UserManagement';
+import ProductManagementForAdmin from './components/protection_page/Admin/ProductManagement';
+import OrderManagement from './components/protection_page/Admin/OrderManagement';
+import ChangePasswordForUser from './components/protection_page/ChangePasswordForUser';
+import BuyServiceOrder from './components/protection_page/BuyServiceOrder';
+import HistoryBuyingOrderByParentId from './components/protection_page/HistoryBuyingOrderByParentId';
 // import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
-  
+
   return (
     <>
       <Router>
@@ -86,6 +92,24 @@ function App() {
                     </ProtectedRouteByRole>
                   }
                 />
+                <Route
+                  path="/buy-service"
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['User']}>
+                      <BuyServiceOrder />
+                    </ProtectedRouteByRole>
+                  }
+                />
+                  <Route 
+                  path="/history-orders/:parentId" 
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['User']}>
+                      <HistoryBuyingOrderByParentId />
+                    </ProtectedRouteByRole>
+                  } 
+                />
+
+
 
                 {/* Protected Routes for Doctors */}
                 <Route
@@ -207,8 +231,8 @@ function App() {
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                 {/* Admin Routes */}
-                <Route 
-                  path="/admin" 
+                <Route
+                  path="/admin"
                   element={
                     <ProtectedRouteByRole allowedRoles={['Manager']}>
                       <AdminLayout />
@@ -222,8 +246,14 @@ function App() {
                   <Route path="services/edit/:id" element={<UpdateService />} />
                   <Route path="doctors" element={<DoctorManagement />} />
                   <Route path="doctors/:accountId" element={<DetailDoctor />} />
+                  <Route path="users" element={<UserManagement />} />
+                  <Route path="products" element={<ProductManagementForAdmin />} />
+                  <Route path="orders" element={<OrderManagement />} />
                   {/* <Route path="doctors/edit/:accountId" element={<EditDoctor />} /> */}
                 </Route>
+
+                {/* Change Password Route */}
+                <Route path="/change-password/:accountId" element={<ChangePasswordForUser />} />
 
                 {/* 404 Route */}
                 <Route path="*" element={
@@ -234,12 +264,25 @@ function App() {
                     </div>
                   </div>
                 } />
+
+                {/* New route for profile */}
+                <Route
+                  path="/profile/:accountId"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+
+              
+
               </Routes>
             </div>
           </>
         </AuthProvider>
       </Router>
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}

@@ -59,72 +59,62 @@ export const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (validateForm()) {
             try {
                 const response = await api.post('Auth/login', {
                     email: formData.email.trim(),
                     password: formData.password
                 });
-                console.log(response);
 
-                if (response.data.status) {
-                    if (formData.rememberMe) {
-                        localStorage.setItem('rememberMe', 'true');
-                    }
+                const { jwt: token, userId, firstName, lastName } = response.data;
+                
+                // Giải mã JWT để lấy role
+                const decodedToken = jwtDecode(token);
+                const userRole = decodedToken.role;
 
-                    const token = response.data.jwt;
-                    const firstName = response.data.firstName;
-                    const lastName = response.data.lastName;
+                // Lưu thông tin vào localStorage
+                localStorage.setItem('token', token);
+                localStorage.setItem('userId', userId);
+                localStorage.setItem('firstName', firstName);
+                localStorage.setItem('lastName', lastName);
+                localStorage.setItem('userRole', userRole);
 
-                    // Giải mã token để lấy role
-                    const decoded = jwtDecode(token);
-                    const userRole = decoded.role;
+                // Cập nhật Auth Context
+                login(token, userId, firstName, lastName, userRole);
 
-                    login(token);
-
-                    localStorage.setItem('firstName', firstName);
-                    localStorage.setItem('lastName', lastName);
-                    localStorage.setItem('role', userRole);
-                    localStorage.setItem('email', formData.email);
-
-                    setNotification({
-                        show: true,
-                        message: 'Đăng nhập thành công!',
-                        type: 'success'
-                    });
-
-                    // Điều hướng dựa vào role
-                    setTimeout(() => {
-                        switch (userRole) {
-                            case 'Manager':
-                                navigate('/admin');
-                                break;
-                            case 'Doctor':
-                                navigate('/doctor-dashboard');
-                                break;
-                            case 'User':
-                                navigate('/home');
-                                break;
-                            default:
-                                navigate('/home');
-                                break;
-                        }
-                    }, 1000);
-                } else {
-                    throw new Error(response.data.message || 'Đăng nhập thất bại');
+                // Điều hướng theo role
+                let redirectPath = '/';
+                switch(userRole) {
+                    case 'Doctor':
+                        redirectPath = '/doctor-dashboard';
+                        break;
+                    case 'Manager':
+                        redirectPath = '/admin';
+                        break;
+                    default:
+                        redirectPath = '/';
                 }
-            } catch (error) {
-                console.error("Login error:", error);
+
                 setNotification({
                     show: true,
-                    message: error.response?.data?.message || 'Email hoặc mật khẩu không chính xác',
+                    message: 'Đăng nhập thành công!',
+                    type: 'success'
+                });
+                setTimeout(() => navigate(redirectPath), 1000);
+
+            } catch (error) {
+                // Xử lý lỗi
+                setNotification({
+                    show: true,
+                    message: error.response?.data?.message || 'Đăng nhập thất bại',
                     type: 'error'
                 });
-
-                setTimeout(() => {
-                    setNotification(prev => ({ ...prev, show: false }));
-                }, 3000);
             }
+            
+            setTimeout(() => {
+                setNotification(prev => ({ ...prev, show: false }));
+            }, 3000);
         }
     };
 

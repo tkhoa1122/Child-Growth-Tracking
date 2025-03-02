@@ -169,7 +169,7 @@ const DetailDoctor = () => {
         <div className="p-6 max-w-4xl mx-auto">
             <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-2xl font-bold text-gray-800">Chi tiết bác sĩ</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">Doctor Detail</h1>
                     <button
                         onClick={() => navigate(-1)}
                         className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"

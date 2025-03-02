@@ -6,8 +6,9 @@ import { jwtDecode } from 'jwt-decode';
 
 export const Header = () => {
     const navigate = useNavigate();
-    const { isAuthenticated, logout } = useAuth();
+    const { isAuthenticated, logout, login, userId } = useAuth();
     const [userInfo, setUserInfo] = useState({
+        userId: '',
         firstName: '',
         lastName: '',
         role: ''
@@ -16,15 +17,17 @@ export const Header = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     useEffect(() => {
+
         const getUserInfo = () => {
             const token = localStorage.getItem('token');
             if (token && isAuthenticated) {
                 // Lấy thông tin từ localStorage thay vì decode token
                 const storedUser = {
+                    userId: localStorage.getItem('userId') || '',
                     firstName: localStorage.getItem('firstName') || '',
                     lastName: localStorage.getItem('lastName') || '',
-                    role: localStorage.getItem('role') || '',
-                    email: localStorage.getItem('email') || ''
+                    // role: localStorage.getItem('role') || '',
+                    // email: localStorage.getItem('email') || ''
                 };
                 console.log(storedUser);
                 setUserInfo(storedUser);
@@ -32,6 +35,7 @@ export const Header = () => {
         };
 
         getUserInfo();
+
     }, [isAuthenticated]);
 
     useEffect(() => {
@@ -102,20 +106,30 @@ export const Header = () => {
                                 >
                                     <FaUserCircle className="w-6 h-6" />
                                     <span className="text-sm">
-                                        {userInfo.firstName} {userInfo.lastName}
+                                        {userInfo.firstName || userInfo.lastName 
+                                            ? [userInfo.firstName, userInfo.lastName].filter(Boolean).join(' ')
+                                            : 'Tài khoản'}
                                     </span>
                                 </button>
                                 
                                 {/* Dropdown Menu */}
                                 {showUserMenu && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                                        <Link
-                                            to={getProfilePath()}
+                                         <Link
+                                            to={`/profile/${userInfo.userId}`}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
                                             onClick={() => setShowUserMenu(false)}
                                         >
                                             Hồ Sơ
                                         </Link>
+                                        <Link
+                                            to={`/change-password/${userInfo.userId}`}
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
+                                            onClick={() => setShowUserMenu(false)}
+                                        >
+                                            Đổi mật khẩu
+                                        </Link>
+                                       
                                         <button
                                             onClick={handleLogout}
                                             className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
