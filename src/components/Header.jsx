@@ -44,6 +44,10 @@ export const Header = () => {
 
     const getProfilePath = () => {
         switch (userInfo.role) {
+            case 'Manager':
+                return '/admin'
+            case 'Doctor':
+                return '/doctor-dashboard';
             default:
                 return '/profile';
         }
