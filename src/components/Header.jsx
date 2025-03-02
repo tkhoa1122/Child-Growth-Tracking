@@ -26,8 +26,8 @@ export const Header = () => {
                     userId: localStorage.getItem('userId') || '',
                     firstName: localStorage.getItem('firstName') || '',
                     lastName: localStorage.getItem('lastName') || '',
-                    role: localStorage.getItem('role') || '',
-                    email: localStorage.getItem('email') || ''
+                    // role: localStorage.getItem('role') || '',
+                    // email: localStorage.getItem('email') || ''
                 };
                 console.log(storedUser);
                 setUserInfo(storedUser);
