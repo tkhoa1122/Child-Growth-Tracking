@@ -111,6 +111,13 @@ export const Header = () => {
                                 {/* Dropdown Menu */}
                                 {showUserMenu && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                                         <Link
+                                            to={`/profile/${userInfo.userId}`}
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
+                                            onClick={() => setShowUserMenu(false)}
+                                        >
+                                            Hồ Sơ
+                                        </Link>
                                         <Link
                                             to={`/change-password/${userInfo.userId}`}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
@@ -118,13 +125,7 @@ export const Header = () => {
                                         >
                                             Đổi mật khẩu
                                         </Link>
-                                        <Link
-                                            to={`/profile/${userInfo.userId}`}
-                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
-                                            onClick={() => setShowUserMenu(false)}
-                                        >
-                                            Hồ Sơ
-                                        </Link>
+                                       
                                         <button
                                             onClick={handleLogout}
                                             className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
