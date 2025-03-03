@@ -41,6 +41,7 @@ import OrderManagement from './components/protection_page/Admin/OrderManagement'
 import ChangePasswordForUser from './components/protection_page/ChangePasswordForUser';
 import BuyServiceOrder from './components/protection_page/BuyServiceOrder';
 import HistoryBuyingOrderByParentId from './components/protection_page/HistoryBuyingOrderByParentId';
+import DetailChildByChildId from './components/protection_page/DetailChildByChildId';
 // import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
 
 function App() {
@@ -107,6 +108,14 @@ function App() {
                       <HistoryBuyingOrderByParentId />
                     </ProtectedRouteByRole>
                   } 
+                />
+                 <Route 
+                  path="/child/:childId/parent/:parentId" 
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['User']}>
+                      <DetailChildByChildId />
+                    </ProtectedRouteByRole>
+                  }
                 />
 
 
@@ -275,7 +284,7 @@ function App() {
                   }
                 />
 
-              
+               
 
               </Routes>
             </div>
