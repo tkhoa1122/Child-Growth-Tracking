@@ -22,6 +22,10 @@ const DoctorDashboard = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [updatedInfo, setUpdatedInfo] = useState({});
+    const [newPassword, setNewPassword] = useState('');
+    const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [oldPassword, setOldPassword] = useState('');
 
     useEffect(() => {
         const fetchDoctorData = async () => {
@@ -53,22 +57,6 @@ const DoctorDashboard = () => {
         fetchDoctorData();
     }, []);
 
-    const handleDeleteAccount = () => {
-        const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác.");
-        if (confirmDelete) {
-            // Gọi API để xóa tài khoản
-            axios.delete(`Doctor/${doctorInfo.accountId}`)
-                .then(response => {
-                    alert("Tài khoản đã được xóa thành công.");
-                    // Điều hướng về trang chủ hoặc trang đăng nhập
-                    window.location.href = '/login';
-                })
-                .catch(error => {
-                    console.error('Lỗi khi xóa tài khoản:', error);
-                    alert("Đã xảy ra lỗi khi xóa tài khoản. Vui lòng thử lại.");
-                });
-        }
-    };
 
     const handleUpdateClick = () => {
         setUpdatedInfo({
@@ -103,7 +91,7 @@ const DoctorDashboard = () => {
             console.log("Dữ liệu gửi lên API:", JSON.stringify(updatedInfo, null, 2));
             await axios.put(`Doctor/${doctorInfo.accountId}`, updatedInfo);
             alert("Cập nhật thông tin thành công!");
-            setIsModalOpen(false);
+            setIsModalPasswordOpen(false);
             // Cập nhật lại thông tin bác sĩ
             setDoctorInfo((prev) => ({ ...prev, ...updatedInfo }));
         } catch (error) {
@@ -112,9 +100,23 @@ const DoctorDashboard = () => {
         }
     };
 
-    const handleChangePassword = () => {
-        // Logic to handle password change
-        alert("Chức năng đổi mật khẩu chưa được triển khai.");
+    const handleChangePassword = async () => {
+        if (!oldPassword || !newPassword || newPassword !== confirmPassword) {
+            alert("Vui lòng nhập mật khẩu cũ, mật khẩu mới và xác nhận mật khẩu.");
+            return;
+        }
+        try {
+            await axios.post(`User/change-password/${doctorInfo.accountId}`, { 
+                oldPassword,
+                newPassword,
+                confirmPassword
+            });
+            alert("Đổi mật khẩu thành công!");
+            setIsModalPasswordOpen(false);
+        } catch (error) {
+            console.error('Lỗi khi đổi mật khẩu:', error);
+            alert("Đã xảy ra lỗi khi đổi mật khẩu. Vui lòng thử lại.");
+        }
     };
 
     return (
@@ -175,16 +177,10 @@ const DoctorDashboard = () => {
                                     Cập nhật thông tin
                                 </button>
                                 <button
-                                    onClick={handleChangePassword}
+                                    onClick={() => setIsModalPasswordOpen(true)}
                                     className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
                                 >
                                     Đổi mật khẩu
-                                </button>
-                                <button
-                                    onClick={handleDeleteAccount}
-                                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-                                >
-                                    Xóa tài khoản
                                 </button>
                             </div>
                         </div>
@@ -356,6 +352,58 @@ const DoctorDashboard = () => {
                         </div>
                     </div>
                 )}
+
+                {isModalPasswordOpen && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 backdrop-blur-sm z-50">
+                        <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg animate-fadeIn flex flex-col">
+                            <h2 className="text-2xl font-semibold mb-4 text-gray-800 text-center">Đổi mật khẩu</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-1 block">Mật khẩu cũ</label>
+                                    <input
+                                        type="password"
+                                        value={oldPassword}
+                                        onChange={(e) => setOldPassword(e.target.value)}
+                                        className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-1 block">Mật khẩu mới</label>
+                                    <input
+                                        type="password"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-1 block">Xác nhận mật khẩu</label>
+                                    <input
+                                        type="password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:border-blue-500"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex justify-between items-center mt-6">
+                                <button
+                                    onClick={handleChangePassword}
+                                    className="bg-blue-500 text-white px-5 py-2.5 rounded-lg hover:bg-blue-600 transition w-1/2 mr-2"
+                                >
+                                    Lưu
+                                </button>
+                                <button
+                                    onClick={() => setIsModalPasswordOpen(false)}
+                                    className="bg-gray-300 text-gray-800 px-5 py-2.5 rounded-lg hover:bg-gray-400 transition w-1/2 ml-2"
+                                >
+                                    Hủy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
             </div>
         </DoctorLayout>
     );
