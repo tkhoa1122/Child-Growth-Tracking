@@ -40,10 +40,8 @@ export const OwnHeader = () => {
         switch (role) {
             case 'Manager':
                 return '/admin';
-            case 'Doctor':
+            default :
                 return '/doctor-dashboard';
-            default:
-                return '/profile';
         }
     };
 
@@ -69,14 +67,12 @@ export const OwnHeader = () => {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <div className="flex-shrink-0">
-                        <Link to="/" className="flex items-center">
+                        <Link to={getProfilePath()} className="flex items-center">
                             <span className="font-mono text-xl font-bold text-black">
                                 Thonglnse<span className="text-blue-500">.tech</span>
                             </span>
                         </Link>
                     </div>
-
-                    
 
                     {/* Auth Buttons or User Menu */}
                     <div className="flex items-center space-x-4">
@@ -95,13 +91,6 @@ export const OwnHeader = () => {
                                 {/* Dropdown Menu */}
                                 {showUserMenu && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                                        <Link
-                                            to={getProfilePath()}
-                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
-                                            onClick={() => setShowUserMenu(false)}
-                                        >
-                                            Hồ Sơ
-                                        </Link>
                                         <button
                                             onClick={handleLogout}
                                             className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-500"
