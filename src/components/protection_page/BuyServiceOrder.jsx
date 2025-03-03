@@ -67,8 +67,8 @@ const BuyServiceOrder = () => {
     return (
         <div className="min-h-screen" style={{ backgroundColor: '#80CBC4' }}>
             <Header />
-            <div className="container mx-auto p-8 text-black">
-                <h1 className="text-4xl font-bold text-center mb-8">Các Gói Dịch Vụ</h1>
+            <div className="container mx-auto p-8 text-black pt-20">
+                <h1 className="text-4xl font-bold text-left mb-8">Các Gói Dịch Vụ</h1>
                 
                 {loading ? (
                     <div className="flex justify-center py-12">

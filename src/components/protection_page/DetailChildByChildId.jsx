@@ -52,9 +52,9 @@ const DetailChildByChildId = () => {
         <div className="min-h-screen bg-[#F8F3D9]">
             <Header />
             
-            <main className="container mx-auto p-4 md:p-6">
+            <main className="container mx-auto p-4 md:p-6 pt-20">
                 {/* Header Section */}
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 pt-20">
                     Thông tin chi tiết trẻ
                 </h1>
 
