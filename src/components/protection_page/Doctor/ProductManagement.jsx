@@ -26,6 +26,10 @@ export const ProductManagement = () => {
         type: ''
     });
 
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+
     useEffect(() => {
         fetchProducts();
     }, []);
@@ -38,6 +42,7 @@ export const ProductManagement = () => {
             console.error('Error fetching products:', error);
         }
     };
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -59,6 +64,57 @@ export const ProductManagement = () => {
             setNotification({
                 show: true,
                 message: 'Đã xảy ra lỗi khi thêm sản phẩm. Vui lòng thử lại.',
+                type: 'error'
+            });
+        }
+    };
+
+    const handleOpenEditModal = (product) => {
+        setSelectedProduct(product);
+        console.log(product);
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditInputChange = (e) => {
+        const { name, value } = e.target;
+        setSelectedProduct((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleUpdateProduct = async () => {
+        try {
+            console.log(selectedProduct);
+            await axios.put(`Product/update`, selectedProduct);
+            setNotification({
+                show: true,
+                message: 'Cập nhật sản phẩm thành công!',
+                type: 'success'
+            });
+            setIsEditModalOpen(false);
+            fetchProducts();
+        } catch (error) {
+            console.error('Error updating product:', error);
+            setNotification({
+                show: true,
+                message: 'Đã xảy ra lỗi khi cập nhật sản phẩm.',
+                type: 'error'
+            });
+        }
+    };
+
+    const handleDeleteProduct = async (productId) => {
+        try {
+            await axios.delete(`Product/delete/${productId}`);
+            setNotification({
+                show: true,
+                message: 'Xóa sản phẩm thành công!',
+                type: 'success'
+            });
+            fetchProducts(); // Load lại danh sách sau khi xóa
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            setNotification({
+                show: true,
+                message: 'Xóa sản phẩm thất bại. Vui lòng thử lại.',
                 type: 'error'
             });
         }
@@ -116,10 +172,17 @@ export const ProductManagement = () => {
 
                                 {/* Nút hành động */}
                                 <div className="mt-4 flex justify-end gap-2">
-                                    <button className="text-blue-500 hover:text-blue-700">
+                                    <button
+                                        className="text-blue-500 hover:text-blue-700"
+                                        onClick={() => handleOpenEditModal(product)}
+                                    >
                                         <FaEdit />
                                     </button>
-                                    <button className="text-red-500 hover:text-red-700">
+
+                                    <button
+                                        className="text-red-500 hover:text-red-700"
+                                        onClick={() => handleDeleteProduct(product.productListId)}
+                                    >
                                         <FaTrash />
                                     </button>
                                 </div>
@@ -206,14 +269,17 @@ export const ProductManagement = () => {
                                 onChange={handleInputChange}
                                 className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full"
                             />
-                            <input
-                                type="text"
+                            <select
                                 name="productType"
-                                placeholder="Loại sản phẩm"
                                 value={newProduct.productType}
                                 onChange={handleInputChange}
                                 className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full"
-                            />
+                            >
+                                <option value="">-- Chọn loại sản phẩm --</option>
+                                <option value="Underweight">Underweight</option>
+                                <option value="Balanced">Balanced</option>
+                                <option value="Overweight">Overweight</option>
+                            </select>
                         </div>
                         <div className="flex justify-end mt-4">
                             <button
@@ -232,6 +298,140 @@ export const ProductManagement = () => {
                     </div>
                 </div>
             )}
+
+            {isEditModalOpen && selectedProduct && (
+                <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-opacity-50 z-50">
+                    <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-lg animate-fadeIn">
+                        <div className="flex gap-6">
+                            {/* Cột bên trái cho hình ảnh */}
+                            <div className="w-1/3">
+                                <div className="aspect-square rounded-lg bg-gray-100 overflow-hidden">
+                                    <img
+                                        src={selectedProduct.imageUrl || '/placeholder-image.png'}
+                                        alt={selectedProduct.productName}
+                                        className="w-full h-full object-contain"
+                                    />
+                                </div>
+                                {/* Input URL hình ảnh */}
+                                <div className="mt-2">
+                                    <label className="text-xs font-medium text-gray-700">URL hình ảnh</label>
+                                    <input
+                                        type="text"
+                                        name="imageUrl"
+                                        value={selectedProduct.imageUrl}
+                                        onChange={handleEditInputChange}
+                                        className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Cột bên phải cho form */}
+                            <div className="flex-1">
+                                <h2 className="text-xl font-bold mb-4 text-gray-800">Cập nhật sản phẩm</h2>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="col-span-2">
+                                        <label className="text-xs font-medium text-gray-700">Tên sản phẩm</label>
+                                        <input
+                                            type="text"
+                                            name="productName"
+                                            value={selectedProduct.productName}
+                                            onChange={handleEditInputChange}
+                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <label className="text-xs font-medium text-gray-700">Mô tả</label>
+                                        <textarea
+                                            name="productDescription"
+                                            value={selectedProduct.productDescription}
+                                            onChange={handleEditInputChange}
+                                            rows="2"
+                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-700">Giá</label>
+                                        <input
+                                            type="number"
+                                            name="price"
+                                            value={selectedProduct.price}
+                                            onChange={handleEditInputChange}
+                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-700">Phân loại</label>
+                                        <select
+                                            name="productType"
+                                            value={selectedProduct.productType}
+                                            onChange={handleEditInputChange}
+                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                        >
+                                            <option value="">-- Chọn loại sản phẩm --</option>
+                                            <option value="Underweight">Underweight</option>
+                                            <option value="Balanced">Balanced</option>
+                                            <option value="Overweight">Overweight</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-700">Độ tuổi tối thiểu</label>
+                                        <input
+                                            type="text"
+                                            name="minAge"
+                                            value={selectedProduct.minAge}
+                                            onChange={handleEditInputChange}
+                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-700">Độ tuổi tối đa</label>
+                                        <input
+                                            type="text"
+                                            name="maxAge"
+                                            value={selectedProduct.maxAge}
+                                            onChange={handleEditInputChange}
+                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <label className="text-xs font-medium text-gray-700">Thương hiệu</label>
+                                        <input
+                                            type="text"
+                                            name="brand"
+                                            value={selectedProduct.brand}
+                                            onChange={handleEditInputChange}
+                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Nút hành động */}
+                                <div className="flex justify-end mt-4 gap-2">
+                                    <button
+                                        onClick={handleUpdateProduct}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm"
+                                    >
+                                        Lưu thay đổi
+                                    </button>
+                                    <button
+                                        onClick={() => setIsEditModalOpen(false)}
+                                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 text-sm"
+                                    >
+                                        Hủy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </DoctorLayout>
     );
 };
