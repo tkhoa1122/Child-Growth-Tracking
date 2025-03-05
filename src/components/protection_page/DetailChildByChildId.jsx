@@ -29,6 +29,10 @@ const DetailChildByChildId = () => {
     const [reports, setReports] = useState([]);
     const [reportsLoading, setReportsLoading] = useState(true);
     const [chartData, setChartData] = useState(null);
+    const [selectedReport, setSelectedReport] = useState(null);
+    const [editHeight, setEditHeight] = useState('');
+    const [editWeight, setEditWeight] = useState('');
+    const [editDate, setEditDate] = useState(moment());
 
     useEffect(() => {
         const fetchData = async () => {
@@ -166,12 +170,49 @@ const DetailChildByChildId = () => {
         try {
             const response = await api.get(`/reports/${childId}`);
             setReports(response.data);
-            toast.success('Đã cập nhật lịch sử báo cáo');
+            // Tạo lại chart data
+            setChartData(null);
+            setTimeout(() => {
+                const sorted = [...response.data].sort((a, b) => 
+                    new Date(a.reportContent.split(' ')[3]) - new Date(b.reportContent.split(' ')[3])
+                );
+                setChartData({...chartData, labels: sorted.map(r => r.reportContent.split(' ')[3])});
+            }, 100);
+            toast.success('Đã cập nhật dữ liệu mới nhất');
         } catch (error) {
             console.error('Lỗi tải báo cáo:', error);
             toast.error('Cập nhật thất bại');
         } finally {
             setReportsLoading(false);
+        }
+    };
+
+    const handleSelectReport = (report) => {
+        setSelectedReport(report);
+        setEditHeight(report.height);
+        setEditWeight(report.weight);
+        const datePart = report.reportContent.split(' ')[3];
+        setEditDate(moment(datePart, 'YYYY-MM-DD'));
+    };
+
+    const handleUpdateReport = async () => {
+        try {
+            const response = await api.put(`/reports/${selectedReport.reportId}`, {
+                childId: childData.childId,
+                height: parseFloat(editHeight),
+                weight: parseFloat(editWeight),
+                date: editDate.format('YYYY-MM-DD')
+            });
+
+            if (response.status === 200) {
+                toast.success('Cập nhật thành công!');
+                // Gọi lại API để cập nhật dữ liệu mới nhất
+                await handleRefreshReports();
+                setSelectedReport(null);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Cập nhật thất bại!');
+            console.error('Lỗi khi cập nhật:', error);
         }
     };
 
@@ -361,8 +402,8 @@ const DetailChildByChildId = () => {
                     </div>
                 )}
 
-                                {/* Section lịch sử báo cáo */}
-                                <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
+                {/* Section lịch sử báo cáo */}
+                <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl font-bold text-green-500">Lịch sử báo cáo BMI</h3>
                         <button
@@ -397,12 +438,19 @@ const DetailChildByChildId = () => {
                             {reports.map((report) => (
                                 <div 
                                     key={report.reportId}
-                                    className="bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
+                                    onClick={() => handleSelectReport(report)}
+                                    className={`bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
+                                        selectedReport?.reportId === report.reportId ? 'ring-2 ring-blue-500' : ''
+                                    }`}
                                 >
                                     <div className="space-y-2">
                                         <p className="text-sm text-gray-600 font-medium">
                                             {report.reportContent}
                                         </p>
+                                        <div className="flex justify-between hidden">
+                                            <span className="font-medium">Id Report:</span>
+                                            <span>{report.reportId}</span>
+                                        </div>
                                         <div className="flex justify-between">
                                             <span className="font-medium">Chiều cao:</span>
                                             <span>{report.height} cm</span>
@@ -430,6 +478,64 @@ const DetailChildByChildId = () => {
                     )}
                 </div>
 
+                {selectedReport && (
+                    <div className="mt-4 bg-white rounded-xl shadow-lg p-6">
+                        <h3 className="text-xl font-bold mb-4 text-green-500">Chỉnh sửa báo cáo</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-black">Chiều cao (cm)</label>
+                                <input
+                                    type="number"
+                                    value={editHeight}
+                                    onChange={(e) => setEditHeight(e.target.value)}
+                                    className="w-full p-2 border rounded text-black"
+                                    min="50"
+                                    max="250"
+                                    step="0.1"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-black">Cân nặng (kg)</label>
+                                <input
+                                    type="number"
+                                    value={editWeight}
+                                    onChange={(e) => setEditWeight(e.target.value)}
+                                    className="w-full p-2 border rounded text-black"
+                                    min="2"
+                                    max="300"
+                                    step="0.1"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-black">Ngày đo</label>
+                                <DatePicker
+                                    format="DD/MM/YYYY"
+                                    value={editDate}
+                                    onChange={setEditDate}
+                                    disabledDate={current => current > moment().endOf('day')}
+                                    className="w-full text-black"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-2 mt-4">
+                            <button
+                                onClick={() => setSelectedReport(null)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                onClick={handleUpdateReport}
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            >
+                                Cập nhật
+                            </button>
+                        </div>
+                    </div>
+                )}
 
             </main>
             <Footer />
