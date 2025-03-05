@@ -3,6 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../Utils/Axios';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
+import { toast } from 'react-hot-toast';
+import moment from 'moment';
+import { DatePicker } from 'antd';
 
 const Profile = () => {
     const { accountId } = useParams();
@@ -12,6 +15,15 @@ const Profile = () => {
     const [childrenLoading, setChildrenLoading] = useState(true);
     const [serviceOrder, setServiceOrder] = useState(null);
     const [serviceOrderLoading, setServiceOrderLoading] = useState(true);
+    const [showCreateChildForm, setShowCreateChildForm] = useState(false);
+    const [newChild, setNewChild] = useState({
+        firstName: '',
+        lastName: '',
+        gender: 'Female',
+        dob: moment(),
+        imageUrl: 'string'
+    });
+    const [creatingChild, setCreatingChild] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -42,6 +54,30 @@ const Profile = () => {
 
         fetchData();
     }, [accountId]);
+
+    // Hàm xử lý tạo trẻ mới
+    const handleCreateChild = async () => {
+        try {
+            setCreatingChild(true);
+            const response = await api.post('/Parent/children', {
+                parentId: profileData.parentId,
+                ...newChild,
+                dob: newChild.dob.format('YYYY-MM-DD')
+            });
+
+            if (response.status === 201) {
+                toast.success('Tạo hồ sơ trẻ thành công!');
+                // Làm mới danh sách trẻ
+                const childrenResponse = await api.get(`/Parent/parents/${profileData.parentId}/children`);
+                setChildren(childrenResponse.data);
+                setShowCreateChildForm(false);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Tạo hồ sơ thất bại');
+        } finally {
+            setCreatingChild(false);
+        }
+    };
 
     if (loading) return <div>Loading...</div>;
 
@@ -154,8 +190,78 @@ const Profile = () => {
 
                 {/* Section Quản lý trẻ em */}
                 <div className="bg-white rounded-lg shadow p-6 mt-4">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-900">Quản lý trẻ em</h2>
-                    
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold text-gray-900">Quản lý trẻ em</h2>
+                        <button
+                            onClick={() => setShowCreateChildForm(!showCreateChildForm)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+                        >
+                            Tạo hồ sơ trẻ
+                        </button>
+                    </div>
+
+                    {showCreateChildForm && (
+                        <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                            <h3 className="text-lg font-medium mb-4">Thông tin trẻ mới</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Họ</label>
+                                    <input
+                                        type="text"
+                                        value={newChild.lastName}
+                                        onChange={(e) => setNewChild({...newChild, lastName: e.target.value})}
+                                        className="w-full p-2 border rounded"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Tên</label>
+                                    <input
+                                        type="text"
+                                        value={newChild.firstName}
+                                        onChange={(e) => setNewChild({...newChild, firstName: e.target.value})}
+                                        className="w-full p-2 border rounded"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Giới tính</label>
+                                    <select
+                                        value={newChild.gender}
+                                        onChange={(e) => setNewChild({...newChild, gender: e.target.value})}
+                                        className="w-full p-2 border rounded"
+                                    >
+                                        <option value="Female">Nữ</option>
+                                        <option value="Male">Nam</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Ngày sinh</label>
+                                    <DatePicker
+                                        format="DD/MM/YYYY"
+                                        value={newChild.dob}
+                                        onChange={(date) => setNewChild({...newChild, dob: date})}
+                                        className="w-full"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-end space-x-2 mt-4">
+                                <button
+                                    onClick={() => setShowCreateChildForm(false)}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    onClick={handleCreateChild}
+                                    disabled={!newChild.firstName || !newChild.lastName || creatingChild}
+                                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                >
+                                    {creatingChild ? 'Đang tạo...' : 'Tạo hồ sơ'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {childrenLoading ? (
                         <div className="flex justify-center py-4">
                             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -182,7 +288,7 @@ const Profile = () => {
                                     </div>
                                     <div className="space-y-2">
                                         <p className="font-medium text-gray-900">
-                                            {child.lastName} {child.firstName}
+                                            {child.firstName} {child.lastName}
                                         </p>
                                         <p className="text-sm">
                                             <span className="font-medium">ID:</span> 
