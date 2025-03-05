@@ -48,8 +48,9 @@ const ChangePasswordForUser = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-gray-50">
+        <div className="min-h-screen flex flex-col bg-gray-50 pt-40">
             <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-md w-full">
+           
                 <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
                     <FaKey className="text-blue-500" />
                     Đổi mật khẩu
