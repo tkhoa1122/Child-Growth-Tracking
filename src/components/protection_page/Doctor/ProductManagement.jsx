@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { DoctorLayout } from '../../layouts/DoctorLayout';
 import axios from '../../Utils/Axios';
 
@@ -176,6 +176,22 @@ export const ProductManagement = () => {
 
     return (
         <DoctorLayout>
+            {/* Notification Popup */}
+            {notification.show && (
+                <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+                    }`}>
+                    {notification.type === 'success' ? (
+                        <FaCheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                    ) : (
+                        <FaTimesCircle className="w-6 h-6 text-red-500 mr-2" />
+                    )}
+                    <span className={`font-medium ${notification.type === 'success' ? 'text-green-700' : 'text-red-700'
+                        }`}>
+                        {notification.message}
+                    </span>
+                </div>
+            )}
+
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
                     <h2 className="text-xl font-bold text-gray-800">Quản lý sản phẩm</h2>
