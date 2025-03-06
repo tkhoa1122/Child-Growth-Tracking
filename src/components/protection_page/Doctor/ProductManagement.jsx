@@ -29,6 +29,12 @@ export const ProductManagement = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+    const [filters, setFilters] = useState({
+        productName: '',
+        productType: '',
+        minAge: '',
+        maxAge: ''
+    });
 
     useEffect(() => {
         fetchProducts();
@@ -42,7 +48,6 @@ export const ProductManagement = () => {
             console.error('Error fetching products:', error);
         }
     };
-
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -102,23 +107,72 @@ export const ProductManagement = () => {
     };
 
     const handleDeleteProduct = async (productId) => {
+        const token = localStorage.getItem('accessToken');  // Lấy token nếu cần
+
         try {
-            await axios.delete(`Product/delete/${productId}`);
+            console.log('Deleting product with ID:', productId);
+
+            await axios.delete('Product/delete', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`  // Bỏ nếu API không yêu cầu token
+                },
+                data: {
+                    productListId: productId   // Đảm bảo đúng key productListId
+                }
+            });
+
             setNotification({
                 show: true,
                 message: 'Xóa sản phẩm thành công!',
                 type: 'success'
             });
-            fetchProducts(); // Load lại danh sách sau khi xóa
+
+            fetchProducts();  // Load lại danh sách sau khi xóa
         } catch (error) {
             console.error('Error deleting product:', error);
+
             setNotification({
                 show: true,
-                message: 'Xóa sản phẩm thất bại. Vui lòng thử lại.',
+                message: error.response?.data || 'Xóa sản phẩm thất bại. Vui lòng thử lại.',
                 type: 'error'
             });
         }
     };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
+
+    const filteredProducts = products.filter(product => {
+        const { productName, productType, minAge, maxAge } = filters;
+
+        const matchesName = productName === '' || product.productName.toLowerCase().includes(productName.toLowerCase());
+
+        const matchesType = productType === '' || product.productType === productType;
+
+        const filterMinAge = minAge !== '' ? Number(minAge) : null;
+        const filterMaxAge = maxAge !== '' ? Number(maxAge) : null;
+
+        // Lọc theo minAge: minAge của product phải <= minAge lọc
+        // Và maxAge của product phải > minAge lọc (vì nếu maxAge <= minAge thì độ tuổi sản phẩm không phù hợp)
+        let matchesMinAge = true;
+        if (filterMinAge !== null) {
+            matchesMinAge = product.minAge <= filterMinAge && product.maxAge > filterMinAge;
+        }
+
+        // Lọc theo maxAge: maxAge của product phải >= maxAge lọc (nếu có)
+        let matchesMaxAge = true;
+        if (filterMaxAge !== null) {
+            matchesMaxAge = product.maxAge >= filterMaxAge;
+        }
+
+        return matchesName && matchesType && matchesMinAge && matchesMaxAge;
+    });
+
+
+
 
     return (
         <DoctorLayout>
@@ -133,19 +187,76 @@ export const ProductManagement = () => {
                     </button>
                 </div>
 
+                {/* Bộ lọc */}
+                <div className="bg-white p-4 rounded-lg shadow-md">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-black mb-1">Tên sản phẩm</label>
+                            <input
+                                type="text"
+                                name="productName"
+                                value={filters.productName}
+                                onChange={handleFilterChange}
+                                className="w-full p-2 border border-gray-300 rounded-lg text-black"
+                                placeholder="Tìm kiếm theo tên"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-black mb-1">Loại sản phẩm</label>
+                            <select
+                                name="productType"
+                                value={filters.productType}
+                                onChange={handleFilterChange}
+                                className="w-full p-2 border border-gray-300 rounded-lg text-black"
+                            >
+                                <option value="">Tất cả</option>
+                                <option value="Underweight">Underweight</option>
+                                <option value="Balanced">Balanced</option>
+                                <option value="Overweight">Overweight</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-black mb-1">Độ tuổi tối thiểu</label>
+                            <input
+                                type="number"
+                                name="minAge"
+                                value={filters.minAge}
+                                onChange={handleFilterChange}
+                                className="w-full p-2 border border-gray-300 rounded-lg text-black"
+                                placeholder="Từ tuổi"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-black mb-1">Độ tuổi tối đa</label>
+                            <input
+                                type="number"
+                                name="maxAge"
+                                value={filters.maxAge}
+                                onChange={handleFilterChange}
+                                className="w-full p-2 border border-gray-300 rounded-lg text-black"
+                                placeholder="Đến tuổi"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Danh sách sản phẩm */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {products.map((product, index) => (
+                    {filteredProducts.map((product, index) => (
                         <div
                             key={product.productListId || index}
                             className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col border border-gray-200"
-                            style={{ height: '440px' }} // Chiều cao cố định
+                            style={{ height: '440px' }}
                         >
                             {/* Ảnh - đảm bảo hiển thị đầy đủ, không méo, không cắt góc */}
                             <div className="w-full h-[250px] overflow-hidden flex items-center justify-center bg-gray-100">
                                 <img
-                                    src={product.imageUrl}
+                                    src={product.imageUrl || '/Images/pro2.jpg'}
                                     alt={product.productName}
                                     className="w-full h-full object-contain" // Dùng object-contain thay vì object-cover
+                                    onError={(e) => {
+                                        e.target.src = '/Images/pro2.jpg'; // Hiển thị ảnh mặc định nếu imageUrl không hợp lệ
+                                    }}
                                 />
                             </div>
 

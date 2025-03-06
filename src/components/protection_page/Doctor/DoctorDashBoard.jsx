@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaStar } from 'react-icons/fa';
+import { FaStar, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { DoctorLayout } from '../../layouts/DoctorLayout';
 import axios from '../../Utils/Axios';
 
@@ -26,6 +26,11 @@ const DoctorDashboard = () => {
     const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
     const [oldPassword, setOldPassword] = useState('');
+    const [notification, setNotification] = useState({
+        show: false,
+        message: '',
+        type: ''
+    });
 
     useEffect(() => {
         const fetchDoctorData = async () => {
@@ -84,25 +89,41 @@ const DoctorDashboard = () => {
     const handleUpdateSubmit = async () => {
         // Kiểm tra các trường cần thiết
         if (!updatedInfo.firstName || !updatedInfo.lastName || !updatedInfo.hospitalAddressWork || !updatedInfo.specialization || !updatedInfo.experienceYears || !updatedInfo.email || !updatedInfo.phoneNumber) {
-            alert("Vui lòng điền đầy đủ thông tin.");
+            setNotification({
+                show: true,
+                message: 'Vui lòng điền đầy đủ thông tin.',
+                type: 'error'
+            });
             return;
         }
         try {
             console.log("Dữ liệu gửi lên API:", JSON.stringify(updatedInfo, null, 2));
             await axios.put(`Doctor/${doctorInfo.accountId}`, updatedInfo);
-            alert("Cập nhật thông tin thành công!");
-            setIsModalPasswordOpen(false);
+            setNotification({
+                show: true,
+                message: 'Cập nhật thông tin thành công!',
+                type: 'success'
+            });
+            setIsModalOpen(false); // Tắt modal sau khi cập nhật thành công
             // Cập nhật lại thông tin bác sĩ
             setDoctorInfo((prev) => ({ ...prev, ...updatedInfo }));
         } catch (error) {
             console.error('Lỗi khi cập nhật thông tin:', error);
-            alert("Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại.");
+            setNotification({
+                show: true,
+                message: 'Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại.',
+                type: 'error'
+            });
         }
     };
 
     const handleChangePassword = async () => {
         if (!oldPassword || !newPassword || newPassword !== confirmPassword) {
-            alert("Vui lòng nhập mật khẩu cũ, mật khẩu mới và xác nhận mật khẩu.");
+            setNotification({
+                show: true,
+                message: 'Vui lòng nhập mật khẩu cũ, mật khẩu mới và xác nhận mật khẩu.',
+                type: 'error'
+            });
             return;
         }
         try {
@@ -111,16 +132,40 @@ const DoctorDashboard = () => {
                 newPassword,
                 confirmPassword
             });
-            alert("Đổi mật khẩu thành công!");
-            setIsModalPasswordOpen(false);
+            setNotification({
+                show: true,
+                message: 'Đổi mật khẩu thành công!',
+                type: 'success'
+            });
+            setIsModalPasswordOpen(false); // Tắt modal sau khi đổi mật khẩu thành công
         } catch (error) {
             console.error('Lỗi khi đổi mật khẩu:', error);
-            alert("Đã xảy ra lỗi khi đổi mật khẩu. Vui lòng thử lại.");
+            setNotification({
+                show: true,
+                message: 'Đã xảy ra lỗi khi đổi mật khẩu. Vui lòng thử lại.',
+                type: 'error'
+            });
         }
     };
 
     return (
         <DoctorLayout>
+            {/* Notification Popup */}
+            {notification.show && (
+                <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+                    }`}>
+                    {notification.type === 'success' ? (
+                        <FaCheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                    ) : (
+                        <FaTimesCircle className="w-6 h-6 text-red-500 mr-2" />
+                    )}
+                    <span className={`font-medium ${notification.type === 'success' ? 'text-green-700' : 'text-red-700'
+                        }`}>
+                        {notification.message}
+                    </span>
+                </div>
+            )}
+
             <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Avatar and Rating */}
@@ -130,6 +175,9 @@ const DoctorDashboard = () => {
                                 src={doctorInfo.imageUrl || "/Images/avatar.jpg"}
                                 alt="Doctor"
                                 className="w-full h-auto max-h-80 object-cover rounded-lg shadow"
+                                onError={(e) => {
+                                    e.target.src = '/Images/avatar.jpg'; // Hiển thị ảnh mặc định nếu imageUrl không hợp lệ
+                                }}
                             />
                         </div>
                         {/* Đánh giá sao */}
@@ -227,6 +275,9 @@ const DoctorDashboard = () => {
                                     src={updatedInfo.imageUrl || "/Images/avatar.jpg"}
                                     alt="Doctor"
                                     className="w-32 h-32 object-cover rounded-full shadow-lg"
+                                    onError={(e) => {
+                                        e.target.src = '/Images/avatar.jpg'; // Hiển thị ảnh mặc định nếu imageUrl không hợp lệ
+                                    }}
                                 />
                                 <p className="mt-2 text-gray-600 text-sm">{doctorInfo.fullName}</p>
                             </div>
