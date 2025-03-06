@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import api from '../Utils/Axios';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
+import { FaArrowLeft } from 'react-icons/fa';
 
 const HistoryBuyingOrderByParentId = () => {
     const { parentId } = useParams();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [userId, setUserId] = useState('');
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -21,8 +23,18 @@ const HistoryBuyingOrderByParentId = () => {
             }
         };
 
+        const fetchUserData = async () => {
+            try {
+                const response = await api.get(`/user/${parentId}`);
+                setUserId(response.data.userId);
+            } catch (error) {
+                console.error('Lỗi tải thông tin user:', error);
+            }
+        };
+
         if (parentId) {
             fetchOrders();
+            fetchUserData();
         }
     }, [parentId]);
 
@@ -30,7 +42,16 @@ const HistoryBuyingOrderByParentId = () => {
         <div className="min-h-screen" style={{ backgroundColor: '#F8F3D9' }}>
             <Header />
             <div className="container mx-auto p-4 text-black">
-                <h1 className="text-2xl font-bold mb-6">Lịch sử đơn hàng</h1>
+                <div className="flex items-center gap-4 mb-6 pt-20">
+                    {/* <Link 
+                        to={`/profile/${userId}`}
+                        className="flex items-center text-blue-500 hover:text-blue-600 transition-colors"
+                    >
+                        <FaArrowLeft className="mr-2" />
+                        Quay lại hồ sơ
+                    </Link> */}
+                    <h1 className="text-2xl font-bold">Lịch sử đơn hàng</h1>
+                </div>
                 
                 {loading ? (
                     <div className="flex justify-center py-4">
