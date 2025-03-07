@@ -241,10 +241,18 @@ const Profile = () => {
                                                     }).format(serviceOrder.totalPrice)}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-900">
-                                                    {new Date(serviceOrder.createDate).toLocaleDateString()}
+                                                    {new Date(serviceOrder.createDate).toLocaleDateString('vi-VN', {
+                                                        day: '2-digit',
+                                                        month: '2-digit',
+                                                        year: 'numeric'
+                                                    }).split('/').join('-')}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-900">
-                                                    {new Date(serviceOrder.endDate).toLocaleDateString()}
+                                                    {new Date(serviceOrder.endDate).toLocaleDateString('vi-VN', {
+                                                        day: '2-digit',
+                                                        month: '2-digit',
+                                                        year: 'numeric'
+                                                    }).split('/').join('-')}
                                                 </td>
                                             </tr>
                                         </tbody>

@@ -68,6 +68,7 @@ const HistoryBuyingOrderByParentId = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày mua</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày hết hạn</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số lượng</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thời hạn (ngày)</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
@@ -84,13 +85,24 @@ const HistoryBuyingOrderByParentId = () => {
                                             }).format(order.totalPrice)}
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-900">
-                                            {new Date(order.createDate).toLocaleDateString()}
+                                            {new Date(order.createDate).toLocaleDateString('vi-VN', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric'
+                                            }).split('/').join('-')}
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-900">
-                                            {new Date(order.endDate).toLocaleDateString()}
+                                            {new Date(order.endDate).toLocaleDateString('vi-VN', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric'
+                                            }).split('/').join('-')}
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-900">
                                             {order.quantity}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-900">
+                                            {order.service?.serviceDuration || 'N/A'}
                                         </td>
                                     </tr>
                                 ))}
