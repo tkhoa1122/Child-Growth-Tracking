@@ -276,6 +276,12 @@ const Profile = () => {
                             >
                                 Tải lại
                             </button>
+                            <Link
+                                to="/appointment"
+                                className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
+                            >
+                                Đặt Lịch
+                            </Link>
                             <button
                                 onClick={() => setShowCreateChildForm(!showCreateChildForm)}
                                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
