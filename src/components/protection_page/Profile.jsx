@@ -277,7 +277,7 @@ const Profile = () => {
                                 Tải lại
                             </button>
                             <Link
-                                to="/appointment"
+                                to={`/appointment/${accountId}`}
                                 className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
                             >
                                 Đặt Lịch
