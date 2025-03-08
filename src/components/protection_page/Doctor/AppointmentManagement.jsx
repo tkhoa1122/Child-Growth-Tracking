@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { DoctorLayout } from '../../layouts/DoctorLayout';
-import { FaCalendarAlt, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
+import { FaCalendarAlt, FaCheck, FaTimes, FaClock, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import axios from '../../Utils/Axios';
+import './DoctorCSS/AppointmentManagement.css'
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const AppointmentManagement = () => {
     const [appointments, setAppointments] = useState([]);
@@ -9,18 +12,35 @@ const AppointmentManagement = () => {
         type: 'all', // all, today, week, month
         date: null   // Ngày được chọn từ lịch
     });
+    const [doctorId, setDoctorId] = useState('');
+    const [notification, setNotification] = useState({
+        show: false,
+        message: '',
+        type: ''
+    });
+    const [editingStatus, setEditingStatus] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingAppointment, setEditingAppointment] = useState(null);
+    const [updateForm, setUpdateForm] = useState({
+        status: '',
+        appointmentDate: null
+    });
+
+    const fetchAppointments = async () => {
+        try {
+            const response = await axios.get('Appointment');
+            setAppointments(response.data);
+        } catch (error) {
+            console.error('Error fetching appointments:', error);
+        }
+    };
 
     useEffect(() => {
-        const fetchAppointments = async () => {
-            try {
-                const response = await axios.get('Appointment');
-                setAppointments(response.data);
-            } catch (error) {
-                console.error('Error fetching appointments:', error);
-            }
+        const initializeData = async () => {
+            await fetchAppointments();
         };
 
-        fetchAppointments();
+        initializeData();
     }, []);
 
     const getStatusColor = (status) => {
@@ -73,8 +93,113 @@ const AppointmentManagement = () => {
         return true;
     });
 
+    // Thêm enum hoặc object để quản lý các trạng thái
+    const AppointmentStatus = {
+        PENDING: 'Pending',
+        CONFIRMED: 'Confirmed',
+        CANCELLED: 'Cancelled'
+    };
+
+    const handleUpdate = async () => {
+        try {
+            if (!updateForm.appointmentDate || !updateForm.status) {
+                setNotification({
+                    show: true,
+                    message: 'Vui lòng điền đầy đủ thông tin!',
+                    type: 'error'
+                });
+                return;
+            }
+
+            // Chuyển đổi ngày sang múi giờ UTC và format lại --quan trọng--
+            const selectedDate = new Date(updateForm.appointmentDate);
+            const utcDate = new Date(Date.UTC(
+                selectedDate.getFullYear(),
+                selectedDate.getMonth(),
+                selectedDate.getDate(),
+                selectedDate.getHours(),
+                selectedDate.getMinutes(),
+                selectedDate.getSeconds()
+            ));
+
+            // Đóng gói dữ liệu với format mới
+            const updateData = {
+                appointmentDate: utcDate.toISOString(),
+                status: updateForm.status
+            };
+
+            console.log('Update data:', updateData);
+
+            const response = await axios.put(
+                `Appointment/${editingAppointment.appointmentId}`, 
+                updateData
+            );
+
+            await fetchAppointments();
+            setNotification({
+                show: true,
+                message: 'Cập nhật cuộc hẹn thành công!',
+                type: 'success'
+            });
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error('Error details:', error.response?.data);
+            setNotification({
+                show: true,
+                message: error.response?.data?.title || 'Đã xảy ra lỗi khi cập nhật cuộc hẹn.',
+                type: 'error'
+            });
+        }
+    };
+    
+    const handleEdit = (appointment) => {
+        setEditingAppointment(appointment);
+        setUpdateForm({
+            status: appointment.status,
+            appointmentDate: new Date(appointment.appointmentDate)
+        });
+        setIsModalOpen(true);
+    };
+
+    // Hàm xử lý xóa cuộc hẹn
+    const handleDeleteAppointment = async (appointmentId) => {
+        if (window.confirm('Bạn có chắc chắn muốn xóa cuộc hẹn này?')) {
+            try {
+                await axios.delete(`Appointment/${appointmentId}`);
+                setNotification({
+                    show: true,
+                    message: 'Xóa cuộc hẹn thành công!',
+                    type: 'success'
+                });
+                fetchAppointments();
+            } catch (error) {
+                setNotification({
+                    show: true,
+                    message: 'Đã xảy ra lỗi khi xóa cuộc hẹn.',
+                    type: 'error'
+                });
+            }
+        }
+    };
+
     return (
         <DoctorLayout>
+            {/* Notification với z-index cao nhất */}
+            {notification.show && (
+                <div className={`fixed top-4 right-4 z-[100] flex items-center p-4 rounded-lg shadow-lg ${notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+                    }`}>
+                    {notification.type === 'success' ? (
+                        <FaCheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                    ) : (
+                        <FaTimesCircle className="w-6 h-6 text-red-500 mr-2" />
+                    )}
+                    <span className={`font-medium ${notification.type === 'success' ? 'text-green-700' : 'text-red-700'
+                        }`}>
+                        {notification.message}
+                    </span>
+                </div>
+            )}
+
             <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-3">
@@ -82,15 +207,30 @@ const AppointmentManagement = () => {
                         <h2 className="text-xl font-bold text-gray-800">Quản lý cuộc hẹn</h2>
                     </div>
                     <div className="flex gap-4">
-                        <button className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600">
-                            Thêm cuộc hẹn mới
-                        </button>
-                        <select className="border rounded-lg px-4 py-2 text-gray-600">
+                        <select
+                            name="type"
+                            value={filter.type}
+                            onChange={handleFilterChange}
+                            className="border rounded-lg px-4 py-2 text-gray-600"
+                        >
                             <option value="all">Tất cả cuộc hẹn</option>
                             <option value="today">Hôm nay</option>
                             <option value="week">Tuần này</option>
                             <option value="month">Tháng này</option>
                         </select>
+                        <div className="datepicker-container">
+                            <DatePicker
+                                selected={filter.date}
+                                onChange={handleDateChange}
+                                className="datepicker-input"
+                                placeholderText="Chọn ngày"
+                                dateFormat="dd/MM/yyyy"
+                                isClearable
+                                popperClassName="react-datepicker-popper"
+                                popperPlacement="bottom-start"
+                            />
+                            <FaCalendarAlt className="datepicker-icon" />
+                        </div>
                     </div>
                 </div>
 
@@ -100,38 +240,142 @@ const AppointmentManagement = () => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bệnh nhân</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày hẹn</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                    Cập nhật trạng thái
+                                </th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {filteredAppointments.map((appointment) => (
                                 <tr key={appointment.appointmentId}>
-                                    <td className="px-6 py-4">
-                                        <div className="font-medium text-gray-900">{appointment.childName}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-900">
+                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{appointment.childName}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {new Date(appointment.appointmentDate).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(appointment.status)}`}>
-                                            {appointment.status}
-                                        </span>
+                                        <div className="flex justify-center">
+                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(appointment.status)}`}>
+                                                {appointment.status}
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium">
-                                        <div className="flex gap-3">
-                                            {appointment.status === 'Pending' && (
+                                    <td className="px-6 py-4">
+                                        <div className="flex gap-3 justify-center">
+                                            {appointment.status === AppointmentStatus.CONFIRMED && (
                                                 <>
-                                                    <button className="text-green-600 hover:text-green-900">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingAppointment(appointment);
+                                                            setUpdateForm({
+                                                                status: AppointmentStatus.CANCELLED,
+                                                                appointmentDate: new Date(appointment.appointmentDate)
+                                                            });
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                                                        title="Cancel"
+                                                    >
+                                                        <FaTimes size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingAppointment(appointment);
+                                                            setUpdateForm({
+                                                                status: AppointmentStatus.PENDING,
+                                                                appointmentDate: new Date(appointment.appointmentDate)
+                                                            });
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                        className="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200"
+                                                        title="Set as Pending"
+                                                    >
+                                                        <FaClock size={16} />
+                                                    </button>
+                                                </>
+                                            )}
+                                            {appointment.status === AppointmentStatus.CANCELLED && (
+                                                <>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingAppointment(appointment);
+                                                            setUpdateForm({
+                                                                status: AppointmentStatus.CONFIRMED,
+                                                                appointmentDate: new Date(appointment.appointmentDate)
+                                                            });
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                        className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"
+                                                        title="Confirm"
+                                                    >
                                                         <FaCheck />
                                                     </button>
-                                                    <button className="text-red-600 hover:text-red-900">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingAppointment(appointment);
+                                                            setUpdateForm({
+                                                                status: AppointmentStatus.PENDING,
+                                                                appointmentDate: new Date(appointment.appointmentDate)
+                                                            });
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                                                        title="Set as Pending"
+                                                    >
+                                                        <FaClock />
+                                                    </button>
+                                                </>
+                                            )}
+                                            {appointment.status === AppointmentStatus.PENDING && (
+                                                <>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingAppointment(appointment);
+                                                            setUpdateForm({
+                                                                status: AppointmentStatus.CONFIRMED,
+                                                                appointmentDate: new Date(appointment.appointmentDate)
+                                                            });
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                        className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"
+                                                        title="Confirm"
+                                                    >
+                                                        <FaCheck />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingAppointment(appointment);
+                                                            setUpdateForm({
+                                                                status: AppointmentStatus.CANCELLED,
+                                                                appointmentDate: new Date(appointment.appointmentDate)
+                                                            });
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                                                        title="Cancel"
+                                                    >
                                                         <FaTimes />
                                                     </button>
                                                 </>
                                             )}
-                                            <button className="text-blue-600 hover:text-blue-900">
-                                                Chi tiết
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex gap-3 justify-center">
+                                            <button
+                                                onClick={() => handleEdit(appointment)}
+                                                className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
+                                                title="Edit"
+                                            >
+                                                <FaEdit size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteAppointment(appointment.appointmentId)}
+                                                className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                                                title="Delete"
+                                            >
+                                                <FaTrash size={16} />
                                             </button>
                                         </div>
                                     </td>
@@ -141,6 +385,74 @@ const AppointmentManagement = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Modal Cập nhật - chỉ giữ lại một phiên bản */}
+            {isModalOpen && (
+                <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 overflow-y-auto h-full w-full z-[90]">
+                    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                        <div className="flex flex-col gap-4">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-medium text-gray-900">Cập nhật cuộc hẹn</h3>
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="text-gray-400 hover:text-gray-500"
+                                >
+                                    <FaTimes />
+                                </button>
+                            </div>
+
+                            <div className="mt-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Trạng thái
+                                </label>
+                                <select
+                                    value={updateForm.status}
+                                    onChange={(e) => setUpdateForm(prev => ({
+                                        ...prev,
+                                        status: e.target.value
+                                    }))}
+                                    className="w-full text-gray-500 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option value={AppointmentStatus.PENDING}>Pending</option>
+                                    <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
+                                    <option value={AppointmentStatus.CANCELLED}>Cancelled</option>
+                                </select>
+                            </div>
+
+                            <div className="mt-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Ngày hẹn
+                                </label>
+                                <DatePicker
+                                    selected={updateForm.appointmentDate}
+                                    onChange={(date) => setUpdateForm(prev => ({
+                                        ...prev,
+                                        appointmentDate: date
+                                    }))}
+                                    className="w-full border text-gray-500 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    dateFormat="dd/MM/yyyy"
+                                    placeholderText="Chọn ngày"
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 mt-4">
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    onClick={handleUpdate}
+                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                >
+                                    Cập nhật
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </DoctorLayout>
     );
 };
