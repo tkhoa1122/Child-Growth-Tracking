@@ -42,6 +42,7 @@ import ChangePasswordForUser from './components/protection_page/ChangePasswordFo
 import BuyServiceOrder from './components/protection_page/BuyServiceOrder';
 import HistoryBuyingOrderByParentId from './components/protection_page/HistoryBuyingOrderByParentId';
 import DetailChildByChildId from './components/protection_page/DetailChildByChildId';
+import AppointmentWithDoctor from './components/protection_page/AppointmentWithDoctor';
 // import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
 
 function App() {
@@ -284,7 +285,14 @@ function App() {
                   }
                 />
 
-               
+                <Route
+                  path="/appointment/:userId"
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['User']}>
+                      <AppointmentWithDoctor />
+                    </ProtectedRouteByRole>
+                  }
+                />
 
               </Routes>
             </div>
