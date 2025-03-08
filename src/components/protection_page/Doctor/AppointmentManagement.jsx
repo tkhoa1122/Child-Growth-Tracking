@@ -1,32 +1,27 @@
+import { useEffect, useState } from 'react';
 import { DoctorLayout } from '../../layouts/DoctorLayout';
 import { FaCalendarAlt, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
+import axios from '../../Utils/Axios';
 
 const AppointmentManagement = () => {
-    const appointments = [
-        {
-            id: 1,
-            patientName: "Emma Wilson",
-            age: "4 years",
-            date: "2024-03-21",
-            time: "09:00 AM",
-            type: "Khám định kỳ",
-            status: "Confirmed",
-            notes: "Tái khám sau 2 tuần điều trị",
-            phone: "0123456789"
-        },
-        {
-            id: 2,
-            patientName: "Lucas Brown",
-            age: "7 years",
-            date: "2024-03-21",
-            time: "10:30 AM",
-            type: "Tư vấn dinh dưỡng",
-            status: "Pending",
-            notes: "Lần đầu khám",
-            phone: "0987654321"
-        },
-        // Thêm các cuộc hẹn khác
-    ];
+    const [appointments, setAppointments] = useState([]);
+    const [filter, setFilter] = useState({
+        type: 'all', // all, today, week, month
+        date: null   // Ngày được chọn từ lịch
+    });
+
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            try {
+                const response = await axios.get('Appointment');
+                setAppointments(response.data);
+            } catch (error) {
+                console.error('Error fetching appointments:', error);
+            }
+        };
+
+        fetchAppointments();
+    }, []);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -36,6 +31,47 @@ const AppointmentManagement = () => {
             default: return 'bg-gray-100 text-gray-800';
         }
     };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilter(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleDateChange = (date) => {
+        setFilter(prev => ({ ...prev, date }));
+    };
+
+    const filteredAppointments = appointments.filter(appointment => {
+        const { type, date } = filter;
+        const appointmentDate = new Date(appointment.appointmentDate);
+
+        // Lọc theo loại (all, today, week, month)
+        if (type === 'today') {
+            const today = new Date();
+            if (appointmentDate.toDateString() !== today.toDateString()) {
+                return false;
+            }
+        } else if (type === 'week') {
+            const today = new Date();
+            const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+            const endOfWeek = new Date(today.setDate(today.getDate() + 6));
+            if (appointmentDate < startOfWeek || appointmentDate > endOfWeek) {
+                return false;
+            }
+        } else if (type === 'month') {
+            const today = new Date();
+            if (appointmentDate.getMonth() !== today.getMonth() || appointmentDate.getFullYear() !== today.getFullYear()) {
+                return false;
+            }
+        }
+
+        // Lọc theo ngày được chọn từ lịch
+        if (date && appointmentDate.toDateString() !== new Date(date).toDateString()) {
+            return false;
+        }
+
+        return true;
+    });
 
     return (
         <DoctorLayout>
@@ -49,7 +85,7 @@ const AppointmentManagement = () => {
                         <button className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600">
                             Thêm cuộc hẹn mới
                         </button>
-                        <select className="border rounded-lg px-4 py-2">
+                        <select className="border rounded-lg px-4 py-2 text-gray-600">
                             <option value="all">Tất cả cuộc hẹn</option>
                             <option value="today">Hôm nay</option>
                             <option value="week">Tuần này</option>
@@ -63,30 +99,20 @@ const AppointmentManagement = () => {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bệnh nhân</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tuổi</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày giờ</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Loại khám</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày hẹn</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {appointments.map((appointment) => (
-                                <tr key={appointment.id}>
+                            {filteredAppointments.map((appointment) => (
+                                <tr key={appointment.appointmentId}>
                                     <td className="px-6 py-4">
-                                        <div>
-                                            <div className="font-medium text-gray-900">{appointment.patientName}</div>
-                                            <div className="text-sm text-gray-500">{appointment.phone}</div>
-                                        </div>
+                                        <div className="font-medium text-gray-900">{appointment.childName}</div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-900">{appointment.age}</td>
-                                    <td className="px-6 py-4">
-                                        <div>
-                                            <div className="text-sm text-gray-900">{appointment.date}</div>
-                                            <div className="text-sm text-gray-500">{appointment.time}</div>
-                                        </div>
+                                    <td className="px-6 py-4 text-sm text-gray-900">
+                                        {new Date(appointment.appointmentDate).toLocaleDateString()}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-900">{appointment.type}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(appointment.status)}`}>
                                             {appointment.status}
