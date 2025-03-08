@@ -43,7 +43,9 @@ export const ProductManagement = () => {
     const fetchProducts = async () => {
         try {
             const response = await axios.get('Product/get-all');
-            setProducts(response.data);
+            // Lọc các sản phẩm có isActive == true
+            const activeProducts = response.data.filter(product => product.isActive === true);
+            setProducts(activeProducts);
         } catch (error) {
             console.error('Error fetching products:', error);
         }

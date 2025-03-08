@@ -38,6 +38,17 @@ export const DoctorLayout = ({ children }) => {
                             <span>Quản lý sản phẩm</span>
                         </Link>
                         <Link
+                            to="/doctor-dashboard/appointments"
+                            className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                                location.pathname === '/doctor-dashboard/appointments'
+                                    ? 'bg-indigo-800 text-white'
+                                    : 'text-indigo-100 hover:bg-indigo-800'
+                            }`}
+                        >
+                            <FaCalendarAlt />
+                            <span>Quản lý cuộc hẹn</span>
+                        </Link>
+                        <Link
                             to="/doctor-dashboard/requests"
                             className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
                                 location.pathname.includes('/doctor-dashboard/requests') || 
@@ -48,17 +59,6 @@ export const DoctorLayout = ({ children }) => {
                         >
                             <FaBell />
                             <span>Quản lý yêu cầu tư vấn</span>
-                        </Link>
-                        <Link
-                            to="/doctor-dashboard/appointments"
-                            className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
-                                location.pathname === '/doctor-dashboard/appointments'
-                                    ? 'bg-indigo-800 text-white'
-                                    : 'text-indigo-100 hover:bg-indigo-800'
-                            }`}
-                        >
-                            <FaCalendarAlt />
-                            <span>Quản lý cuộc hẹn</span>
                         </Link>
                         <Link
                             to="/doctor-dashboard/feedback"
