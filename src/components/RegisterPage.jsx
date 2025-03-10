@@ -177,7 +177,7 @@ export const RegisterPage = () => {
         <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
         {/* Form Container */}
         <div className="max-w-md w-full space-y-8 relative z-10 my-8 bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-2xl">
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-bold text-gray-900">
             Đăng ký tài khoản
           </h2>
           <p className="text-center text-sm text-gray-600">

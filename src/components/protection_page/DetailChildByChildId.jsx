@@ -197,12 +197,14 @@ const DetailChildByChildId = () => {
 
     const handleUpdateReport = async () => {
         try {
-            const response = await api.put(`/reports/${selectedReport.reportId}`, {
+            const requestData = {
                 childId: childData.childId,
                 height: parseFloat(editHeight),
                 weight: parseFloat(editWeight),
-                date: editDate.format('YYYY-MM-DD')
-            });
+                date: editDate.toISOString()
+            };
+
+            const response = await api.put(`/reports/${selectedReport.reportId}`, requestData);
 
             if (response.status === 200) {
                 toast.success('Cập nhật thành công!');
@@ -211,8 +213,8 @@ const DetailChildByChildId = () => {
                 setSelectedReport(null);
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Cập nhật thất bại!');
             console.error('Lỗi khi cập nhật:', error);
+            toast.error(error.response?.data?.message || 'Cập nhật thất bại!');
         }
     };
 

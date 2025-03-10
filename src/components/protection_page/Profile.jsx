@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../Utils/Axios';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 import moment from 'moment';
 import { DatePicker } from 'antd';
 
@@ -64,12 +64,17 @@ const Profile = () => {
         fetchData();
     }, [accountId]);
 
-    // Thêm hàm kiểm tra tuổi
+    // Sửa lại hàm kiểm tra ngày sinh
     const disabledDate = (current) => {
-        const today = moment();
-        const minAgeDate = today.clone().subtract(18, 'years');
-        const maxAgeDate = today.clone().subtract(1, 'year');
-        return current > today || current < minAgeDate || current > maxAgeDate;
+        if (!current) return false;
+        
+        const currentYear = new Date().getFullYear();
+        const minYear = currentYear - 18; // 18 tuổi
+        const maxYear = currentYear - 1;  // 1 tuổi
+        const selectedYear = current.year();
+
+        // Kiểm tra năm nằm trong khoảng cho phép
+        return selectedYear < minYear || selectedYear > maxYear;
     };
 
     // Hàm xử lý tạo trẻ mới
@@ -82,15 +87,36 @@ const Profile = () => {
                 dob: newChild.dob.format('YYYY-MM-DD')
             });
 
-            if (response.status === 201) {
-                toast.success('Tạo hồ sơ trẻ thành công!');
-                // Làm mới danh sách
+            if (response.status === 200) {
+                toast.success('Tạo hồ sơ trẻ thành công!', {
+                    duration: 3000, // Hiển thị trong 3 giây
+                    position: 'top-right' // Vị trí hiển thị
+                });
+                // Làm mới danh sách trẻ
                 const childrenResponse = await api.get(`/Parent/parents/${profileData.parentId}/children`);
                 setChildren(childrenResponse.data);
+                // Đóng form nhập
                 setShowCreateChildForm(false);
+                // Reset form
+                setNewChild({
+                    firstName: '',
+                    lastName: '',
+                    gender: 'Female',
+                    dob: moment(),
+                    imageUrl: 'string'
+                });
+            } else {
+                toast.error('Tạo hồ sơ thất bại', {
+                    duration: 3000,
+                    position: 'top-right'
+                });
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Tạo hồ sơ thất bại');
+            toast.error(error.response?.data?.message || 'Tạo hồ sơ thất bại', {
+                duration: 3000,
+                position: 'top-right'
+            });
+            console.error('Lỗi khi tạo hồ sơ trẻ:', error);
         } finally {
             setCreatingChild(false);
         }
@@ -152,6 +178,7 @@ const Profile = () => {
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: '#F8F3D9' }}>
+            <Toaster position="top-right" />
             <div className="container mx-auto p-4 text-black">
                 <Header />
                 <h1 className="text-2xl font-bold mb-4 text-black">Thông tin hồ sơ</h1>
@@ -197,19 +224,19 @@ const Profile = () => {
                         </p>
                         <div className="pt-4">
                             <div className="flex justify-between items-center mb-2">
-                                <p className="font-medium text-gray-900">Service Orders:</p>
+                                <p className="font-medium text-gray-900">Đơn hàng:</p>
                                 <div className="space-x-2">
                                     <Link 
                                         to="/buy-service" 
                                         className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
                                     >
-                                        Buy Order
+                                        Mua dịch vụ
                                     </Link>
                                     <Link 
                                         to={`/history-orders/${profileData.parentId}`} 
                                         className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
                                     >
-                                        History Order
+                                        Lịch sử đơn hàng
                                     </Link>
                                 </div>
                             </div>
@@ -329,7 +356,20 @@ const Profile = () => {
                                     <DatePicker
                                         format="DD/MM/YYYY"
                                         value={newChild.dob}
-                                        onChange={(date) => setNewChild({...newChild, dob: date})}
+                                        onChange={(date) => {
+                                            if (date) {
+                                                const year = date.year();
+                                                const currentYear = new Date().getFullYear();
+                                                const minYear = currentYear - 18;
+                                                const maxYear = currentYear - 1;
+
+                                                if (year >= minYear && year <= maxYear) {
+                                                    setNewChild({...newChild, dob: date});
+                                                } else {
+                                                    toast.error(`Năm sinh phải từ ${minYear} đến ${maxYear}`);
+                                                }
+                                            }
+                                        }}
                                         className="w-full"
                                         disabledDate={disabledDate}
                                     />
