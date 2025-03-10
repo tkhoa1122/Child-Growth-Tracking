@@ -6,7 +6,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import api from '../Utils/Axios';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 import { FaCalendarAlt, FaClock, FaUser, FaUserMd } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 
@@ -33,6 +33,8 @@ const AppointmentWithDoctor = () => {
         description: ''
     });
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [appointmentHistory, setAppointmentHistory] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
 
     // Fetch thông tin parent và children
     useEffect(() => {
@@ -59,9 +61,15 @@ const AppointmentWithDoctor = () => {
                 const childrenResponse = await api.get(`/Parent/parents/${parentData.parentId}/children`);
                 setChildren(childrenResponse.data);
 
-                // Fetch danh sách bác sĩ
-                const doctorsResponse = await api.get('/doctors');
-                setDoctors(doctorsResponse.data);
+                // Thêm bác sĩ mặc định vào danh sách
+                const defaultDoctor = {
+                    id: "3623994b-d713-4dd4-9580-955d49b1c443",
+                    firstName: "Doc",
+                    lastName: "tor",
+                    name: "Doc tor"
+                };
+                
+                setDoctors([defaultDoctor]);
 
                 setLoading(false);
             } catch (error) {
@@ -75,6 +83,28 @@ const AppointmentWithDoctor = () => {
             fetchData();
         }
     }, [userId]);
+
+    // Thêm useEffect mới để fetch lịch sử đặt lịch
+    useEffect(() => {
+        const fetchAppointmentHistory = async () => {
+            if (!parentInfo.parentId) return;
+            
+            setLoadingHistory(true);
+            try {
+                const response = await api.get(`/Appointment/parent/${parentInfo.parentId}`);
+                setAppointmentHistory(response.data);
+            } catch (error) {
+                toast.error('Không thể tải lịch sử đặt lịch');
+                console.error('Error fetching appointment history:', error);
+            } finally {
+                setLoadingHistory(false);
+            }
+        };
+
+        if (parentInfo.parentId) {
+            fetchAppointmentHistory();
+        }
+    }, [parentInfo.parentId]);
 
     // Kiểm tra thời gian có hợp lệ không
     const isTimeSlotValid = (time) => {
@@ -286,18 +316,29 @@ const AppointmentWithDoctor = () => {
 
         try {
             const appointmentDateTime = moment(selectedDate)
-                .format('YYYY-MM-DD') + 'T' + appointmentForm.appointmentTime;
+                .set({
+                    hour: parseInt(appointmentForm.appointmentTime.split(':')[0]),
+                    minute: parseInt(appointmentForm.appointmentTime.split(':')[1]),
+                    second: 0
+                })
+                .toISOString();
 
-            const response = await api.post('/appointments', {
-                ...appointmentForm,
-                appointmentDateTime
-            });
+            const requestData = {
+                doctorId: appointmentForm.doctorId,
+                parentId: parentInfo.parentId,
+                childId: appointmentForm.childId,
+                appointmentDate: appointmentDateTime,
+                status: "Pending"
+            };
 
-            if (response.status === 201) {
+            const response = await api.post('/Appointment', requestData);
+
+            if (response.status === 200) {
                 toast.success('Đặt lịch hẹn thành công!');
+                // Reset form
                 setSelectedDate(null);
                 setAppointmentForm({
-                    fullName: '',
+                    fullName: parentInfo.firstName + ' ' + parentInfo.lastName,
                     doctorId: '',
                     childId: '',
                     appointmentTime: '',
@@ -305,7 +346,7 @@ const AppointmentWithDoctor = () => {
                 });
             }
         } catch (error) {
-            toast.error('Đặt lịch thất bại: ' + error.message);
+            toast.error(error.response?.data?.message || 'Đặt lịch thất bại. Vui lòng thử lại sau.');
         }
     };
 
@@ -462,18 +503,11 @@ const AppointmentWithDoctor = () => {
                                     {/* Nội dung */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Nội dung
+                                            Trạng thái
                                         </label>
-                                        <textarea
-                                            required
-                                            rows="4"
-                                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                                            value={appointmentForm.description}
-                                            onChange={(e) => setAppointmentForm(prev => ({
-                                                ...prev,
-                                                description: e.target.value
-                                            }))}
-                                        />
+                                        <div className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
+                                            Đang chờ xác nhận
+                                        </div>
                                     </div>
 
                                     {/* Buttons */}
@@ -497,8 +531,98 @@ const AppointmentWithDoctor = () => {
                         )}
                     </div>
                 </div>
+
+                {/* New Appointment History Section */}
+                <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
+                    <div className="flex items-center mb-6">
+                        <FaCalendarAlt className="text-blue-500 text-2xl mr-3" />
+                        <h2 className="text-2xl font-bold text-black">Lịch sử đặt lịch</h2>
+                    </div>
+
+                    {loadingHistory ? (
+                        <div className="text-center py-4">
+                            <div className="spinner-border text-blue-500" role="status">
+                                <span className="sr-only">Đang tải...</span>
+                            </div>
+                        </div>
+                    ) : appointmentHistory.length === 0 ? (
+                        <div className="text-center py-4 text-gray-500">
+                            Chưa có lịch sử đặt lịch
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            ID cuộc hẹn
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Tên trẻ được đặt lịch
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ngày hẹn
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Trạng thái
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {appointmentHistory.map((appointment) => (
+                                        <tr key={appointment.appointmentId}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {appointment.appointmentId}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {appointment.childName}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {appointment.appointmentDate !== "0001-01-01T00:00:00" 
+                                                    ? moment(appointment.appointmentDate).format('DD/MM/YYYY HH:mm')
+                                                    : 'Chưa có ngày hẹn'}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    ${appointment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                                      appointment.status === 'Approved' ? 'bg-green-100 text-green-800' : 
+                                                      'bg-red-100 text-red-800'}`}>
+                                                    {appointment.status === 'Pending' ? 'Đang chờ' :
+                                                     appointment.status === 'Approved' ? 'Đã duyệt' : 
+                                                     'Đã hủy'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             </div>
             <Footer />
+            <Toaster 
+                position="top-right"
+                toastOptions={{
+                    duration: 3000,
+                    style: {
+                        background: '#363636',
+                        color: '#fff',
+                    },
+                    success: {
+                        duration: 3000,
+                        style: {
+                            background: 'green',
+                        },
+                    },
+                    error: {
+                        duration: 3000,
+                        style: {
+                            background: 'red',
+                        },
+                    },
+                }}
+            />
         </div>
     );
 };
