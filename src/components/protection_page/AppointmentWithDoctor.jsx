@@ -6,7 +6,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import api from '../Utils/Axios';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 import { FaCalendarAlt, FaClock, FaUser, FaUserMd } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 
@@ -59,9 +59,15 @@ const AppointmentWithDoctor = () => {
                 const childrenResponse = await api.get(`/Parent/parents/${parentData.parentId}/children`);
                 setChildren(childrenResponse.data);
 
-                // Fetch danh sách bác sĩ
-                const doctorsResponse = await api.get('/doctors');
-                setDoctors(doctorsResponse.data);
+                // Thêm bác sĩ mặc định vào danh sách
+                const defaultDoctor = {
+                    id: "3623994b-d713-4dd4-9580-955d49b1c443",
+                    firstName: "Doc",
+                    lastName: "tor",
+                    name: "Doc tor"
+                };
+                
+                setDoctors([defaultDoctor]);
 
                 setLoading(false);
             } catch (error) {
@@ -286,18 +292,29 @@ const AppointmentWithDoctor = () => {
 
         try {
             const appointmentDateTime = moment(selectedDate)
-                .format('YYYY-MM-DD') + 'T' + appointmentForm.appointmentTime;
+                .set({
+                    hour: parseInt(appointmentForm.appointmentTime.split(':')[0]),
+                    minute: parseInt(appointmentForm.appointmentTime.split(':')[1]),
+                    second: 0
+                })
+                .toISOString();
 
-            const response = await api.post('/appointments', {
-                ...appointmentForm,
-                appointmentDateTime
-            });
+            const requestData = {
+                doctorId: appointmentForm.doctorId,
+                parentId: parentInfo.parentId,
+                childId: appointmentForm.childId,
+                appointmentDate: appointmentDateTime,
+                status: "Pending"
+            };
 
-            if (response.status === 201) {
+            const response = await api.post('/Parent/appointments/create', requestData);
+
+            if (response.status === 200) {
                 toast.success('Đặt lịch hẹn thành công!');
+                // Reset form
                 setSelectedDate(null);
                 setAppointmentForm({
-                    fullName: '',
+                    fullName: parentInfo.firstName + ' ' + parentInfo.lastName,
                     doctorId: '',
                     childId: '',
                     appointmentTime: '',
@@ -305,7 +322,7 @@ const AppointmentWithDoctor = () => {
                 });
             }
         } catch (error) {
-            toast.error('Đặt lịch thất bại: ' + error.message);
+            toast.error(error.response?.data?.message || 'Đặt lịch thất bại. Vui lòng thử lại sau.');
         }
     };
 
@@ -462,18 +479,11 @@ const AppointmentWithDoctor = () => {
                                     {/* Nội dung */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Nội dung
+                                            Trạng thái
                                         </label>
-                                        <textarea
-                                            required
-                                            rows="4"
-                                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                                            value={appointmentForm.description}
-                                            onChange={(e) => setAppointmentForm(prev => ({
-                                                ...prev,
-                                                description: e.target.value
-                                            }))}
-                                        />
+                                        <div className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
+                                            Đang chờ xác nhận
+                                        </div>
                                     </div>
 
                                     {/* Buttons */}
@@ -499,6 +509,28 @@ const AppointmentWithDoctor = () => {
                 </div>
             </div>
             <Footer />
+            <Toaster 
+                position="top-right"
+                toastOptions={{
+                    duration: 3000,
+                    style: {
+                        background: '#363636',
+                        color: '#fff',
+                    },
+                    success: {
+                        duration: 3000,
+                        style: {
+                            background: 'green',
+                        },
+                    },
+                    error: {
+                        duration: 3000,
+                        style: {
+                            background: 'red',
+                        },
+                    },
+                }}
+            />
         </div>
     );
 };
