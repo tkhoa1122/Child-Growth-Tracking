@@ -33,6 +33,8 @@ const AppointmentWithDoctor = () => {
         description: ''
     });
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [appointmentHistory, setAppointmentHistory] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
 
     // Fetch thông tin parent và children
     useEffect(() => {
@@ -81,6 +83,28 @@ const AppointmentWithDoctor = () => {
             fetchData();
         }
     }, [userId]);
+
+    // Thêm useEffect mới để fetch lịch sử đặt lịch
+    useEffect(() => {
+        const fetchAppointmentHistory = async () => {
+            if (!parentInfo.parentId) return;
+            
+            setLoadingHistory(true);
+            try {
+                const response = await api.get(`/Appointment/parent/${parentInfo.parentId}`);
+                setAppointmentHistory(response.data);
+            } catch (error) {
+                toast.error('Không thể tải lịch sử đặt lịch');
+                console.error('Error fetching appointment history:', error);
+            } finally {
+                setLoadingHistory(false);
+            }
+        };
+
+        if (parentInfo.parentId) {
+            fetchAppointmentHistory();
+        }
+    }, [parentInfo.parentId]);
 
     // Kiểm tra thời gian có hợp lệ không
     const isTimeSlotValid = (time) => {
@@ -307,7 +331,7 @@ const AppointmentWithDoctor = () => {
                 status: "Pending"
             };
 
-            const response = await api.post('/Parent/appointments/create', requestData);
+            const response = await api.post('/Appointment', requestData);
 
             if (response.status === 200) {
                 toast.success('Đặt lịch hẹn thành công!');
@@ -506,6 +530,74 @@ const AppointmentWithDoctor = () => {
                             </div>
                         )}
                     </div>
+                </div>
+
+                {/* New Appointment History Section */}
+                <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
+                    <div className="flex items-center mb-6">
+                        <FaCalendarAlt className="text-blue-500 text-2xl mr-3" />
+                        <h2 className="text-2xl font-bold text-black">Lịch sử đặt lịch</h2>
+                    </div>
+
+                    {loadingHistory ? (
+                        <div className="text-center py-4">
+                            <div className="spinner-border text-blue-500" role="status">
+                                <span className="sr-only">Đang tải...</span>
+                            </div>
+                        </div>
+                    ) : appointmentHistory.length === 0 ? (
+                        <div className="text-center py-4 text-gray-500">
+                            Chưa có lịch sử đặt lịch
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            ID cuộc hẹn
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Tên trẻ được đặt lịch
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ngày hẹn
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Trạng thái
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {appointmentHistory.map((appointment) => (
+                                        <tr key={appointment.appointmentId}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {appointment.appointmentId}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {appointment.childName}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {appointment.appointmentDate !== "0001-01-01T00:00:00" 
+                                                    ? moment(appointment.appointmentDate).format('DD/MM/YYYY HH:mm')
+                                                    : 'Chưa có ngày hẹn'}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    ${appointment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                                      appointment.status === 'Approved' ? 'bg-green-100 text-green-800' : 
+                                                      'bg-red-100 text-red-800'}`}>
+                                                    {appointment.status === 'Pending' ? 'Đang chờ' :
+                                                     appointment.status === 'Approved' ? 'Đã duyệt' : 
+                                                     'Đã hủy'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
             </div>
             <Footer />
