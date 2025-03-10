@@ -106,6 +106,21 @@ const AppointmentWithDoctor = () => {
         }
     }, [parentInfo.parentId]);
 
+    // Thêm useEffect mới để fetch danh sách bác sĩ
+    useEffect(() => {
+        const fetchDoctors = async () => {
+            try {
+                const response = await api.get('/Doctor/list-doctors-for-user');
+                setDoctors(response.data);
+            } catch (error) {
+                console.error('Lỗi khi tải danh sách bác sĩ:', error);
+                toast.error('Không thể tải danh sách bác sĩ');
+            }
+        };
+
+        fetchDoctors();
+    }, []);
+
     // Kiểm tra thời gian có hợp lệ không
     const isTimeSlotValid = (time) => {
         if (!selectedDate) return false;
@@ -493,14 +508,14 @@ const AppointmentWithDoctor = () => {
                                         >
                                             <option value="">Chọn bác sĩ</option>
                                             {doctors.map((doctor) => (
-                                                <option key={doctor.id} value={doctor.id}>
-                                                    {doctor.name}
+                                                <option key={doctor.doctorId} value={doctor.doctorId}>
+                                                    {`${doctor.lastName} ${doctor.firstName}`}
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
 
-                                    {/* Nội dung */}
+                                    {/* Trạng thái */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Trạng thái

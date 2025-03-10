@@ -140,7 +140,7 @@ const DetailChildByChildId = () => {
                 height: parseFloat(height),
                 weight: parseFloat(weight),
                 reportCreateDate: selectedDate.format('YYYY-MM-DD'),
-                reportIsActive: "true",
+                reportIsActive: "string",
                 reportMark: comment,
                 reportContent: `Báo cáo BMI ngày ${selectedDate.format('DD/MM/YYYY')}`,
                 reportName: `Báo cáo BMI - ${childData.lastName} ${childData.firstName}`,
