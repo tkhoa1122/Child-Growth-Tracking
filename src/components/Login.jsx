@@ -171,7 +171,7 @@ export const Login = () => {
                 <div className="max-w-md w-full space-y-8 relative z-10">
                     <div className="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-2xl">
                         <div>
-                            <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">
+                            <h2 className="mt-2 text-center text-3xl font-bold text-gray-900">
                                 Đăng nhập
                             </h2>
                             <p className="mt-2 text-center text-sm text-gray-600">
