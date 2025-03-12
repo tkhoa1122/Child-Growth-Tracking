@@ -37,6 +37,8 @@ const Profile = () => {
         dob: moment()
     });
     const [editingChild, setEditingChild] = useState(false);
+    const [checkingRights, setCheckingRights] = useState(false);
+    const [hasServiceRights, setHasServiceRights] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -68,6 +70,26 @@ const Profile = () => {
 
         fetchData();
     }, [accountId]);
+
+    // Thêm useEffect để kiểm tra quyền
+    useEffect(() => {
+        const fetchServiceRights = async () => {
+            if (profileData?.parentId) {
+                try {
+                    setCheckingRights(true);
+                    const response = await api.get(`/serviceorder/CheckServiceRights/${profileData.parentId}`);
+                    setHasServiceRights(response.data.isValid);
+                } catch (error) {
+                    console.error('Lỗi kiểm tra quyền dịch vụ:', error);
+                    toast.error('Không thể kiểm tra quyền đặt lịch');
+                } finally {
+                    setCheckingRights(false);
+                }
+            }
+        };
+        
+        fetchServiceRights();
+    }, [profileData?.parentId]);
 
     // Sửa lại hàm kiểm tra ngày sinh
     const disabledDate = (current) => {
@@ -314,7 +336,15 @@ const Profile = () => {
                             </button>
                             <Link
                                 to={`/appointment/${accountId}`}
-                                className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
+                                className={`bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm ${
+                                    checkingRights || !hasServiceRights ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                                title={!hasServiceRights ? "Bạn cần mua gói dịch vụ để đặt lịch" : ""}
+                                onClick={(e) => {
+                                    if (checkingRights || !hasServiceRights) {
+                                        e.preventDefault();
+                                    }
+                                }}
                             >
                                 Đặt Lịch
                             </Link>

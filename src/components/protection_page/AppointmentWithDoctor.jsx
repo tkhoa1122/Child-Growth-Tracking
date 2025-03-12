@@ -35,6 +35,7 @@ const AppointmentWithDoctor = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [appointmentHistory, setAppointmentHistory] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
+    const [loadingDoctors, setLoadingDoctors] = useState(true);
 
     // Fetch thông tin parent và children
     useEffect(() => {
@@ -60,16 +61,6 @@ const AppointmentWithDoctor = () => {
                 // Fetch danh sách trẻ em dựa theo parentId
                 const childrenResponse = await api.get(`/Parent/parents/${parentData.parentId}/children`);
                 setChildren(childrenResponse.data);
-
-                // Thêm bác sĩ mặc định vào danh sách
-                const defaultDoctor = {
-                    id: "3623994b-d713-4dd4-9580-955d49b1c443",
-                    firstName: "Doc",
-                    lastName: "tor",
-                    name: "Doc tor"
-                };
-                
-                setDoctors([defaultDoctor]);
 
                 setLoading(false);
             } catch (error) {
@@ -110,11 +101,13 @@ const AppointmentWithDoctor = () => {
     useEffect(() => {
         const fetchDoctors = async () => {
             try {
-                const response = await api.get('/Doctor/list-doctors-for-user');
+                const response = await api.get('/Doctor/get-all');
                 setDoctors(response.data);
             } catch (error) {
                 console.error('Lỗi khi tải danh sách bác sĩ:', error);
                 toast.error('Không thể tải danh sách bác sĩ');
+            } finally {
+                setLoadingDoctors(false);
             }
         };
 
@@ -338,30 +331,35 @@ const AppointmentWithDoctor = () => {
                 })
                 .toISOString();
 
-            const requestData = {
+            const requestBody = {
                 doctorId: appointmentForm.doctorId,
                 parentId: parentInfo.parentId,
                 childId: appointmentForm.childId,
                 appointmentDate: appointmentDateTime,
-                status: "Pending"
+                status: "Inactive" // Giá trị mặc định theo yêu cầu
             };
 
-            const response = await api.post('/Appointment', requestData);
+            const response = await api.post('/Parent/appointment/create', requestBody);
 
             if (response.status === 200) {
-                toast.success('Đặt lịch hẹn thành công!');
-                // Reset form
+                toast.success('Đặt lịch thành công!');
+                // Reset form và cập nhật lịch sử
                 setSelectedDate(null);
-                setAppointmentForm({
-                    fullName: parentInfo.firstName + ' ' + parentInfo.lastName,
+                setAppointmentForm(prev => ({
+                    ...prev,
                     doctorId: '',
                     childId: '',
                     appointmentTime: '',
                     description: ''
-                });
+                }));
+                // Gọi lại API lịch sử
+                const historyResponse = await api.get(`/Appointment/parent/${parentInfo.parentId}`);
+                setAppointmentHistory(historyResponse.data);
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Đặt lịch thất bại. Vui lòng thử lại sau.');
+            const errorMessage = error.response?.data?.title || error.response?.data || 'Đặt lịch thất bại';
+            toast.error(errorMessage);
+            console.error('Lỗi khi đặt lịch:', error);
         }
     };
 
@@ -494,25 +492,27 @@ const AppointmentWithDoctor = () => {
 
                                     {/* Chọn bác sĩ */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Chọn bác sĩ muốn đặt lịch
+                                        <label className="block text-sm font-medium mb-1 flex items-center text-gray-700">
+                                            <FaUserMd className="mr-2 text-blue-500" />
+                                            Bác sĩ
                                         </label>
-                                        <select
-                                            required
-                                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                                            value={appointmentForm.doctorId}
-                                            onChange={(e) => setAppointmentForm(prev => ({
-                                                ...prev,
-                                                doctorId: e.target.value
-                                            }))}
-                                        >
-                                            <option value="">Chọn bác sĩ</option>
-                                            {doctors.map((doctor) => (
-                                                <option key={doctor.doctorId} value={doctor.doctorId}>
-                                                    {`${doctor.lastName} ${doctor.firstName}`}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        {loadingDoctors ? (
+                                            <div className="animate-pulse bg-gray-200 h-10 rounded-md"></div>
+                                        ) : (
+                                            <select
+                                                value={appointmentForm.doctorId}
+                                                onChange={(e) => setAppointmentForm({...appointmentForm, doctorId: e.target.value})}
+                                                className="w-full p-3 border border-gray-300 rounded-md bg-white text-gray-700"
+                                                required
+                                            >
+                                                <option value="" >Chọn bác sĩ</option>
+                                                {doctors.map((doctor) => (
+                                                    <option key={doctor.doctorId} value={doctor.doctorId}>
+                                                        {`${doctor.firstName || ''} ${doctor.lastName || ''}`.trim() || 'Chưa có tên'}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        )}
                                     </div>
 
                                     {/* Trạng thái */}
