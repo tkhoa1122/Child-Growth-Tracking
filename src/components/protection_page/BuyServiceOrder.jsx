@@ -93,8 +93,8 @@ const BuyServiceOrder = () => {
                 const paymentData = {
                     parentId: userInfo.parentId,
                     description: selectedService.serviceName,
-                    returnUrl: "http://localhost:5173/payment-success",
-                    cancelUrl: "http://localhost:5173/payment-fail",
+                    returnUrl: "http://localhost:5175/payment-success",
+                    cancelUrl: "http://localhost:5175/payment-fail",
                     services: [
                         {
                             serviceId: selectedService.serviceId,
@@ -270,62 +270,11 @@ const BuyServiceOrder = () => {
                                     </table>
                                 </div>
 
-                                <div className="mt-6">
-                                    <h3 className="text-lg font-semibold mb-4">Hình thức thanh toán</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Option Banking */}
-                                        <div
-                                            className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
-                                                paymentMethod === 'banking'
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-gray-200 hover:border-blue-300'
-                                            }`}
-                                            onClick={() => setPaymentMethod('banking')}
-                                        >
-                                            <div className="flex items-center space-x-3">
-                                                <input
-                                                    type="radio"
-                                                    checked={paymentMethod === 'banking'}
-                                                    onChange={() => setPaymentMethod('banking')}
-                                                    className="w-4 h-4 text-blue-600"
-                                                />
-                                                <div>
-                                                    <p className="font-medium text-gray-900">Chuyển khoản ngân hàng</p>
-                                                    <p className="text-sm text-gray-500">Thanh toán qua tài khoản ngân hàng</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Option Cash */}
-                                        <div
-                                            className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
-                                                paymentMethod === 'cash'
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-gray-200 hover:border-blue-300'
-                                            }`}
-                                            onClick={() => setPaymentMethod('cash')}
-                                        >
-                                            <div className="flex items-center space-x-3">
-                                                <input
-                                                    type="radio"
-                                                    checked={paymentMethod === 'cash'}
-                                                    onChange={() => setPaymentMethod('cash')}
-                                                    className="w-4 h-4 text-blue-600"
-                                                />
-                                                <div>
-                                                    <p className="font-medium text-gray-900">Tiền mặt</p>
-                                                    <p className="text-sm text-gray-500">Thanh toán trực tiếp bằng tiền mặt</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <button 
                                     onClick={handleServiceRegistration}
                                     className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg transition-colors"
                                 >
-                                    {paymentMethod === 'cash' ? 'Đăng ký dịch vụ' : 'Thanh toán và Đăng ký'}
+                                    Thanh toán và Đăng ký
                                 </button>
                             </div>
                         )}

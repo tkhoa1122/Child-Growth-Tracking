@@ -250,16 +250,17 @@ const Profile = () => {
                                 <div className="flex justify-center py-4">
                                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                                 </div>
-                            ) : serviceOrder ? (
+                            ) : serviceOrder && serviceOrder.status === 'Completed' ? (
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full bg-white rounded-lg overflow-hidden">
                                         <thead className="bg-gray-50">
                                             <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service ID</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Price</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buy Date</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Date</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đơn hàng</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dịch vụ</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giá</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày mua</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày kết thúc</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
@@ -285,6 +286,9 @@ const Profile = () => {
                                                         month: '2-digit',
                                                         year: 'numeric'
                                                     }).split('/').join('-')}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-900">
+                                                    {serviceOrder.status === 'Completed' ? 'Đã thanh toán' : 'Chưa thanh toán'}
                                                 </td>
                                             </tr>
                                         </tbody>
