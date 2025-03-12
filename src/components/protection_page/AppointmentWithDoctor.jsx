@@ -39,6 +39,8 @@ const AppointmentWithDoctor = () => {
     const [appointmentHistory, setAppointmentHistory] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [loadingDoctors, setLoadingDoctors] = useState(true);
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
 
     // Fetch thông tin parent và children
     useEffect(() => {
@@ -378,6 +380,94 @@ const AppointmentWithDoctor = () => {
         }
     };
 
+    const handleAppointmentClick = async (appointmentId) => {
+        try {
+            const response = await api.get(`/Appointment/${appointmentId}`);
+            const appointment = response.data;
+            
+            // Chuyển đổi thời gian từ UTC sang múi giờ Việt Nam
+            const utcMoment = moment.utc(appointment.appointmentDate);
+            const localTime = utcMoment.tz('Asia/Ho_Chi_Minh');
+
+            setSelectedAppointmentId(appointmentId);
+            setSelectedDate(localTime.toDate());
+            setAppointmentForm({
+                fullName: `${parentInfo.firstName} ${parentInfo.lastName}`,
+                doctorId: appointment.doctorId,
+                childId: appointment.childId,
+                appointmentTime: localTime.format('HH:mm') // Hiển thị giờ theo múi giờ Việt Nam
+            });
+            
+            // Cuộn lên phần form để người dùng dễ dàng chỉnh sửa
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+            toast.error('Không thể tải thông tin đặt lịch');
+            console.error('Chi tiết lỗi:', error.response?.data);
+        }
+    };
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        if (!selectedAppointmentId || !appointmentForm.doctorId || !appointmentForm.childId || !selectedDate || !appointmentForm.appointmentTime) {
+            toast.error('Vui lòng điền đầy đủ thông tin');
+            return;
+        }
+
+        try {
+            // Chuyển đổi thời gian từ giờ địa phương sang UTC trước khi gửi API
+            const localDateTime = moment(selectedDate)
+                .set({
+                    hour: parseInt(appointmentForm.appointmentTime.split(':')[0]),
+                    minute: parseInt(appointmentForm.appointmentTime.split(':')[1]),
+                    second: 0
+                })
+                .tz('Asia/Ho_Chi_Minh');
+
+            const utcDateTime = localDateTime.utc().toISOString();
+
+            const response = await api.put(`/Appointment/${selectedAppointmentId}`, {
+                scheduledTime: utcDateTime,
+                status: 0
+            });
+
+            if (response.status === 200) {
+                toast.success('Cập nhật thành công!');
+                // Reset form và tải lại lịch sử
+                setSelectedAppointmentId(null);
+                setSelectedDate(null);
+                setAppointmentForm({
+                    fullName: '',
+                    doctorId: '',
+                    childId: '',
+                    appointmentTime: ''
+                });
+                // Tải lại lịch sử đặt lịch
+                const historyResponse = await api.get(`/Appointment/appoiment-byid/${parentInfo.parentId}`);
+                setAppointmentHistory(historyResponse.data);
+            }
+        } catch (error) {
+            toast.error('Cập nhật thất bại: ' + (error.response?.data?.title || 'Lỗi hệ thống'));
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!selectedAppointmentId) return;
+
+        try {
+            const response = await api.delete(`/Appointment/${selectedAppointmentId}`);
+            if (response.status === 200) {
+                toast.success('Đã xóa cuộc hẹn!');
+                // Reset và tải lại dữ liệu
+                setSelectedAppointmentId(null);
+                setSelectedDate(null);
+                const historyResponse = await api.get(`/Appointment/appoiment-byid/${parentInfo.parentId}`);
+                setAppointmentHistory(historyResponse.data);
+            }
+        } catch (error) {
+            toast.error('Xóa thất bại: ' + (error.response?.data?.title || 'Lỗi hệ thống'));
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F8F3D9' }}>
@@ -445,28 +535,26 @@ const AppointmentWithDoctor = () => {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Chọn giờ hẹn
                                         </label>
-                                        <div className="grid grid-cols-4 gap-2">
-                                            {timeSlots.map((time) => (
-                                                <button
-                                                    key={time}
-                                                    type="button"
+                                        <select
+                                            value={appointmentForm.appointmentTime}
+                                            onChange={(e) => setAppointmentForm(prev => ({
+                                                ...prev,
+                                                appointmentTime: e.target.value
+                                            }))}
+                                            className="w-full p-2 border rounded text-gray-700"
+                                            required
+                                        >
+                                            <option value="">Chọn giờ</option>
+                                            {timeSlots.map(time => (
+                                                <option 
+                                                    key={time} 
+                                                    value={time}
                                                     disabled={!isTimeSlotValid(time)}
-                                                    className={`p-2 rounded-md text-center ${
-                                                        appointmentForm.appointmentTime === time
-                                                            ? 'bg-blue-500 text-white'
-                                                            : !isTimeSlotValid(time)
-                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                                                    }`}
-                                                    onClick={() => setAppointmentForm(prev => ({
-                                                        ...prev,
-                                                        appointmentTime: time
-                                                    }))}
                                                 >
                                                     {time}
-                                                </button>
+                                                </option>
                                             ))}
-                                        </div>
+                                        </select>
                                     </div>
 
                                     {/* Họ và tên (disabled) */}
@@ -538,19 +626,40 @@ const AppointmentWithDoctor = () => {
 
                                     {/* Buttons */}
                                     <div className="flex justify-end space-x-3 pt-4">
-                                        <button
-                                            type="button"
-                                            className="px-6 py-2.5 bg-red-500 text-white-700 rounded-md hover:bg-red-800 transition duration-200"
-                                            onClick={() => setSelectedDate(null)}
-                                        >
-                                            Hủy
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="px-6 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
-                                        >
-                                            Xác nhận đặt lịch
-                                        </button>
+                                        {selectedAppointmentId ? (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    className="px-6 py-2.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200"
+                                                    onClick={handleDelete}
+                                                >
+                                                    Xóa cuộc hẹn
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+                                                    onClick={handleUpdate}
+                                                >
+                                                    Lưu thay đổi
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    className="px-6 py-2.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200"
+                                                    onClick={() => setSelectedDate(null)}
+                                                >
+                                                    Hủy
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    className="px-6 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
+                                                >
+                                                    Xác nhận đặt lịch
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 </form>
                             </div>
@@ -590,7 +699,11 @@ const AppointmentWithDoctor = () => {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {appointmentHistory.map((appointment) => (
-                                        <tr key={appointment.appointmentId}>
+                                        <tr 
+                                            key={appointment.appointmentId}
+                                            onClick={() => handleAppointmentClick(appointment.appointmentId)}
+                                            className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                        >
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{appointment.appointmentId}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {appointment.doctorName || `${appointment.doctorId}`}
@@ -604,8 +717,8 @@ const AppointmentWithDoctor = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {appointment.appointmentDate?.startsWith('0001-01-01') 
                                                     ? 'Chưa có ngày hẹn'
-                                                    : moment.utc(appointment.appointmentDate)
-                                                        .tz('Asia/Ho_Chi_Minh')
+                                                    : moment.utc(appointment.appointmentDate) // Parse từ UTC
+                                                        .tz('Asia/Ho_Chi_Minh') // Chuyển đổi sang múi giờ Việt Nam
                                                         .format('DD/MM/YYYY HH:mm')}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
