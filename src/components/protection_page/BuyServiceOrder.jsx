@@ -164,50 +164,52 @@ const BuyServiceOrder = () => {
                     <>
                         <div className="relative px-8">
                             <Slider {...sliderSettings}>
-                                {services.map((service) => (
-                                    <div key={service.serviceId} className="px-2">
-                                        <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                                            <div className="relative h-48">
-                                                <img
-                                                    src="/Images/information.png"
-                                                    alt={service.serviceName}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                                <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
-                                                    {service.serviceDuration} ngày
+                                {services
+                                    .filter(service => service.isActive)
+                                    .map((service) => (
+                                        <div key={service.serviceId} className="px-2">
+                                            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                                <div className="relative h-48">
+                                                    <img
+                                                        src="/Images/information.png"
+                                                        alt={service.serviceName}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                                    <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+                                                        {service.serviceDuration} ngày
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="p-6">
-                                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                                    {service.serviceName}
-                                                </h3>
-                                                <div className="flex items-center text-gray-600 mb-4">
-                                                    <FaCalendarAlt className="mr-2" />
-                                                    <span>
-                                                        Ngày tạo: {new Date(service.serviceCreateDate).toLocaleDateString('vi-VN')}
-                                                    </span>
+                                                <div className="p-6">
+                                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                                        {service.serviceName}
+                                                    </h3>
+                                                    <div className="flex items-center text-gray-600 mb-4">
+                                                        <FaCalendarAlt className="mr-2" />
+                                                        <span>
+                                                            Ngày tạo: {new Date(service.serviceCreateDate).toLocaleDateString('vi-VN')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-2xl font-bold text-blue-500 mb-4">
+                                                        {new Intl.NumberFormat('vi-VN', { 
+                                                            style: 'currency', 
+                                                            currency: 'VND' 
+                                                        }).format(service.servicePrice)}
+                                                    </div>
+                                                    <p className="text-gray-600 mb-6 line-clamp-2">
+                                                        {service.serviceDescription}
+                                                    </p>
+                                                    <button 
+                                                        onClick={() => setSelectedService(service)}
+                                                        className="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg transition-colors"
+                                                    >
+                                                        Đăng ký ngay
+                                                    </button>
                                                 </div>
-                                                <div className="text-2xl font-bold text-blue-500 mb-4">
-                                                    {new Intl.NumberFormat('vi-VN', { 
-                                                        style: 'currency', 
-                                                        currency: 'VND' 
-                                                    }).format(service.servicePrice)}
-                                                </div>
-                                                <p className="text-gray-600 mb-6 line-clamp-2">
-                                                    {service.serviceDescription}
-                                                </p>
-                                                <button 
-                                                    onClick={() => setSelectedService(service)}
-                                                    className="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg transition-colors"
-                                                >
-                                                    Đăng ký ngay
-                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
                             </Slider>
                         </div>
                         
