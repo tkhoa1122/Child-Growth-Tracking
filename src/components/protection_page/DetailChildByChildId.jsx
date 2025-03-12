@@ -12,6 +12,11 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
+// Thêm hàm helper để format ngày
+const formatDate = (date) => {
+    return moment(date).format('DD-MM-YYYY');
+};
+
 const DetailChildByChildId = () => {
     const { childId, parentId } = useParams();
     const [childData, setChildData] = useState(null);
@@ -142,7 +147,7 @@ const DetailChildByChildId = () => {
                 reportCreateDate: selectedDate.format('YYYY-MM-DD'),
                 reportIsActive: "string",
                 reportMark: comment,
-                reportContent: `Báo cáo BMI ngày ${selectedDate.format('DD/MM/YYYY')}`,
+                reportContent: `Báo cáo BMI ngày ${selectedDate.format('DD-MM-YYYY')}`,
                 reportName: `Báo cáo BMI - ${childData.lastName} ${childData.firstName}`,
                 bmi: parseFloat(bmi)
             };
@@ -330,11 +335,11 @@ const DetailChildByChildId = () => {
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium mb-1 text-black">Ngày đo</label>
                                 <DatePicker
-                                    format="DD/MM/YYYY"
+                                    format="DD-MM-YYYY"
                                     value={selectedDate}
                                     onChange={setSelectedDate}
+                                    className="w-full text-black"
                                     disabledDate={current => current > moment().endOf('day')}
-                                    className="w-full"
                                 />
                             </div>
                             
@@ -371,7 +376,10 @@ const DetailChildByChildId = () => {
                         <h3 className="text-xl font-bold mb-4 text-green-500">Biểu đồ theo dõi BMI</h3>
                         <div className="h-96">
                             <Line
-                                data={chartData}
+                                data={{
+                                    ...chartData,
+                                    labels: chartData.labels.map(date => formatDate(date))
+                                }}
                                 options={{
                                     responsive: true,
                                     maintainAspectRatio: false,
@@ -447,7 +455,10 @@ const DetailChildByChildId = () => {
                                 >
                                     <div className="space-y-2">
                                         <p className="text-sm text-gray-600 font-medium">
-                                            {report.reportContent}
+                                            {report.reportContent.replace(
+                                                /(\d{4}-\d{2}-\d{2})/,
+                                                (date) => formatDate(date)
+                                            )}
                                         </p>
                                         <div className="flex justify-between hidden">
                                             <span className="font-medium">Id Report:</span>
@@ -513,11 +524,11 @@ const DetailChildByChildId = () => {
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-black">Ngày đo</label>
                                 <DatePicker
-                                    format="DD/MM/YYYY"
+                                    format="DD-MM-YYYY"
                                     value={editDate}
                                     onChange={setEditDate}
-                                    disabledDate={current => current > moment().endOf('day')}
                                     className="w-full text-black"
+                                    disabledDate={current => current > moment().endOf('day')}
                                 />
                             </div>
                         </div>

@@ -7,6 +7,11 @@ import { toast, Toaster } from 'react-hot-toast';
 import moment from 'moment';
 import { DatePicker } from 'antd';
 
+// Thêm hàm helper để format ngày
+const formatDate = (date) => {
+    return moment(date).format('DD-MM-YYYY');
+};
+
 const Profile = () => {
     const { accountId } = useParams();
     const [profileData, setProfileData] = useState(null);
@@ -319,8 +324,8 @@ const Profile = () => {
                     </div>
 
                     {showCreateChildForm && (
-                        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                            <h3 className="text-lg font-medium mb-4">Thông tin trẻ mới</h3>
+                        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                            <h3 className="text-xl font-bold mb-4">Tạo hồ sơ trẻ mới</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Họ</label>
@@ -354,22 +359,9 @@ const Profile = () => {
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Ngày sinh</label>
                                     <DatePicker
-                                        format="DD/MM/YYYY"
+                                        format="DD-MM-YYYY"
                                         value={newChild.dob}
-                                        onChange={(date) => {
-                                            if (date) {
-                                                const year = date.year();
-                                                const currentYear = new Date().getFullYear();
-                                                const minYear = currentYear - 18;
-                                                const maxYear = currentYear - 1;
-
-                                                if (year >= minYear && year <= maxYear) {
-                                                    setNewChild({...newChild, dob: date});
-                                                } else {
-                                                    toast.error(`Năm sinh phải từ ${minYear} đến ${maxYear}`);
-                                                }
-                                            }
-                                        }}
+                                        onChange={(date) => setNewChild({...newChild, dob: date})}
                                         className="w-full"
                                         disabledDate={disabledDate}
                                     />
@@ -441,7 +433,7 @@ const Profile = () => {
                                         <p className="text-sm">
                                             <span className="font-medium">Ngày sinh:</span> 
                                             <span className="text-gray-600 ml-1">
-                                                {new Date(child.dob).toLocaleDateString()}
+                                                {formatDate(child.dob)}
                                             </span>
                                         </p>
                                     </div>
@@ -488,7 +480,7 @@ const Profile = () => {
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Ngày sinh</label>
                                     <DatePicker
-                                        format="DD/MM/YYYY"
+                                        format="DD-MM-YYYY"
                                         value={editChildData.dob}
                                         onChange={(date) => setEditChildData({...editChildData, dob: date})}
                                         className="w-full"
