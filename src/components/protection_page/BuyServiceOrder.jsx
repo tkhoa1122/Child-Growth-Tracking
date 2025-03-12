@@ -8,6 +8,7 @@ import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useAuth } from '../Utils/AuthContext';
+import { toast } from 'react-toastify';
 
 const CustomArrow = ({ direction, onClick }) => (
     <button
@@ -67,19 +68,59 @@ const BuyServiceOrder = () => {
         }
 
         try {
-            const orderData = {
-                parentId: userInfo.parentId,
-                serviceId: selectedService.serviceId,
-                quantity: 1,
-                totalPrice: selectedService.servicePrice
-            };
+            if (paymentMethod === 'cash') {
+                const orderData = {
+                    parentId: userInfo.parentId,
+                    serviceId: selectedService.serviceId,
+                    quantity: 1
+                };
 
-            await api.post('/serviceorder/create', orderData);
-            alert('Đăng ký dịch vụ thành công!');
-            setSelectedService(null);
+                const response = await api.post('/serviceorder/CreateServiceOrder', orderData);
+                
+                if (response.status === 200) {
+                    toast.success('Đăng ký dịch vụ thành công!', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                    setSelectedService(null);
+                } else {
+                    toast.error('Đăng ký dịch vụ thất bại!', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                }
+            } else if (paymentMethod === 'banking') {
+                const paymentData = {
+                    parentId: userInfo.parentId,
+                    description: selectedService.serviceName,
+                    returnUrl: "http://localhost:5173/payment-success",
+                    cancelUrl: "http://localhost:5173/payment-fail",
+                    services: [
+                        {
+                            serviceId: selectedService.serviceId,
+                            quantity: 1,
+                            totalPrice: 0
+                        }
+                    ]
+                };
+
+                const response = await api.post('/payments/create', paymentData);
+                
+                if (response.data && response.data.paymentUrl) {
+                    window.location.href = response.data.paymentUrl;
+                } else {
+                    toast.error('Không thể tạo liên kết thanh toán!', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                }
+            }
         } catch (error) {
-            console.error('Lỗi đăng ký dịch vụ:', error);
-            alert('Đăng ký dịch vụ thất bại!');
+            console.error('Lỗi xử lý thanh toán:', error);
+            toast.error(error.response?.data?.message || 'Xử lý thanh toán thất bại!', {
+                position: "top-right",
+                autoClose: 3000,
+            });
         }
     };
 
@@ -179,6 +220,7 @@ const BuyServiceOrder = () => {
                                         <h3 className="text-lg font-semibold">Thông tin người mua:</h3>
                                         {userInfo && (
                                             <div className="space-y-1">
+                                                <p className='' >Mã khách hàng: {userInfo.parentId}</p>
                                                 <p>Họ tên: {userInfo.account.firstName} {userInfo.account.lastName}</p>
                                                 <p>Email: {userInfo.account.email}</p>
                                                 <p>Điện thoại: {userInfo.account.phoneNumber}</p>
@@ -226,26 +268,62 @@ const BuyServiceOrder = () => {
                                     </table>
                                 </div>
 
-                                <div className="mt-4">
-                                    <label className="block font-medium mb-2">
-                                        Hình thức thanh toán:
-                                    </label>
-                                    <select
-                                        value={paymentMethod}
-                                        onChange={(e) => setPaymentMethod(e.target.value)}
-                                        className="w-full p-2 border rounded"
-                                    >
-                                        <option value="banking">Chuyển khoản ngân hàng</option>
-                                        <option value="momo">Ví điện tử Momo</option>
-                                        <option value="cash">Tiền mặt</option>
-                                    </select>
+                                <div className="mt-6">
+                                    <h3 className="text-lg font-semibold mb-4">Hình thức thanh toán</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Option Banking */}
+                                        <div
+                                            className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                                                paymentMethod === 'banking'
+                                                    ? 'border-blue-500 bg-blue-50'
+                                                    : 'border-gray-200 hover:border-blue-300'
+                                            }`}
+                                            onClick={() => setPaymentMethod('banking')}
+                                        >
+                                            <div className="flex items-center space-x-3">
+                                                <input
+                                                    type="radio"
+                                                    checked={paymentMethod === 'banking'}
+                                                    onChange={() => setPaymentMethod('banking')}
+                                                    className="w-4 h-4 text-blue-600"
+                                                />
+                                                <div>
+                                                    <p className="font-medium text-gray-900">Chuyển khoản ngân hàng</p>
+                                                    <p className="text-sm text-gray-500">Thanh toán qua tài khoản ngân hàng</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Option Cash */}
+                                        <div
+                                            className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                                                paymentMethod === 'cash'
+                                                    ? 'border-blue-500 bg-blue-50'
+                                                    : 'border-gray-200 hover:border-blue-300'
+                                            }`}
+                                            onClick={() => setPaymentMethod('cash')}
+                                        >
+                                            <div className="flex items-center space-x-3">
+                                                <input
+                                                    type="radio"
+                                                    checked={paymentMethod === 'cash'}
+                                                    onChange={() => setPaymentMethod('cash')}
+                                                    className="w-4 h-4 text-blue-600"
+                                                />
+                                                <div>
+                                                    <p className="font-medium text-gray-900">Tiền mặt</p>
+                                                    <p className="text-sm text-gray-500">Thanh toán trực tiếp bằng tiền mặt</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <button 
                                     onClick={handleServiceRegistration}
                                     className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg transition-colors"
                                 >
-                                    Thanh toán và Đăng ký
+                                    {paymentMethod === 'cash' ? 'Đăng ký dịch vụ' : 'Thanh toán và Đăng ký'}
                                 </button>
                             </div>
                         )}

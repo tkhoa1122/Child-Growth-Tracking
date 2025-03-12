@@ -43,6 +43,8 @@ import BuyServiceOrder from './components/protection_page/BuyServiceOrder';
 import HistoryBuyingOrderByParentId from './components/protection_page/HistoryBuyingOrderByParentId';
 import DetailChildByChildId from './components/protection_page/DetailChildByChildId';
 import AppointmentWithDoctor from './components/protection_page/AppointmentWithDoctor';
+import PaymentSuccess from './components/protection_page/PaymentSuccess';
+import PaymentFail from './components/protection_page/PaymentFail';
 // import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
 
 function App() {
@@ -290,6 +292,23 @@ function App() {
                   element={
                     <ProtectedRouteByRole allowedRoles={['User']}>
                       <AppointmentWithDoctor />
+                    </ProtectedRouteByRole>
+                  }
+                />
+
+                <Route
+                  path="/payment-success"
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['User']}>
+                      <PaymentSuccess />
+                    </ProtectedRouteByRole>
+                  }
+                />
+                <Route
+                  path="/payment-fail"
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['User']}>
+                      <PaymentFail />
                     </ProtectedRouteByRole>
                   }
                 />
