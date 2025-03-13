@@ -35,19 +35,19 @@ export const Navbar = () => {
                 <div className="hidden md:flex items-center justify-center h-16">
                     <div className="flex items-center space-x-12">
                         <Link to="/" className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors`}>
-                            Home
+                            Trang chủ
                         </Link>
                         <Link to="/about" className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors`}>
-                            About
+                            Giới thiệu
                         </Link>
                         <Link to="/products" className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors`}>
-                            Products
+                            Sản phẩm
                         </Link>
                         <Link to="/projects" className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors`}>
-                            Projects
+                            Dự án
                         </Link>
                         <Link to="/contact" className={`text-lg ${isScrolled ? 'text-black' : 'text-white'} hover:text-blue-500 transition-colors`}>
-                            Contact
+                            Liên hệ
                         </Link>
                       
                     </div>

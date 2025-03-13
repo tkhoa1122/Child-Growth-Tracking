@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import 'moment/locale/vi';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Header } from '../Header';
@@ -9,8 +9,11 @@ import api from '../Utils/Axios';
 import { toast, Toaster } from 'react-hot-toast';
 import { FaCalendarAlt, FaClock, FaUser, FaUserMd } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 moment.locale('vi');
+moment.tz.setDefault('Asia/Ho_Chi_Minh');
 const localizer = momentLocalizer(moment);
 
 const AppointmentWithDoctor = () => {
@@ -35,6 +38,9 @@ const AppointmentWithDoctor = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [appointmentHistory, setAppointmentHistory] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
+    const [loadingDoctors, setLoadingDoctors] = useState(true);
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
 
     // Fetch thông tin parent và children
     useEffect(() => {
@@ -61,16 +67,6 @@ const AppointmentWithDoctor = () => {
                 const childrenResponse = await api.get(`/Parent/parents/${parentData.parentId}/children`);
                 setChildren(childrenResponse.data);
 
-                // Thêm bác sĩ mặc định vào danh sách
-                const defaultDoctor = {
-                    id: "3623994b-d713-4dd4-9580-955d49b1c443",
-                    firstName: "Doc",
-                    lastName: "tor",
-                    name: "Doc tor"
-                };
-                
-                setDoctors([defaultDoctor]);
-
                 setLoading(false);
             } catch (error) {
                 console.error('Lỗi khi lấy dữ liệu:', error);
@@ -86,25 +82,39 @@ const AppointmentWithDoctor = () => {
 
     // Thêm useEffect mới để fetch lịch sử đặt lịch
     useEffect(() => {
-        const fetchAppointmentHistory = async () => {
-            if (!parentInfo.parentId) return;
-            
-            setLoadingHistory(true);
+        const fetchHistory = async () => {
             try {
-                const response = await api.get(`/Appointment/parent/${parentInfo.parentId}`);
+                setLoadingHistory(true);
+                const response = await api.get(`/Appointment/appoiment-byid/${parentInfo.parentId}`);
                 setAppointmentHistory(response.data);
             } catch (error) {
                 toast.error('Không thể tải lịch sử đặt lịch');
-                console.error('Error fetching appointment history:', error);
             } finally {
                 setLoadingHistory(false);
             }
         };
 
         if (parentInfo.parentId) {
-            fetchAppointmentHistory();
+            fetchHistory();
         }
     }, [parentInfo.parentId]);
+
+    // Thêm useEffect mới để fetch danh sách bác sĩ
+    useEffect(() => {
+        const fetchDoctors = async () => {
+            try {
+                const response = await api.get('/Doctor/get-all');
+                setDoctors(response.data);
+            } catch (error) {
+                console.error('Lỗi khi tải danh sách bác sĩ:', error);
+                toast.error('Không thể tải danh sách bác sĩ');
+            } finally {
+                setLoadingDoctors(false);
+            }
+        };
+
+        fetchDoctors();
+    }, []);
 
     // Kiểm tra thời gian có hợp lệ không
     const isTimeSlotValid = (time) => {
@@ -309,44 +319,152 @@ const AppointmentWithDoctor = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedDate || !appointmentForm.appointmentTime) {
-            toast.error('Vui lòng chọn ngày và giờ hẹn');
+        if (!appointmentForm.doctorId || !appointmentForm.childId || !selectedDate || !appointmentForm.appointmentTime) {
+            toast.error('Vui lòng điền đầy đủ thông tin');
             return;
         }
 
         try {
-            const appointmentDateTime = moment(selectedDate)
+            // Xử lý scheduledTime
+            const scheduledTime = moment(selectedDate)
                 .set({
                     hour: parseInt(appointmentForm.appointmentTime.split(':')[0]),
                     minute: parseInt(appointmentForm.appointmentTime.split(':')[1]),
                     second: 0
                 })
+                .tz('Asia/Ho_Chi_Minh')
+                .utc()
                 .toISOString();
 
-            const requestData = {
+            // Tạo createdAt
+            const createdAt = moment().utc().toISOString();
+
+            const requestBody = {
                 doctorId: appointmentForm.doctorId,
                 parentId: parentInfo.parentId,
                 childId: appointmentForm.childId,
-                appointmentDate: appointmentDateTime,
-                status: "Pending"
+                status: "Pending",
+                scheduledTime: scheduledTime, // Đổi tên trường theo API
+                createdAt: createdAt
             };
 
-            const response = await api.post('/Appointment', requestData);
+            // Đổi endpoint API
+            const response = await api.post('/Parent/appointments/create', requestBody);
 
             if (response.status === 200) {
-                toast.success('Đặt lịch hẹn thành công!');
+                toast.success('Đặt lịch thành công!');
                 // Reset form
                 setSelectedDate(null);
-                setAppointmentForm({
-                    fullName: parentInfo.firstName + ' ' + parentInfo.lastName,
+                setAppointmentForm(prev => ({
+                    ...prev,
                     doctorId: '',
                     childId: '',
-                    appointmentTime: '',
-                    description: ''
-                });
+                    appointmentTime: ''
+                }));
+                
+                // Tải lại lịch sử NGAY LẬP TỨC
+                try {
+                    const historyResponse = await api.get(`/Appointment/appoiment-byid/${parentInfo.parentId}`);
+                    setAppointmentHistory(historyResponse.data);
+                } catch (historyError) {
+                    console.error('Lỗi khi tải lại lịch sử:', historyError);
+                    toast.error('Không thể cập nhật lịch sử');
+                }
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Đặt lịch thất bại. Vui lòng thử lại sau.');
+            const errorMessage = error.response?.data?.title 
+                || error.response?.data?.errors?.join(', ') 
+                || 'Đặt lịch thất bại';
+            toast.error(errorMessage);
+            console.error('Chi tiết lỗi:', error.response?.data);
+        }
+    };
+
+    const handleAppointmentClick = async (appointmentId) => {
+        try {
+            const response = await api.get(`/Appointment/${appointmentId}`);
+            const appointment = response.data;
+            
+            // Chuyển đổi thời gian từ UTC sang múi giờ Việt Nam
+            const utcMoment = moment.utc(appointment.appointmentDate);
+            const localTime = utcMoment.tz('Asia/Ho_Chi_Minh');
+
+            setSelectedAppointmentId(appointmentId);
+            setSelectedDate(localTime.toDate());
+            setAppointmentForm({
+                fullName: `${parentInfo.firstName} ${parentInfo.lastName}`,
+                doctorId: appointment.doctorId,
+                childId: appointment.childId,
+                appointmentTime: localTime.format('HH:mm') // Hiển thị giờ theo múi giờ Việt Nam
+            });
+            
+            // Cuộn lên phần form để người dùng dễ dàng chỉnh sửa
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+            toast.error('Không thể tải thông tin đặt lịch');
+            console.error('Chi tiết lỗi:', error.response?.data);
+        }
+    };
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        if (!selectedAppointmentId || !appointmentForm.doctorId || !appointmentForm.childId || !selectedDate || !appointmentForm.appointmentTime) {
+            toast.error('Vui lòng điền đầy đủ thông tin');
+            return;
+        }
+
+        try {
+            // Chuyển đổi thời gian từ giờ địa phương sang UTC trước khi gửi API
+            const localDateTime = moment(selectedDate)
+                .set({
+                    hour: parseInt(appointmentForm.appointmentTime.split(':')[0]),
+                    minute: parseInt(appointmentForm.appointmentTime.split(':')[1]),
+                    second: 0
+                })
+                .tz('Asia/Ho_Chi_Minh');
+
+            const utcDateTime = localDateTime.utc().toISOString();
+
+            const response = await api.put(`/Appointment/${selectedAppointmentId}`, {
+                scheduledTime: utcDateTime,
+                status: 0
+            });
+
+            if (response.status === 200) {
+                toast.success('Cập nhật thành công!');
+                // Reset form và tải lại lịch sử
+                setSelectedAppointmentId(null);
+                setSelectedDate(null);
+                setAppointmentForm({
+                    fullName: '',
+                    doctorId: '',
+                    childId: '',
+                    appointmentTime: ''
+                });
+                // Tải lại lịch sử đặt lịch
+                const historyResponse = await api.get(`/Appointment/appoiment-byid/${parentInfo.parentId}`);
+                setAppointmentHistory(historyResponse.data);
+            }
+        } catch (error) {
+            toast.error('Cập nhật thất bại: ' + (error.response?.data?.title || 'Lỗi hệ thống'));
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!selectedAppointmentId) return;
+
+        try {
+            const response = await api.delete(`/Appointment/${selectedAppointmentId}`);
+            if (response.status === 200) {
+                toast.success('Đã xóa cuộc hẹn!');
+                // Reset và tải lại dữ liệu
+                setSelectedAppointmentId(null);
+                setSelectedDate(null);
+                const historyResponse = await api.get(`/Appointment/appoiment-byid/${parentInfo.parentId}`);
+                setAppointmentHistory(historyResponse.data);
+            }
+        } catch (error) {
+            toast.error('Xóa thất bại: ' + (error.response?.data?.title || 'Lỗi hệ thống'));
         }
     };
 
@@ -417,28 +535,26 @@ const AppointmentWithDoctor = () => {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Chọn giờ hẹn
                                         </label>
-                                        <div className="grid grid-cols-4 gap-2">
-                                            {timeSlots.map((time) => (
-                                                <button
-                                                    key={time}
-                                                    type="button"
+                                        <select
+                                            value={appointmentForm.appointmentTime}
+                                            onChange={(e) => setAppointmentForm(prev => ({
+                                                ...prev,
+                                                appointmentTime: e.target.value
+                                            }))}
+                                            className="w-full p-2 border rounded text-gray-700"
+                                            required
+                                        >
+                                            <option value="">Chọn giờ</option>
+                                            {timeSlots.map(time => (
+                                                <option 
+                                                    key={time} 
+                                                    value={time}
                                                     disabled={!isTimeSlotValid(time)}
-                                                    className={`p-2 rounded-md text-center ${
-                                                        appointmentForm.appointmentTime === time
-                                                            ? 'bg-blue-500 text-white'
-                                                            : !isTimeSlotValid(time)
-                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                                                    }`}
-                                                    onClick={() => setAppointmentForm(prev => ({
-                                                        ...prev,
-                                                        appointmentTime: time
-                                                    }))}
                                                 >
                                                     {time}
-                                                </button>
+                                                </option>
                                             ))}
-                                        </div>
+                                        </select>
                                     </div>
 
                                     {/* Họ và tên (disabled) */}
@@ -479,28 +595,26 @@ const AppointmentWithDoctor = () => {
 
                                     {/* Chọn bác sĩ */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Chọn bác sĩ muốn đặt lịch
+                                        <label className="block text-sm font-medium mb-1 text-gray-700">
+                                            <FaUserMd className="inline mr-2" />
+                                            Bác sĩ
                                         </label>
                                         <select
-                                            required
-                                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                                             value={appointmentForm.doctorId}
-                                            onChange={(e) => setAppointmentForm(prev => ({
-                                                ...prev,
-                                                doctorId: e.target.value
-                                            }))}
+                                            onChange={(e) => setAppointmentForm({...appointmentForm, doctorId: e.target.value})}
+                                            className="w-full p-2 border rounded  text-gray-700"
+                                            required
                                         >
                                             <option value="">Chọn bác sĩ</option>
-                                            {doctors.map((doctor) => (
-                                                <option key={doctor.id} value={doctor.id}>
-                                                    {doctor.name}
+                                            {doctors.map(doctor => (
+                                                <option key={doctor.doctorId} value={doctor.doctorId}>
+                                                    {`${doctor.firstName} ${doctor.lastName}`}
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
 
-                                    {/* Nội dung */}
+                                    {/* Trạng thái */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Trạng thái
@@ -512,19 +626,40 @@ const AppointmentWithDoctor = () => {
 
                                     {/* Buttons */}
                                     <div className="flex justify-end space-x-3 pt-4">
-                                        <button
-                                            type="button"
-                                            className="px-6 py-2.5 bg-red-500 text-white-700 rounded-md hover:bg-red-800 transition duration-200"
-                                            onClick={() => setSelectedDate(null)}
-                                        >
-                                            Hủy
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="px-6 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
-                                        >
-                                            Xác nhận đặt lịch
-                                        </button>
+                                        {selectedAppointmentId ? (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    className="px-6 py-2.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200"
+                                                    onClick={handleDelete}
+                                                >
+                                                    Xóa cuộc hẹn
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+                                                    onClick={handleUpdate}
+                                                >
+                                                    Lưu thay đổi
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    className="px-6 py-2.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200"
+                                                    onClick={() => setSelectedDate(null)}
+                                                >
+                                                    Hủy
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    className="px-6 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
+                                                >
+                                                    Xác nhận đặt lịch
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 </form>
                             </div>
@@ -554,33 +689,37 @@ const AppointmentWithDoctor = () => {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            ID cuộc hẹn
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Tên trẻ được đặt lịch
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Ngày hẹn
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Trạng thái
-                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bác sĩ</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phụ huynh</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trẻ</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày hẹn</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {appointmentHistory.map((appointment) => (
-                                        <tr key={appointment.appointmentId}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {appointment.appointmentId}
+                                        <tr 
+                                            key={appointment.appointmentId}
+                                            onClick={() => handleAppointmentClick(appointment.appointmentId)}
+                                            className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                        >
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{appointment.appointmentId}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {appointment.doctorName || `${appointment.doctorId}`}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {appointment.parentName || `${appointment.parentId}`}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {appointment.childName}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {appointment.appointmentDate !== "0001-01-01T00:00:00" 
-                                                    ? moment(appointment.appointmentDate).format('DD/MM/YYYY HH:mm')
-                                                    : 'Chưa có ngày hẹn'}
+                                                {appointment.appointmentDate?.startsWith('0001-01-01') 
+                                                    ? 'Chưa có ngày hẹn'
+                                                    : moment.utc(appointment.appointmentDate) // Parse từ UTC
+                                                        .tz('Asia/Ho_Chi_Minh') // Chuyển đổi sang múi giờ Việt Nam
+                                                        .format('DD/MM/YYYY HH:mm')}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 

@@ -3,9 +3,14 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../Utils/Axios';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 import moment from 'moment';
 import { DatePicker } from 'antd';
+
+// Thêm hàm helper để format ngày
+const formatDate = (date) => {
+    return moment(date).format('DD-MM-YYYY');
+};
 
 const Profile = () => {
     const { accountId } = useParams();
@@ -32,6 +37,8 @@ const Profile = () => {
         dob: moment()
     });
     const [editingChild, setEditingChild] = useState(false);
+    const [checkingRights, setCheckingRights] = useState(false);
+    const [hasServiceRights, setHasServiceRights] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -64,12 +71,37 @@ const Profile = () => {
         fetchData();
     }, [accountId]);
 
-    // Thêm hàm kiểm tra tuổi
+    // Thêm useEffect để kiểm tra quyền
+    useEffect(() => {
+        const fetchServiceRights = async () => {
+            if (profileData?.parentId) {
+                try {
+                    setCheckingRights(true);
+                    const response = await api.get(`/serviceorder/CheckServiceRights/${profileData.parentId}`);
+                    setHasServiceRights(response.data.isValid);
+                } catch (error) {
+                    console.error('Lỗi kiểm tra quyền dịch vụ:', error);
+                    toast.error('Không thể kiểm tra quyền đặt lịch');
+                } finally {
+                    setCheckingRights(false);
+                }
+            }
+        };
+        
+        fetchServiceRights();
+    }, [profileData?.parentId]);
+
+    // Sửa lại hàm kiểm tra ngày sinh
     const disabledDate = (current) => {
-        const today = moment();
-        const minAgeDate = today.clone().subtract(18, 'years');
-        const maxAgeDate = today.clone().subtract(1, 'year');
-        return current > today || current < minAgeDate || current > maxAgeDate;
+        if (!current) return false;
+        
+        const currentYear = new Date().getFullYear();
+        const minYear = currentYear - 18; // 18 tuổi
+        const maxYear = currentYear - 1;  // 1 tuổi
+        const selectedYear = current.year();
+
+        // Kiểm tra năm nằm trong khoảng cho phép
+        return selectedYear < minYear || selectedYear > maxYear;
     };
 
     // Hàm xử lý tạo trẻ mới
@@ -82,15 +114,36 @@ const Profile = () => {
                 dob: newChild.dob.format('YYYY-MM-DD')
             });
 
-            if (response.status === 201) {
-                toast.success('Tạo hồ sơ trẻ thành công!');
-                // Làm mới danh sách
+            if (response.status === 200) {
+                toast.success('Tạo hồ sơ trẻ thành công!', {
+                    duration: 3000, // Hiển thị trong 3 giây
+                    position: 'top-right' // Vị trí hiển thị
+                });
+                // Làm mới danh sách trẻ
                 const childrenResponse = await api.get(`/Parent/parents/${profileData.parentId}/children`);
                 setChildren(childrenResponse.data);
+                // Đóng form nhập
                 setShowCreateChildForm(false);
+                // Reset form
+                setNewChild({
+                    firstName: '',
+                    lastName: '',
+                    gender: 'Female',
+                    dob: moment(),
+                    imageUrl: 'string'
+                });
+            } else {
+                toast.error('Tạo hồ sơ thất bại', {
+                    duration: 3000,
+                    position: 'top-right'
+                });
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Tạo hồ sơ thất bại');
+            toast.error(error.response?.data?.message || 'Tạo hồ sơ thất bại', {
+                duration: 3000,
+                position: 'top-right'
+            });
+            console.error('Lỗi khi tạo hồ sơ trẻ:', error);
         } finally {
             setCreatingChild(false);
         }
@@ -152,6 +205,7 @@ const Profile = () => {
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: '#F8F3D9' }}>
+            <Toaster position="top-right" />
             <div className="container mx-auto p-4 text-black">
                 <Header />
                 <h1 className="text-2xl font-bold mb-4 text-black">Thông tin hồ sơ</h1>
@@ -197,19 +251,19 @@ const Profile = () => {
                         </p>
                         <div className="pt-4">
                             <div className="flex justify-between items-center mb-2">
-                                <p className="font-medium text-gray-900">Service Orders:</p>
+                                <p className="font-medium text-gray-900">Đơn hàng:</p>
                                 <div className="space-x-2">
                                     <Link 
                                         to="/buy-service" 
                                         className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
                                     >
-                                        Buy Order
+                                        Mua dịch vụ
                                     </Link>
                                     <Link 
                                         to={`/history-orders/${profileData.parentId}`} 
                                         className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
                                     >
-                                        History Order
+                                        Lịch sử đơn hàng
                                     </Link>
                                 </div>
                             </div>
@@ -218,16 +272,17 @@ const Profile = () => {
                                 <div className="flex justify-center py-4">
                                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                                 </div>
-                            ) : serviceOrder ? (
+                            ) : serviceOrder && serviceOrder.status === 'Completed' ? (
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full bg-white rounded-lg overflow-hidden">
                                         <thead className="bg-gray-50">
                                             <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service ID</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Price</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buy Date</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Date</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đơn hàng</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dịch vụ</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giá</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày mua</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày kết thúc</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
@@ -254,6 +309,9 @@ const Profile = () => {
                                                         year: 'numeric'
                                                     }).split('/').join('-')}
                                                 </td>
+                                                <td className="px-6 py-4 text-sm text-gray-900">
+                                                    {serviceOrder.status === 'Completed' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -278,7 +336,15 @@ const Profile = () => {
                             </button>
                             <Link
                                 to={`/appointment/${accountId}`}
-                                className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
+                                className={`bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm ${
+                                    checkingRights || !hasServiceRights ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                                title={!hasServiceRights ? "Bạn cần mua gói dịch vụ để đặt lịch" : ""}
+                                onClick={(e) => {
+                                    if (checkingRights || !hasServiceRights) {
+                                        e.preventDefault();
+                                    }
+                                }}
                             >
                                 Đặt Lịch
                             </Link>
@@ -292,8 +358,8 @@ const Profile = () => {
                     </div>
 
                     {showCreateChildForm && (
-                        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                            <h3 className="text-lg font-medium mb-4">Thông tin trẻ mới</h3>
+                        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                            <h3 className="text-xl font-bold mb-4">Tạo hồ sơ trẻ mới</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Họ</label>
@@ -327,7 +393,7 @@ const Profile = () => {
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Ngày sinh</label>
                                     <DatePicker
-                                        format="DD/MM/YYYY"
+                                        format="DD-MM-YYYY"
                                         value={newChild.dob}
                                         onChange={(date) => setNewChild({...newChild, dob: date})}
                                         className="w-full"
@@ -401,7 +467,7 @@ const Profile = () => {
                                         <p className="text-sm">
                                             <span className="font-medium">Ngày sinh:</span> 
                                             <span className="text-gray-600 ml-1">
-                                                {new Date(child.dob).toLocaleDateString()}
+                                                {formatDate(child.dob)}
                                             </span>
                                         </p>
                                     </div>
@@ -448,7 +514,7 @@ const Profile = () => {
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Ngày sinh</label>
                                     <DatePicker
-                                        format="DD/MM/YYYY"
+                                        format="DD-MM-YYYY"
                                         value={editChildData.dob}
                                         onChange={(date) => setEditChildData({...editChildData, dob: date})}
                                         className="w-full"

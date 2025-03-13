@@ -8,6 +8,7 @@ import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useAuth } from '../Utils/AuthContext';
+import { toast } from 'react-toastify';
 
 const CustomArrow = ({ direction, onClick }) => (
     <button
@@ -67,19 +68,59 @@ const BuyServiceOrder = () => {
         }
 
         try {
-            const orderData = {
-                parentId: userInfo.parentId,
-                serviceId: selectedService.serviceId,
-                quantity: 1,
-                totalPrice: selectedService.servicePrice
-            };
+            if (paymentMethod === 'cash') {
+                const orderData = {
+                    parentId: userInfo.parentId,
+                    serviceId: selectedService.serviceId,
+                    quantity: 1
+                };
 
-            await api.post('/serviceorder/create', orderData);
-            alert('Đăng ký dịch vụ thành công!');
-            setSelectedService(null);
+                const response = await api.post('/serviceorder/CreateServiceOrder', orderData);
+                
+                if (response.status === 200) {
+                    toast.success('Đăng ký dịch vụ thành công!', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                    setSelectedService(null);
+                } else {
+                    toast.error('Đăng ký dịch vụ thất bại!', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                }
+            } else if (paymentMethod === 'banking') {
+                const paymentData = {
+                    parentId: userInfo.parentId,
+                    description: selectedService.serviceName,
+                    returnUrl: "http://localhost:5175/payment-success",
+                    cancelUrl: "http://localhost:5175/payment-fail",
+                    services: [
+                        {
+                            serviceId: selectedService.serviceId,
+                            quantity: 1,
+                            totalPrice: 0
+                        }
+                    ]
+                };
+
+                const response = await api.post('/payments/create', paymentData);
+                
+                if (response.data && response.data.paymentUrl) {
+                    window.location.href = response.data.paymentUrl;
+                } else {
+                    toast.error('Không thể tạo liên kết thanh toán!', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                }
+            }
         } catch (error) {
-            console.error('Lỗi đăng ký dịch vụ:', error);
-            alert('Đăng ký dịch vụ thất bại!');
+            console.error('Lỗi xử lý thanh toán:', error);
+            toast.error(error.response?.data?.message || 'Xử lý thanh toán thất bại!', {
+                position: "top-right",
+                autoClose: 3000,
+            });
         }
     };
 
@@ -123,50 +164,52 @@ const BuyServiceOrder = () => {
                     <>
                         <div className="relative px-8">
                             <Slider {...sliderSettings}>
-                                {services.map((service) => (
-                                    <div key={service.serviceId} className="px-2">
-                                        <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                                            <div className="relative h-48">
-                                                <img
-                                                    src="/Images/information.png"
-                                                    alt={service.serviceName}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                                <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
-                                                    {service.serviceDuration} ngày
+                                {services
+                                    .filter(service => service.isActive)
+                                    .map((service) => (
+                                        <div key={service.serviceId} className="px-2">
+                                            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                                <div className="relative h-48">
+                                                    <img
+                                                        src="/Images/information.png"
+                                                        alt={service.serviceName}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                                    <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+                                                        {service.serviceDuration} ngày
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="p-6">
-                                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                                    {service.serviceName}
-                                                </h3>
-                                                <div className="flex items-center text-gray-600 mb-4">
-                                                    <FaCalendarAlt className="mr-2" />
-                                                    <span>
-                                                        Ngày tạo: {new Date(service.serviceCreateDate).toLocaleDateString('vi-VN')}
-                                                    </span>
+                                                <div className="p-6">
+                                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                                        {service.serviceName}
+                                                    </h3>
+                                                    <div className="flex items-center text-gray-600 mb-4">
+                                                        <FaCalendarAlt className="mr-2" />
+                                                        <span>
+                                                            Ngày tạo: {new Date(service.serviceCreateDate).toLocaleDateString('vi-VN')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-2xl font-bold text-blue-500 mb-4">
+                                                        {new Intl.NumberFormat('vi-VN', { 
+                                                            style: 'currency', 
+                                                            currency: 'VND' 
+                                                        }).format(service.servicePrice)}
+                                                    </div>
+                                                    <p className="text-gray-600 mb-6 line-clamp-2">
+                                                        {service.serviceDescription}
+                                                    </p>
+                                                    <button 
+                                                        onClick={() => setSelectedService(service)}
+                                                        className="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg transition-colors"
+                                                    >
+                                                        Đăng ký ngay
+                                                    </button>
                                                 </div>
-                                                <div className="text-2xl font-bold text-blue-500 mb-4">
-                                                    {new Intl.NumberFormat('vi-VN', { 
-                                                        style: 'currency', 
-                                                        currency: 'VND' 
-                                                    }).format(service.servicePrice)}
-                                                </div>
-                                                <p className="text-gray-600 mb-6 line-clamp-2">
-                                                    {service.serviceDescription}
-                                                </p>
-                                                <button 
-                                                    onClick={() => setSelectedService(service)}
-                                                    className="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg transition-colors"
-                                                >
-                                                    Đăng ký ngay
-                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
                             </Slider>
                         </div>
                         
@@ -179,6 +222,7 @@ const BuyServiceOrder = () => {
                                         <h3 className="text-lg font-semibold">Thông tin người mua:</h3>
                                         {userInfo && (
                                             <div className="space-y-1">
+                                                <p className='' >Mã khách hàng: {userInfo.parentId}</p>
                                                 <p>Họ tên: {userInfo.account.firstName} {userInfo.account.lastName}</p>
                                                 <p>Email: {userInfo.account.email}</p>
                                                 <p>Điện thoại: {userInfo.account.phoneNumber}</p>
@@ -224,21 +268,6 @@ const BuyServiceOrder = () => {
                                             </tr>
                                         </tbody>
                                     </table>
-                                </div>
-
-                                <div className="mt-4">
-                                    <label className="block font-medium mb-2">
-                                        Hình thức thanh toán:
-                                    </label>
-                                    <select
-                                        value={paymentMethod}
-                                        onChange={(e) => setPaymentMethod(e.target.value)}
-                                        className="w-full p-2 border rounded"
-                                    >
-                                        <option value="banking">Chuyển khoản ngân hàng</option>
-                                        <option value="momo">Ví điện tử Momo</option>
-                                        <option value="cash">Tiền mặt</option>
-                                    </select>
                                 </div>
 
                                 <button 
