@@ -65,6 +65,7 @@ const AppointmentManagement = () => {
             // Gọi API lấy danh sách cuộc hẹn của bác sĩ
             const response = await axios.get(`Appointment/doctor/${currentDoctorId}`);
             setAppointments(response.data);
+            console.log(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách cuộc hẹn:', error);
             setNotification({
@@ -145,6 +146,17 @@ const AppointmentManagement = () => {
         CANCELLED: 'Cancelled'
     };
 
+    // Thêm hàm chuyển đổi từ text sang số
+    const getStatusNumber = (statusText) => {
+        switch (statusText) {
+            case 'Pending': return 0;
+            case 'Confirmed': return 1;
+            case 'Cancelled': return 2;
+            default: return 0;
+        }
+    };
+
+    // Cập nhật hàm handleUpdate
     const handleUpdate = async () => {
         try {
             if (!updateForm.appointmentDate || !updateForm.status) {
@@ -167,17 +179,25 @@ const AppointmentManagement = () => {
                 selectedDate.getSeconds()
             ));
 
+            // Chuyển đổi trạng thái từ text sang số
+            const statusNumber = getStatusNumber(updateForm.status);
+
             // Đóng gói dữ liệu với format mới
             const updateData = {
-                appointmentDate: utcDate.toISOString(),
-                status: updateForm.status
+                scheduledTime: utcDate.toISOString(),
+                status: statusNumber
             };
 
             console.log('Update data:', updateData);
 
-            const response = await axios.put(
+            await axios.put(
                 `Appointment/${editingAppointment.appointmentId}`, 
-                updateData
+                updateData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
             );
 
             await fetchAppointments();
@@ -191,7 +211,7 @@ const AppointmentManagement = () => {
             console.error('Error details:', error.response?.data);
             setNotification({
                 show: true,
-                message: error.response?.data?.title || 'Đã xảy ra lỗi khi cập nhật cuộc hẹn.',
+                message: error.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật cuộc hẹn.',
                 type: 'error'
             });
         }
@@ -464,16 +484,16 @@ const AppointmentManagement = () => {
                                     Trạng thái
                                 </label>
                                 <select
-                                    value={updateForm.status}
+                                    value={updateForm.status.toString()}
                                     onChange={(e) => setUpdateForm(prev => ({
                                         ...prev,
-                                        status: e.target.value
+                                        status: parseInt(e.target.value, 10)
                                     }))}
                                     className="w-full text-gray-500 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
-                                    <option value={AppointmentStatus.PENDING}>Pending</option>
-                                    <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
-                                    <option value={AppointmentStatus.CANCELLED}>Cancelled</option>
+                                    <option value="0">Đang chờ</option>
+                                    <option value="1">Đã xác nhận</option>
+                                    <option value="2">Đã hủy</option>
                                 </select>
                             </div>
 

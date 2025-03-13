@@ -36,6 +36,9 @@ export const ProductManagement = () => {
         maxAge: ''
     });
 
+    // Thêm state để quản lý lỗi validation
+    const [errors, setErrors] = useState({});
+
     useEffect(() => {
         fetchProducts();
     }, []);
@@ -56,7 +59,52 @@ export const ProductManagement = () => {
         setNewProduct((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Hàm validate chung
+    const validateProduct = (product) => {
+        const newErrors = {};
+
+        if (!product.productName || product.productName.trim() === '') {
+            newErrors.productName = 'Vui lòng nhập tên sản phẩm';
+        }
+
+        if (!product.productDescription || product.productDescription.trim() === '') {
+            newErrors.productDescription = 'Vui lòng nhập mô tả sản phẩm';
+        }
+
+        if (!product.price || isNaN(product.price) || product.price <= 0) {
+            newErrors.price = 'Giá sản phẩm phải là số dương';
+        }
+
+        if (!product.minAge || isNaN(product.minAge) || product.minAge < 0) {
+            newErrors.minAge = 'Độ tuổi tối thiểu không hợp lệ';
+        }
+
+        if (!product.maxAge || isNaN(product.maxAge) || product.maxAge < 0) {
+            newErrors.maxAge = 'Độ tuổi tối đa không hợp lệ';
+        }
+
+        if (product.minAge && product.maxAge && Number(product.minAge) >= Number(product.maxAge)) {
+            newErrors.maxAge = 'Độ tuổi tối đa phải lớn hơn độ tuổi tối thiểu';
+        }
+
+        if (!product.productType) {
+            newErrors.productType = 'Vui lòng chọn loại sản phẩm';
+        }
+
+        if (!product.brand || product.brand.trim() === '') {
+            newErrors.brand = 'Vui lòng nhập thương hiệu';
+        }
+
+        return newErrors;
+    };
+
     const handleAddProduct = async () => {
+        const validationErrors = validateProduct(newProduct);
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+
         try {
             await axios.post('Product/create', newProduct);
             setNotification({
@@ -65,7 +113,8 @@ export const ProductManagement = () => {
                 type: 'success'
             });
             setIsModalOpen(false);
-            fetchProducts(); // Cập nhật danh sách sản phẩm
+            setErrors({});
+            fetchProducts();
         } catch (error) {
             console.error('Error adding product:', error);
             setNotification({
@@ -87,9 +136,15 @@ export const ProductManagement = () => {
         setSelectedProduct((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Cập nhật hàm handleUpdateProduct
     const handleUpdateProduct = async () => {
+        const validationErrors = validateProduct(selectedProduct);
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+
         try {
-            console.log(selectedProduct);
             await axios.put(`Product/update`, selectedProduct);
             setNotification({
                 show: true,
@@ -97,6 +152,7 @@ export const ProductManagement = () => {
                 type: 'success'
             });
             setIsEditModalOpen(false);
+            setErrors({});
             fetchProducts();
         } catch (error) {
             console.error('Error updating product:', error);
@@ -228,9 +284,14 @@ export const ProductManagement = () => {
                                 className="w-full p-2 border border-gray-300 rounded-lg text-black"
                             >
                                 <option value="">Tất cả</option>
-                                <option value="Underweight">Underweight</option>
-                                <option value="Balanced">Balanced</option>
-                                <option value="Overweight">Overweight</option>
+                                <option value="Gầy độ III (Rất gầy) - Nguy cơ cao">Gầy độ III (Rất gầy) - Nguy cơ cao</option>
+                                <option value="Gầy độ II - Nguy cơ vừa">Gầy độ II - Nguy cơ vừa</option>
+                                <option value="Gầy độ I - Nguy cơ thấp">Gầy độ I - Nguy cơ thấp</option>
+                                <option value="Cân nặng bình thường - Bình thường">Cân nặng bình thường - Bình thường</option>
+                                <option value="Thừa cân - Nguy cơ tăng nhẹ">Thừa cân - Nguy cơ tăng nhẹ</option>
+                                <option value="Béo phì độ I - Nguy cơ trung bình">Béo phì độ I - Nguy cơ trung bình</option>
+                                <option value="Béo phì độ II - Nguy cơ cao">Béo phì độ II - Nguy cơ cao</option>
+                                <option value="Béo phì độ III - Nguy cơ rất cao">Béo phì độ III - Nguy cơ rất cao</option>
                             </select>
                         </div>
                         <div>
@@ -333,8 +394,9 @@ export const ProductManagement = () => {
                                 placeholder="Tên sản phẩm"
                                 value={newProduct.productName}
                                 onChange={handleInputChange}
-                                className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full"
+                                className={`border text-gray-700 border-gray-300 rounded-lg p-3 w-full ${errors.productName ? 'border-red-500' : ''}`}
                             />
+                            {errors.productName && <p className="text-red-500 text-sm mt-1">{errors.productName}</p>}
                             <textarea
                                 name="productDescription"
                                 placeholder="Mô tả sản phẩm"
@@ -405,9 +467,14 @@ export const ProductManagement = () => {
                                 className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full"
                             >
                                 <option value="">-- Chọn loại sản phẩm --</option>
-                                <option value="Underweight">Underweight</option>
-                                <option value="Balanced">Balanced</option>
-                                <option value="Overweight">Overweight</option>
+                                <option value="Gầy độ III (Rất gầy) - Nguy cơ cao">Gầy độ III (Rất gầy) - Nguy cơ cao</option>
+                                <option value="Gầy độ II - Nguy cơ vừa">Gầy độ II - Nguy cơ vừa</option>
+                                <option value="Gầy độ I - Nguy cơ thấp">Gầy độ I - Nguy cơ thấp</option>
+                                <option value="Cân nặng bình thường - Bình thường">Cân nặng bình thường - Bình thường</option>
+                                <option value="Thừa cân - Nguy cơ tăng nhẹ">Thừa cân - Nguy cơ tăng nhẹ</option>
+                                <option value="Béo phì độ I - Nguy cơ trung bình">Béo phì độ I - Nguy cơ trung bình</option>
+                                <option value="Béo phì độ II - Nguy cơ cao">Béo phì độ II - Nguy cơ cao</option>
+                                <option value="Béo phì độ III - Nguy cơ rất cao">Béo phì độ III - Nguy cơ rất cao</option>
                             </select>
                         </div>
                         <div className="flex justify-end mt-4">
@@ -465,8 +532,9 @@ export const ProductManagement = () => {
                                             name="productName"
                                             value={selectedProduct.productName}
                                             onChange={handleEditInputChange}
-                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                            className={`border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm ${errors.productName ? 'border-red-500' : ''}`}
                                         />
+                                        {errors.productName && <p className="text-red-500 text-sm mt-1">{errors.productName}</p>}
                                     </div>
 
                                     <div className="col-span-2">
@@ -500,9 +568,14 @@ export const ProductManagement = () => {
                                             className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
                                         >
                                             <option value="">-- Chọn loại sản phẩm --</option>
-                                            <option value="Underweight">Underweight</option>
-                                            <option value="Balanced">Balanced</option>
-                                            <option value="Overweight">Overweight</option>
+                                            <option value="Gầy độ III (Rất gầy) - Nguy cơ cao">Gầy độ III (Rất gầy) - Nguy cơ cao</option>
+                                            <option value="Gầy độ II - Nguy cơ vừa">Gầy độ II - Nguy cơ vừa</option>
+                                            <option value="Gầy độ I - Nguy cơ thấp">Gầy độ I - Nguy cơ thấp</option>
+                                            <option value="Cân nặng bình thường - Bình thường">Cân nặng bình thường - Bình thường</option>
+                                            <option value="Thừa cân - Nguy cơ tăng nhẹ">Thừa cân - Nguy cơ tăng nhẹ</option>
+                                            <option value="Béo phì độ I - Nguy cơ trung bình">Béo phì độ I - Nguy cơ trung bình</option>
+                                            <option value="Béo phì độ II - Nguy cơ cao">Béo phì độ II - Nguy cơ cao</option>
+                                            <option value="Béo phì độ III - Nguy cơ rất cao">Béo phì độ III - Nguy cơ rất cao</option>
                                         </select>
                                     </div>
 
