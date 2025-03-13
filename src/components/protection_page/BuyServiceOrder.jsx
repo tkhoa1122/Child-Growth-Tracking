@@ -93,8 +93,8 @@ const BuyServiceOrder = () => {
                 const paymentData = {
                     parentId: userInfo.parentId,
                     description: selectedService.serviceName,
-                    returnUrl: "http://localhost:5175/payment-success",
-                    cancelUrl: "http://localhost:5175/payment-fail",
+                    returnUrl: "http://localhost:5173/payment-success",
+                    cancelUrl: "http://localhost:5173/payment-fail",
                     services: [
                         {
                             serviceId: selectedService.serviceId,
