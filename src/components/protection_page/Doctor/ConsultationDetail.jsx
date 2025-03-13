@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaCalendar, FaMapMarkerAlt, FaVenusMars, FaPhone } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaCalendar, FaMapMarkerAlt, FaVenusMars, FaPhone, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { DoctorLayout } from '../../layouts/DoctorLayout';
@@ -14,6 +14,13 @@ export const ConsultationDetail = () => {
     const [childInfo, setChildInfo] = useState(null);
     const [bmiReports, setBmiReports] = useState([]);
     const [replyContent, setReplyContent] = useState('');
+    const [feedback, setFeedback] = useState(null);
+    const [doctorFeedback, setDoctorFeedback] = useState('');
+    const [notification, setNotification] = useState({
+        show: false,
+        message: '',
+        type: ''
+    });
 
     useEffect(() => {
         if (!childId) {
@@ -71,12 +78,71 @@ export const ConsultationDetail = () => {
                     bmi: report.bmi,
                     reportMark: report.reportMark
                 })));
+                console.log(bmiReports);
+                
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
 
         fetchData();
+    }, [childId]);
+
+    // Hàm lấy feedback
+    const fetchFeedback = async () => {
+        try {
+            const response = await axios.get('feedback/get-list-feedback');
+            const feedbackData = response.data.result.find(f => f.report.childId === childId);
+            if (feedbackData) {
+                setFeedback(feedbackData);
+            }
+        } catch (error) {
+            console.error('Error fetching feedback:', error);
+        }
+    };
+
+    // Hàm gửi feedback của bác sĩ
+    const handleSubmitFeedback = async () => {
+        try {
+            if (!doctorFeedback.trim()) {
+                setNotification({
+                    show: true,
+                    message: 'Vui lòng nhập phản hồi',
+                    type: 'error'
+                });
+                return;
+            }
+
+            // Cập nhật feedback
+            await axios.put(`feedback/update-feedback/${feedback.feedbackId}`, {
+                feedbackContentRequest: feedback.feedbackContentRequest,
+                feedbackName: feedback.feedbackName,
+                feedbackContentResponse: doctorFeedback
+            });
+
+            // Cập nhật trạng thái feedback
+            await axios.put(`feedback/change-active-feedback/${feedback.feedbackId}`);
+
+            setNotification({
+                show: true,
+                message: 'Gửi phản hồi thành công!',
+                type: 'success'
+            });
+
+            // Lấy lại dữ liệu feedback mới nhất
+            await fetchFeedback();
+        } catch (error) {
+            console.error('Error submitting feedback:', error);
+            setNotification({
+                show: true,
+                message: 'Đã xảy ra lỗi khi gửi phản hồi',
+                type: 'error'
+            });
+        }
+    };
+
+    useEffect(() => {
+        fetchFeedback();
     }, [childId]);
 
     const getBmiStatusColor = (bmi) => {
@@ -244,6 +310,70 @@ export const ConsultationDetail = () => {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                )}
+
+                {/* Feedback Section */}
+                <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">Phản hồi</h2>
+                    
+                    {feedback ? (
+                        <>
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi từ phụ huynh:</h3>
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                    <h4 className="font-medium text-gray-800">{feedback.feedbackName}</h4>
+                                    <p className="text-gray-600 mt-2">{feedback.feedbackContentRequest}</p>
+                                </div>
+                            </div>
+
+                            {feedback.feedbackIsActive ? (
+                                <>
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi của bác sĩ:</h3>
+                                        <textarea
+                                            value={doctorFeedback}
+                                            onChange={(e) => setDoctorFeedback(e.target.value)}
+                                            className="w-full text-black p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            rows="4"
+                                            placeholder="Nhập phản hồi của bạn..."
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={handleSubmitFeedback}
+                                        className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+                                    >
+                                        Gửi phản hồi
+                                    </button>
+                                </>
+                            ) : (
+                                feedback.feedbackContentResponse && (
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi của bác sĩ:</h3>
+                                        <div className="bg-blue-50 p-4 rounded-lg">
+                                            <p className="text-gray-600">{feedback.feedbackContentResponse}</p>
+                                        </div>
+                                    </div>
+                                )
+                            )}
+                        </>
+                    ) : (
+                        <p className="text-gray-600">Chưa có phản hồi từ phụ huynh</p>
+                    )}
+                </div>
+
+                {/* Notification */}
+                {notification.show && (
+                    <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'}`}>
+                        {notification.type === 'success' ? (
+                            <FaCheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                        ) : (
+                            <FaTimesCircle className="w-6 h-6 text-red-500 mr-2" />
+                        )}
+                        <span className={`font-medium ${notification.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                            {notification.message}
+                        </span>
                     </div>
                 )}
             </div>
