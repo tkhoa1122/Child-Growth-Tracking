@@ -8,6 +8,7 @@ import { DatePicker } from 'antd';
 import moment from 'moment';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { FaStar } from 'react-icons/fa';
 
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -38,6 +39,8 @@ const DetailChildByChildId = () => {
     const [editHeight, setEditHeight] = useState('');
     const [editWeight, setEditWeight] = useState('');
     const [editDate, setEditDate] = useState(moment());
+    const [products, setProducts] = useState([]);
+    const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -194,10 +197,23 @@ const DetailChildByChildId = () => {
 
     const handleSelectReport = (report) => {
         setSelectedReport(report);
-        setEditHeight(report.height);
-        setEditWeight(report.weight);
-        const datePart = report.reportContent.split(' ')[3];
-        setEditDate(moment(datePart, 'YYYY-MM-DD'));
+        setEditMode(false);
+        fetchProducts(report.reportMark);
+    };
+
+    const handleDoubleClickReport = (report) => {
+        setSelectedReport(report);
+        setEditMode(true);
+    };
+
+    const fetchProducts = async (productType) => {
+        try {
+            const response = await api.get(`/Product/get-by-type/${productType}`);
+            setProducts(response.data);
+        } catch (error) {
+            console.error('Lỗi khi tải sản phẩm:', error);
+            toast.error('Không thể tải danh sách sản phẩm');
+        }
     };
 
     const handleUpdateReport = async () => {
@@ -446,9 +462,10 @@ const DetailChildByChildId = () => {
                     ) : reports.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-black">
                             {reports.map((report) => (
-                                <div 
+                                <div
                                     key={report.reportId}
                                     onClick={() => handleSelectReport(report)}
+                                    onDoubleClick={() => handleDoubleClickReport(report)}
                                     className={`bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
                                         selectedReport?.reportId === report.reportId ? 'ring-2 ring-blue-500' : ''
                                     }`}
@@ -491,7 +508,7 @@ const DetailChildByChildId = () => {
                     )}
                 </div>
 
-                {selectedReport && (
+                {editMode && selectedReport && (
                     <div className="mt-4 bg-white rounded-xl shadow-lg p-6">
                         <h3 className="text-xl font-bold mb-4 text-green-500">Chỉnh sửa báo cáo</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -548,6 +565,59 @@ const DetailChildByChildId = () => {
                             </button>
                         </div>
                     </div>
+                )}
+
+                {products.length > 0 && (
+                    <section className="py-8">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Sản phẩm gợi ý</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {products.map(product => (
+                                <div key={product.productListId} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                                    <div className="h-48 bg-gray-200">
+                                        <img 
+                                            src={`../../../public/Images/${product.imageUrl}`}
+                                            alt={product.productName}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                            {product.productName}
+                                        </h3>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-2xl font-bold text-red-600">
+                                                {product.price.toLocaleString()}đ
+                                            </span>
+                                            <span className={`px-3 py-1 rounded-full text-sm ${
+                                                product.productType === 'Gầy độ III (Rất gầy) - Nguy cơ cao' ? 'bg-blue-100 text-blue-800' :
+                                                product.productType === 'Gầy độ II - Nguy cơ vừa' ? 'bg-green-100 text-green-800' :
+                                                'bg-orange-100 text-orange-800'
+                                            }`}>
+                                                {product.productType}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center mb-2">
+                                            <FaStar className="text-yellow-400" />
+                                            <span className="ml-1 text-gray-600">{product.rating}</span>
+                                        </div>
+                                        <div className="space-y-2 text-sm text-black">
+                                            <p><span className="font-medium">Độ tuổi:</span> {product.minAge} - {product.maxAge} tuổi</p>
+                                            <p><span className="font-medium">Thương hiệu:</span> {product.brand}</p>
+                                            <p><span className="font-medium">Khuyến nghị:</span> {product.recommendedBy}</p>
+                                        </div>
+                                        <div className="mt-4 border-t pt-4">
+                                            <p className="text-gray-600 text-sm">
+                                                {product.productDescription}
+                                            </p>
+                                        </div>
+                                        <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors w-full">
+                                            Xem chi tiết
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
                 )}
 
             </main>
