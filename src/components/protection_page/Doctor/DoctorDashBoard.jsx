@@ -29,7 +29,8 @@ const DoctorDashboard = () => {
     const [notification, setNotification] = useState({
         show: false,
         message: '',
-        type: ''
+        type: '',
+        timeoutId: null
     });
 
     useEffect(() => {
@@ -62,6 +63,27 @@ const DoctorDashboard = () => {
         fetchDoctorData();
     }, []);
 
+    const showNotification = (message, type) => {
+        if (notification.timeoutId) {
+            clearTimeout(notification.timeoutId);
+        }
+
+        const timeoutId = setTimeout(() => {
+            setNotification({
+                show: false,
+                message: '',
+                type: '',
+                timeoutId: null
+            });
+        }, 5000);
+
+        setNotification({
+            show: true,
+            message,
+            type,
+            timeoutId
+        });
+    };
 
     const handleUpdateClick = () => {
         setUpdatedInfo({
@@ -87,43 +109,24 @@ const DoctorDashboard = () => {
     };
 
     const handleUpdateSubmit = async () => {
-        // Kiểm tra các trường cần thiết
         if (!updatedInfo.firstName || !updatedInfo.lastName || !updatedInfo.hospitalAddressWork || !updatedInfo.specialization || !updatedInfo.experienceYears || !updatedInfo.email || !updatedInfo.phoneNumber) {
-            setNotification({
-                show: true,
-                message: 'Vui lòng điền đầy đủ thông tin.',
-                type: 'error'
-            });
+            showNotification('Vui lòng điền đầy đủ thông tin.', 'error');
             return;
         }
         try {
-            console.log("Dữ liệu gửi lên API:", JSON.stringify(updatedInfo, null, 2));
             await axios.put(`Doctor/${doctorInfo.accountId}`, updatedInfo);
-            setNotification({
-                show: true,
-                message: 'Cập nhật thông tin thành công!',
-                type: 'success'
-            });
-            setIsModalOpen(false); // Tắt modal sau khi cập nhật thành công
-            // Cập nhật lại thông tin bác sĩ
+            showNotification('Cập nhật thông tin thành công!', 'success');
+            setIsModalOpen(false);
             setDoctorInfo((prev) => ({ ...prev, ...updatedInfo }));
         } catch (error) {
             console.error('Lỗi khi cập nhật thông tin:', error);
-            setNotification({
-                show: true,
-                message: 'Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại.',
-                type: 'error'
-            });
+            showNotification('Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại.', 'error');
         }
     };
 
     const handleChangePassword = async () => {
         if (!oldPassword || !newPassword || newPassword !== confirmPassword) {
-            setNotification({
-                show: true,
-                message: 'Vui lòng nhập mật khẩu cũ, mật khẩu mới và xác nhận mật khẩu.',
-                type: 'error'
-            });
+            showNotification('Vui lòng nhập mật khẩu cũ, mật khẩu mới và xác nhận mật khẩu.', 'error');
             return;
         }
         try {
@@ -132,21 +135,20 @@ const DoctorDashboard = () => {
                 newPassword,
                 confirmPassword
             });
-            setNotification({
-                show: true,
-                message: 'Đổi mật khẩu thành công!',
-                type: 'success'
-            });
-            setIsModalPasswordOpen(false); // Tắt modal sau khi đổi mật khẩu thành công
+            setIsModalPasswordOpen(false);
         } catch (error) {
             console.error('Lỗi khi đổi mật khẩu:', error);
-            setNotification({
-                show: true,
-                message: 'Đã xảy ra lỗi khi đổi mật khẩu. Vui lòng thử lại.',
-                type: 'error'
-            });
+            showNotification('Đã xảy ra lỗi khi đổi mật khẩu. Vui lòng thử lại.', 'error');
         }
     };
+
+    useEffect(() => {
+        return () => {
+            if (notification.timeoutId) {
+                clearTimeout(notification.timeoutId);
+            }
+        };
+    }, []);
 
     return (
         <DoctorLayout>
