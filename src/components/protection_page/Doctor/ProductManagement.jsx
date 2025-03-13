@@ -23,7 +23,8 @@ export const ProductManagement = () => {
     const [notification, setNotification] = useState({
         show: false,
         message: '',
-        type: ''
+        type: '',
+        timeoutId: null
     });
 
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -98,6 +99,30 @@ export const ProductManagement = () => {
         return newErrors;
     };
 
+    // Thêm hàm showNotification
+    const showNotification = (message, type) => {
+        // Clear timeout cũ nếu có
+        if (notification.timeoutId) {
+            clearTimeout(notification.timeoutId);
+        }
+
+        const timeoutId = setTimeout(() => {
+            setNotification({
+                show: false,
+                message: '',
+                type: '',
+                timeoutId: null
+            });
+        }, 5000);
+
+        setNotification({
+            show: true,
+            message,
+            type,
+            timeoutId
+        });
+    };
+
     const handleAddProduct = async () => {
         const validationErrors = validateProduct(newProduct);
         if (Object.keys(validationErrors).length > 0) {
@@ -107,21 +132,13 @@ export const ProductManagement = () => {
 
         try {
             await axios.post('Product/create', newProduct);
-            setNotification({
-                show: true,
-                message: 'Sản phẩm đã được thêm thành công!',
-                type: 'success'
-            });
+            showNotification('Sản phẩm đã được thêm thành công!', 'success');
             setIsModalOpen(false);
             setErrors({});
             fetchProducts();
         } catch (error) {
             console.error('Error adding product:', error);
-            setNotification({
-                show: true,
-                message: 'Đã xảy ra lỗi khi thêm sản phẩm. Vui lòng thử lại.',
-                type: 'error'
-            });
+            showNotification('Đã xảy ra lỗi khi thêm sản phẩm. Vui lòng thử lại.', 'error');
         }
     };
 
@@ -146,21 +163,13 @@ export const ProductManagement = () => {
 
         try {
             await axios.put(`Product/update`, selectedProduct);
-            setNotification({
-                show: true,
-                message: 'Cập nhật sản phẩm thành công!',
-                type: 'success'
-            });
+            showNotification('Cập nhật sản phẩm thành công!', 'success');
             setIsEditModalOpen(false);
             setErrors({});
             fetchProducts();
         } catch (error) {
             console.error('Error updating product:', error);
-            setNotification({
-                show: true,
-                message: 'Đã xảy ra lỗi khi cập nhật sản phẩm.',
-                type: 'error'
-            });
+            showNotification('Đã xảy ra lỗi khi cập nhật sản phẩm.', 'error');
         }
     };
 
@@ -180,21 +189,13 @@ export const ProductManagement = () => {
                 }
             });
 
-            setNotification({
-                show: true,
-                message: 'Xóa sản phẩm thành công!',
-                type: 'success'
-            });
+            showNotification('Xóa sản phẩm thành công!', 'success');
 
             fetchProducts();  // Load lại danh sách sau khi xóa
         } catch (error) {
             console.error('Error deleting product:', error);
 
-            setNotification({
-                show: true,
-                message: error.response?.data || 'Xóa sản phẩm thất bại. Vui lòng thử lại.',
-                type: 'error'
-            });
+            showNotification(error.response?.data || 'Xóa sản phẩm thất bại. Vui lòng thử lại.', 'error');
         }
     };
 
@@ -229,8 +230,14 @@ export const ProductManagement = () => {
         return matchesName && matchesType && matchesMinAge && matchesMaxAge;
     });
 
-
-
+    // Thêm useEffect để clear timeout khi component unmount
+    useEffect(() => {
+        return () => {
+            if (notification.timeoutId) {
+                clearTimeout(notification.timeoutId);
+            }
+        };
+    }, []);
 
     return (
         <DoctorLayout>

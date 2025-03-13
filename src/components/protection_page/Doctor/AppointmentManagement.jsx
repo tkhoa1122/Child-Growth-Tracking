@@ -156,20 +156,48 @@ const AppointmentManagement = () => {
         }
     };
 
+    // Thêm hàm để tự động ẩn thông báo sau 5 giây
+    const showNotification = (message, type) => {
+        // Đảm bảo clear timeout cũ trước khi set timeout mới
+        if (notification.timeoutId) {
+            clearTimeout(notification.timeoutId);
+        }
+
+        const timeoutId = setTimeout(() => {
+            setNotification({
+                show: false,
+                message: '',
+                type: '',
+                timeoutId: null
+            });
+        }, 5000);
+
+        setNotification({
+            show: true,
+            message,
+            type,
+            timeoutId
+        });
+    };
+
     // Cập nhật hàm handleUpdate
     const handleUpdate = async () => {
         try {
             if (!updateForm.appointmentDate || !updateForm.status) {
-                setNotification({
-                    show: true,
-                    message: 'Vui lòng điền đầy đủ thông tin!',
-                    type: 'error'
-                });
+                showNotification('Vui lòng điền đầy đủ thông tin!', 'error');
                 return;
             }
 
-            // Chuyển đổi ngày sang múi giờ UTC và format lại --quan trọng--
+            // Kiểm tra ngày và giờ cập nhật phải là tương lai
             const selectedDate = new Date(updateForm.appointmentDate);
+            const currentDate = new Date();
+
+            if (selectedDate <= currentDate) {
+                showNotification('Ngày và giờ hẹn phải là thời gian trong tương lai!', 'error');
+                return;
+            }
+
+            // Chuyển đổi ngày và giờ sang múi giờ UTC và format lại
             const utcDate = new Date(Date.UTC(
                 selectedDate.getFullYear(),
                 selectedDate.getMonth(),
@@ -184,7 +212,7 @@ const AppointmentManagement = () => {
 
             // Đóng gói dữ liệu với format mới
             const updateData = {
-                scheduledTime: utcDate.toISOString(),
+                scheduledTime: utcDate.toISOString(), // Bao gồm cả ngày và giờ
                 status: statusNumber
             };
 
@@ -201,19 +229,11 @@ const AppointmentManagement = () => {
             );
 
             await fetchAppointments();
-            setNotification({
-                show: true,
-                message: 'Cập nhật cuộc hẹn thành công!',
-                type: 'success'
-            });
+            showNotification('Cập nhật cuộc hẹn thành công!', 'success');
             setIsModalOpen(false);
         } catch (error) {
             console.error('Error details:', error.response?.data);
-            setNotification({
-                show: true,
-                message: error.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật cuộc hẹn.',
-                type: 'error'
-            });
+            showNotification(error.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật cuộc hẹn.', 'error');
         }
     };
     
@@ -231,21 +251,52 @@ const AppointmentManagement = () => {
         if (window.confirm('Bạn có chắc chắn muốn xóa cuộc hẹn này?')) {
             try {
                 await axios.delete(`Appointment/${appointmentId}`);
-                setNotification({
-                    show: true,
-                    message: 'Xóa cuộc hẹn thành công!',
-                    type: 'success'
-                });
+                showNotification('Xóa cuộc hẹn thành công!', 'success');
                 fetchAppointments();
             } catch (error) {
-                setNotification({
-                    show: true,
-                    message: 'Đã xảy ra lỗi khi xóa cuộc hẹn.',
-                    type: 'error'
-                });
+                showNotification('Đã xảy ra lỗi khi xóa cuộc hẹn.', 'error');
             }
         }
     };
+
+    const handleUpdateStatus = async (appointment, newStatus) => {
+        try {
+            // Chuyển đổi trạng thái từ text sang số
+            const statusNumber = getStatusNumber(newStatus);
+
+            const updateData = {
+                scheduledTime: new Date(appointment.appointmentDate).toISOString(), // Giữ nguyên ngày giờ cũ
+                status: statusNumber // Cập nhật trạng thái mới dưới dạng số
+            };
+
+            console.log('Update data:', updateData);
+
+            await axios.put(
+                `Appointment/${appointment.appointmentId}`, 
+                updateData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            await fetchAppointments();
+            showNotification('Cập nhật trạng thái thành công!', 'success');
+        } catch (error) {
+            console.error('Error details:', error.response?.data);
+            showNotification(error.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật trạng thái.', 'error');
+        }
+    };
+
+    // Thêm useEffect để clear timeout khi component unmount
+    useEffect(() => {
+        return () => {
+            if (notification.timeoutId) {
+                clearTimeout(notification.timeoutId);
+            }
+        };
+    }, []);
 
     return (
         <DoctorLayout>
@@ -317,11 +368,10 @@ const AppointmentManagement = () => {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bệnh nhân</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giờ hẹn</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày hẹn</th>
                                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                                    Cập nhật trạng thái
-                                </th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Cập nhật trạng thái</th>
                                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Thao tác</th>
                             </tr>
                         </thead>
@@ -329,6 +379,9 @@ const AppointmentManagement = () => {
                             {filteredAppointments.map((appointment) => (
                                 <tr key={appointment.appointmentId}>
                                     <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{appointment.childName}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {new Date(appointment.appointmentDate).toLocaleTimeString()}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {new Date(appointment.appointmentDate).toLocaleDateString()}
                                     </td>
@@ -344,28 +397,14 @@ const AppointmentManagement = () => {
                                             {appointment.status === AppointmentStatus.CONFIRMED && (
                                                 <>
                                                     <button
-                                                        onClick={() => {
-                                                            setEditingAppointment(appointment);
-                                                            setUpdateForm({
-                                                                status: AppointmentStatus.CANCELLED,
-                                                                appointmentDate: new Date(appointment.appointmentDate)
-                                                            });
-                                                            setIsModalOpen(true);
-                                                        }}
+                                                        onClick={() => handleUpdateStatus(appointment, AppointmentStatus.CANCELLED)}
                                                         className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
                                                         title="Cancel"
                                                     >
                                                         <FaTimes size={16} />
                                                     </button>
                                                     <button
-                                                        onClick={() => {
-                                                            setEditingAppointment(appointment);
-                                                            setUpdateForm({
-                                                                status: AppointmentStatus.PENDING,
-                                                                appointmentDate: new Date(appointment.appointmentDate)
-                                                            });
-                                                            setIsModalOpen(true);
-                                                        }}
+                                                        onClick={() => handleUpdateStatus(appointment, AppointmentStatus.PENDING)}
                                                         className="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200"
                                                         title="Set as Pending"
                                                     >
@@ -376,28 +415,14 @@ const AppointmentManagement = () => {
                                             {appointment.status === AppointmentStatus.CANCELLED && (
                                                 <>
                                                     <button
-                                                        onClick={() => {
-                                                            setEditingAppointment(appointment);
-                                                            setUpdateForm({
-                                                                status: AppointmentStatus.CONFIRMED,
-                                                                appointmentDate: new Date(appointment.appointmentDate)
-                                                            });
-                                                            setIsModalOpen(true);
-                                                        }}
+                                                        onClick={() => handleUpdateStatus(appointment, AppointmentStatus.CONFIRMED)}
                                                         className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"
                                                         title="Confirm"
                                                     >
                                                         <FaCheck />
                                                     </button>
                                                     <button
-                                                        onClick={() => {
-                                                            setEditingAppointment(appointment);
-                                                            setUpdateForm({
-                                                                status: AppointmentStatus.PENDING,
-                                                                appointmentDate: new Date(appointment.appointmentDate)
-                                                            });
-                                                            setIsModalOpen(true);
-                                                        }}
+                                                        onClick={() => handleUpdateStatus(appointment, AppointmentStatus.PENDING)}
                                                         className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
                                                         title="Set as Pending"
                                                     >
@@ -408,28 +433,14 @@ const AppointmentManagement = () => {
                                             {appointment.status === AppointmentStatus.PENDING && (
                                                 <>
                                                     <button
-                                                        onClick={() => {
-                                                            setEditingAppointment(appointment);
-                                                            setUpdateForm({
-                                                                status: AppointmentStatus.CONFIRMED,
-                                                                appointmentDate: new Date(appointment.appointmentDate)
-                                                            });
-                                                            setIsModalOpen(true);
-                                                        }}
+                                                        onClick={() => handleUpdateStatus(appointment, AppointmentStatus.CONFIRMED)}
                                                         className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"
                                                         title="Confirm"
                                                     >
                                                         <FaCheck />
                                                     </button>
                                                     <button
-                                                        onClick={() => {
-                                                            setEditingAppointment(appointment);
-                                                            setUpdateForm({
-                                                                status: AppointmentStatus.CANCELLED,
-                                                                appointmentDate: new Date(appointment.appointmentDate)
-                                                            });
-                                                            setIsModalOpen(true);
-                                                        }}
+                                                        onClick={() => handleUpdateStatus(appointment, AppointmentStatus.CANCELLED)}
                                                         className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
                                                         title="Cancel"
                                                     >
@@ -484,22 +495,22 @@ const AppointmentManagement = () => {
                                     Trạng thái
                                 </label>
                                 <select
-                                    value={updateForm.status.toString()}
+                                    value={updateForm.status}
                                     onChange={(e) => setUpdateForm(prev => ({
                                         ...prev,
-                                        status: parseInt(e.target.value, 10)
+                                        status: e.target.value
                                     }))}
                                     className="w-full text-gray-500 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
-                                    <option value="0">Đang chờ</option>
-                                    <option value="1">Đã xác nhận</option>
-                                    <option value="2">Đã hủy</option>
+                                    <option value="Pending">Đang chờ</option>
+                                    <option value="Confirmed">Đã xác nhận</option>
+                                    <option value="Cancelled">Đã hủy</option>
                                 </select>
                             </div>
 
                             <div className="mt-2">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Ngày hẹn
+                                    Ngày và giờ hẹn
                                 </label>
                                 <DatePicker
                                     selected={updateForm.appointmentDate}
@@ -508,8 +519,20 @@ const AppointmentManagement = () => {
                                         appointmentDate: date
                                     }))}
                                     className="w-full border text-gray-500 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                    dateFormat="dd/MM/yyyy"
-                                    placeholderText="Chọn ngày"
+                                    dateFormat="dd/MM/yyyy HH:mm"
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    timeCaption="Giờ"
+                                    placeholderText="Chọn ngày và giờ"
+                                    minDate={new Date()}
+                                    minTime={new Date().getTime() === new Date(updateForm.appointmentDate).setHours(0, 0, 0, 0) ? new Date() : new Date(0, 0, 0, 0)}
+                                    maxTime={new Date(0, 0, 0, 23, 59, 59)}
+                                    filterTime={(time) => {
+                                        const selectedDate = new Date(updateForm.appointmentDate);
+                                        const currentDate = new Date();
+                                        return selectedDate > currentDate || time > currentDate;
+                                    }}
                                 />
                             </div>
 
