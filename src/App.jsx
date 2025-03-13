@@ -165,7 +165,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/consultation-detail"
+                  path="/consultation-detail/:childId"
                   element={
                     <ProtectedRouteByRole allowedRoles={['Doctor']}>
                       <ConsultationDetail />

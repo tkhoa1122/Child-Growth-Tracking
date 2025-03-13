@@ -10,7 +10,8 @@ const AppointmentManagement = () => {
     const [appointments, setAppointments] = useState([]);
     const [filter, setFilter] = useState({
         type: 'all', // all, today, week, month
-        date: null   // Ngày được chọn từ lịch
+        date: null,   // Ngày được chọn từ lịch
+        status: 'all' // all, Pending, Confirmed, Cancelled
     });
     const [doctorId, setDoctorId] = useState('');
     const [notification, setNotification] = useState({
@@ -26,12 +27,52 @@ const AppointmentManagement = () => {
         appointmentDate: null
     });
 
+    // Hàm lấy doctorId từ API dựa vào userId
+    const fetchDoctorId = async () => {
+        try {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                console.error('Không tìm thấy userId trong localStorage');
+                return;
+            }
+            
+            const response = await axios.get(`Doctor/${userId}`);
+            if (response.data && response.data.doctorId) {
+                setDoctorId(response.data.doctorId);
+                return response.data.doctorId;
+            } else {
+                console.error('Không tìm thấy doctorId trong response');
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy doctorId:', error);
+        }
+        return null;
+    };
+
+    // Cập nhật hàm fetchAppointments để sử dụng doctorId
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('Appointment');
+            // Nếu chưa có doctorId, lấy doctorId trước
+            let currentDoctorId = doctorId;
+            if (!currentDoctorId) {
+                currentDoctorId = await fetchDoctorId();
+                if (!currentDoctorId) {
+                    console.error('Không thể lấy doctorId');
+                    return;
+                }
+            }
+            
+            // Gọi API lấy danh sách cuộc hẹn của bác sĩ
+            const response = await axios.get(`Appointment/doctor/${currentDoctorId}`);
             setAppointments(response.data);
+            console.log(response.data);
         } catch (error) {
-            console.error('Error fetching appointments:', error);
+            console.error('Lỗi khi lấy danh sách cuộc hẹn:', error);
+            setNotification({
+                show: true,
+                message: 'Đã xảy ra lỗi khi tải danh sách cuộc hẹn.',
+                type: 'error'
+            });
         }
     };
 
@@ -62,7 +103,7 @@ const AppointmentManagement = () => {
     };
 
     const filteredAppointments = appointments.filter(appointment => {
-        const { type, date } = filter;
+        const { type, date, status } = filter;
         const appointmentDate = new Date(appointment.appointmentDate);
 
         // Lọc theo loại (all, today, week, month)
@@ -90,6 +131,11 @@ const AppointmentManagement = () => {
             return false;
         }
 
+        // Lọc theo trạng thái
+        if (status !== 'all' && appointment.status !== status) {
+            return false;
+        }
+
         return true;
     });
 
@@ -100,6 +146,17 @@ const AppointmentManagement = () => {
         CANCELLED: 'Cancelled'
     };
 
+    // Thêm hàm chuyển đổi từ text sang số
+    const getStatusNumber = (statusText) => {
+        switch (statusText) {
+            case 'Pending': return 0;
+            case 'Confirmed': return 1;
+            case 'Cancelled': return 2;
+            default: return 0;
+        }
+    };
+
+    // Cập nhật hàm handleUpdate
     const handleUpdate = async () => {
         try {
             if (!updateForm.appointmentDate || !updateForm.status) {
@@ -122,17 +179,25 @@ const AppointmentManagement = () => {
                 selectedDate.getSeconds()
             ));
 
+            // Chuyển đổi trạng thái từ text sang số
+            const statusNumber = getStatusNumber(updateForm.status);
+
             // Đóng gói dữ liệu với format mới
             const updateData = {
-                appointmentDate: utcDate.toISOString(),
-                status: updateForm.status
+                scheduledTime: utcDate.toISOString(),
+                status: statusNumber
             };
 
             console.log('Update data:', updateData);
 
-            const response = await axios.put(
+            await axios.put(
                 `Appointment/${editingAppointment.appointmentId}`, 
-                updateData
+                updateData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
             );
 
             await fetchAppointments();
@@ -146,7 +211,7 @@ const AppointmentManagement = () => {
             console.error('Error details:', error.response?.data);
             setNotification({
                 show: true,
-                message: error.response?.data?.title || 'Đã xảy ra lỗi khi cập nhật cuộc hẹn.',
+                message: error.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật cuộc hẹn.',
                 type: 'error'
             });
         }
@@ -218,6 +283,19 @@ const AppointmentManagement = () => {
                             <option value="week">Tuần này</option>
                             <option value="month">Tháng này</option>
                         </select>
+                        
+                                <select
+                            name="status"
+                            value={filter.status}
+                            onChange={handleFilterChange}
+                            className="border rounded-lg px-4 py-2 text-gray-600"
+                        >
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="Pending">Đang chờ</option>
+                            <option value="Confirmed">Đã xác nhận</option>
+                            <option value="Cancelled">Đã hủy</option>
+                        </select>
+                        
                         <div className="datepicker-container">
                             <DatePicker
                                 selected={filter.date}
@@ -406,16 +484,16 @@ const AppointmentManagement = () => {
                                     Trạng thái
                                 </label>
                                 <select
-                                    value={updateForm.status}
+                                    value={updateForm.status.toString()}
                                     onChange={(e) => setUpdateForm(prev => ({
                                         ...prev,
-                                        status: e.target.value
+                                        status: parseInt(e.target.value, 10)
                                     }))}
                                     className="w-full text-gray-500 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
-                                    <option value={AppointmentStatus.PENDING}>Pending</option>
-                                    <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
-                                    <option value={AppointmentStatus.CANCELLED}>Cancelled</option>
+                                    <option value="0">Đang chờ</option>
+                                    <option value="1">Đã xác nhận</option>
+                                    <option value="2">Đã hủy</option>
                                 </select>
                             </div>
 
