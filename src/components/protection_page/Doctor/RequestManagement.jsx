@@ -13,11 +13,11 @@ export const RequestManagement = () => {
         const fetchRequests = async () => {
             try {
                 const pendingResponse = await axios.get('reports/pending');
-                //const activeResponse = await axios.get('reports/active');
+                const activeResponse = await axios.get('reports/active');
                 console.log(pendingResponse)
 
                 // Kết hợp cả hai loại yêu cầu
-                const allRequests = [...pendingResponse.data]; //, ...activeResponse.data
+                const allRequests = [...pendingResponse.data, ...activeResponse.data];
 
                 // Lấy thông tin trẻ từ API Parent/child-info/{childId}
                 const requestsWithChildInfo = await Promise.all(allRequests.map(async (request) => {
@@ -32,7 +32,7 @@ export const RequestManagement = () => {
                 }));
 
                 setRequests(requestsWithChildInfo);
-                setUnreadCount(pendingResponse.data.length);
+                setUnreadCount(pendingResponse.data.filter(request => request.reportIsActive === "0").length);
             } catch (error) {
                 console.error('Error fetching requests:', error);
                 // Có thể thêm thông báo cho người dùng ở đây
@@ -48,7 +48,7 @@ export const RequestManagement = () => {
 
     const filteredRequests = requests.filter(request => {
         if (filter === 'all') return true;
-        return filter === 'pending' ? request.reportIsActive === "Pending" : request.reportIsActive === "Active";
+        return filter === 'pending' ? request.reportIsActive === "0" : request.reportIsActive === "1";
     });
 
     return (
@@ -100,8 +100,12 @@ export const RequestManagement = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.weight} kg</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.bmi.toFixed(1)}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${request.reportIsActive === "Pending" ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                                            {request.reportIsActive === "Pending" ? 'Pending' : 'Active'}
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                            request.reportIsActive === "0" ? 'bg-yellow-100 text-yellow-800' :
+                                            request.reportIsActive === "1" ? 'bg-green-100 text-green-800' :
+                                            'bg-red-100 text-red-800'
+                                        }`}>
+                                            {request.reportIsActive === "1" ? "Active" : "Pending"}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.gender}</td>
