@@ -7,6 +7,7 @@ import axios from '../../Utils/Axios';
 const FeedbackManagement = () => {
     const [feedbacks, setFeedbacks] = useState([]);
     const navigate = useNavigate();
+    const [doctorFeedback, setDoctorFeedback] = useState('');
 
     // Hàm lấy danh sách feedback
     const fetchFeedbacks = async () => {
@@ -35,6 +36,28 @@ const FeedbackManagement = () => {
     // Hàm chuyển hướng đến trang chi tiết tư vấn
     const handleViewConsultation = (childId) => {
         navigate(`/consultation-detail/${childId}`);
+    };
+
+    const handleSubmitFeedback = async (feedbackId) => {
+        try {
+            if (!doctorFeedback.trim()) {
+                alert('Vui lòng nhập phản hồi');
+                return;
+            }
+
+            // Cập nhật feedback
+            await axios.put(`feedback/update-feedback/${feedbackId}`, {
+                feedbackContentResponse: doctorFeedback
+            });
+
+            // Lấy lại danh sách feedback mới nhất
+            await fetchFeedbacks();
+
+            alert('Gửi phản hồi thành công!');
+        } catch (error) {
+            console.error('Error submitting feedback:', error);
+            alert('Đã xảy ra lỗi khi gửi phản hồi');
+        }
     };
 
     return (

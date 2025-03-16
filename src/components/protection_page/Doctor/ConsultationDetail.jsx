@@ -379,7 +379,7 @@ export const ConsultationDetail = () => {
                                 </div>
                             </div>
 
-                            {feedback.feedbackIsActive ? (
+                            {!feedback.feedbackContentResponse || feedback.feedbackContentResponse.trim() === '' ? (
                                 <>
                                     <div className="mb-6">
                                         <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi của bác sĩ:</h3>
@@ -400,14 +400,12 @@ export const ConsultationDetail = () => {
                                     </button>
                                 </>
                             ) : (
-                                feedback.feedbackContentResponse && (
-                                    <div className="mb-6">
-                                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi của bác sĩ:</h3>
-                                        <div className="bg-blue-50 p-4 rounded-lg">
-                                            <p className="text-gray-600">{feedback.feedbackContentResponse}</p>
-                                        </div>
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi của bác sĩ:</h3>
+                                    <div className="bg-blue-50 p-4 rounded-lg">
+                                        <p className="text-gray-600">{feedback.feedbackContentResponse}</p>
                                     </div>
-                                )
+                                </div>
                             )}
                         </>
                     ) : (
