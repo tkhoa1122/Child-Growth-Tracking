@@ -12,13 +12,29 @@ export const RequestManagement = () => {
     useEffect(() => {
         const fetchRequests = async () => {
             try {
+                //lấy doctorId từ localStorage
+                const accountId = localStorage.getItem('userId');
+                const responseId = await axios.get(`Doctor/${accountId}`);
+                const currentDoctorId = responseId.data.doctorId;
+
+                // Lấy danh sách feedback
+                const feedbackResponse = await axios.get('feedback/get-list-feedback');
+                console.log(feedbackResponse);
+                
+                const relevantFeedbacks = feedbackResponse.data.filter(f => f.doctorId === currentDoctorId);
+                const reportIds = relevantFeedbacks.map(f => f.reportId);
+
+                // Lấy các yêu cầu đang chờ và đã xử lý
                 const pendingResponse = await axios.get('reports/pending');
-                const activeResponse = await axios.get('reports/active');
+                //const activeResponse = await axios.get('reports/active');
                 console.log(pendingResponse)
 
-                // Kết hợp cả hai loại yêu cầu
-                const allRequests = [...pendingResponse.data, ...activeResponse.data];
-
+                // Kết hợp các yêu cầu và lọc theo reportId
+                const allRequests = [
+                    ...pendingResponse.data.filter(request => reportIds.includes(request.reportId))//,
+                    //...activeResponse.data.filter(request => reportIds.includes(request.reportId))
+                ];
+                
                 // Lấy thông tin trẻ từ API Parent/child-info/{childId}
                 const requestsWithChildInfo = await Promise.all(allRequests.map(async (request) => {
                     const childInfoResponse = await axios.get(`Parent/child-info/${request.childId}`);

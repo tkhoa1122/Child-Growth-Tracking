@@ -8,7 +8,6 @@ const FeedbackManagement = () => {
     const [feedbacks, setFeedbacks] = useState([]);
     const navigate = useNavigate();
     const [doctorFeedback, setDoctorFeedback] = useState('');
-    const [doctorId, setDoctorId] = useState(null);
 
     // Hàm lấy danh sách feedback
     const fetchFeedbacks = async () => {
@@ -19,7 +18,6 @@ const FeedbackManagement = () => {
             const accountId = localStorage.getItem('userId');
             const responseId = await axios.get(`Doctor/${accountId}`);
             const currentDoctorId = responseId.data.doctorId;
-            setDoctorId(currentDoctorId);
 
             console.log("Current doctorId: ", currentDoctorId);
 
