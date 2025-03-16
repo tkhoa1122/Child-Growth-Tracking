@@ -85,6 +85,24 @@ const DetailChildByChildId = () => {
     const [doctors, setDoctors] = useState([]);
     const [loadingDoctors, setLoadingDoctors] = useState(true);
 
+    // Đặt hàm disabledDate vào trong component để có thể truy cập childData
+    const disabledDate = (current) => {
+        if (!childData || !current) return false;
+        
+        try {
+            // Chuyển đổi ngày sinh của trẻ thành đối tượng moment
+            const birthDate = moment(childData.dob);
+            // Lấy ngày hiện tại
+            const today = moment().endOf('day');
+            
+            // Không cho phép chọn ngày trước ngày sinh và sau ngày hiện tại
+            return current < birthDate || current > today;
+        } catch (error) {
+            console.error('Lỗi kiểm tra ngày:', error);
+            return false;
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -427,7 +445,7 @@ const DetailChildByChildId = () => {
                                 <InfoRow label="Giới tính" value={childData.gender} />
                                 <InfoRow 
                                     label="Ngày sinh" 
-                                    value={new Date(childData.dob).toLocaleDateString('vi-VN')} 
+                                    value={moment(childData.dob).format('DD-MM-YYYY')} 
                                 />
                                 <InfoRow 
                                     label="Tuổi của trẻ" 
@@ -471,13 +489,10 @@ const DetailChildByChildId = () => {
                                 <label className="block text-sm font-medium mb-1 text-black">Chiều cao (cm)</label>
                                 <input
                                     type="number"
-                                    placeholder='Nhập chiều cao'
                                     value={height}
                                     onChange={(e) => setHeight(e.target.value)}
                                     className="w-full p-2 border rounded"
-                                    min="50"
-                                    max="250"
-                                    step="0.1"
+                                    placeholder="Nhập chiều cao"
                                 />
                             </div>
                             
@@ -485,49 +500,61 @@ const DetailChildByChildId = () => {
                                 <label className="block text-sm font-medium mb-1 text-black">Cân nặng (kg)</label>
                                 <input
                                     type="number"
-                                    placeholder='Nhập cân nặng'
                                     value={weight}
                                     onChange={(e) => setWeight(e.target.value)}
                                     className="w-full p-2 border rounded"
-                                    min="2"
-                                    max="300"
-                                    step="0.1"
+                                    placeholder="Nhập cân nặng"
                                 />
                             </div>
                             
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium mb-1 text-black">Ngày đo</label>
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-black">Ngày ghi nhận</label>
                                 <DatePicker
-                                    format="DD-MM-YYYY"
                                     value={selectedDate}
-                                    onChange={setSelectedDate}
-                                    className="w-full text-black"
-                                    disabledDate={current => current > moment().endOf('day')}
+                                    onChange={(date) => setSelectedDate(date)}
+                                    format="DD-MM-YYYY"
+                                    className="w-full"
+                                    disabledDate={disabledDate}
+                                    placeholder="Chọn ngày ghi nhận"
                                 />
+                                {childData && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        *Chỉ được chọn ngày từ {moment(childData.dob).format('DD-MM-YYYY')} đến {moment().format('DD-MM-YYYY')}
+                                    </p>
+                                )}
                             </div>
                             
                             {bmi && (
-                                <div className="md:col-span-2 bg-gray-100 p-4 rounded">
-                                    <p className="font-medium text-black">Kết quả:</p>
-                                    <p>BMI: {bmi}</p>
-                                    {/* <p>Nhận xét: {comment}</p> */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-black">Chỉ số BMI</label>
+                                    <div className="p-2 border rounded bg-gray-50">
+                                        <span className="font-medium">{bmi}</span>
+                                        <span className="ml-2 text-sm text-gray-600">({comment})</span>
+                                    </div>
                                 </div>
                             )}
                         </div>
 
                         <div className="flex justify-end space-x-2 mt-6">
                             <button
-                                onClick={() => setShowReportForm(false)}
+                                onClick={() => {
+                                    setShowReportForm(false);
+                                    setHeight('');
+                                    setWeight('');
+                                    setSelectedDate(moment());
+                                    setBmi(null);
+                                    setComment('');
+                                }}
                                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
                             >
-                                Hủy bỏ
+                                Hủy
                             </button>
                             <button
                                 onClick={handleSubmitReport}
                                 disabled={!height || !weight || !selectedDate}
-                                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
                             >
-                                Lưu báo cáo
+                                Tạo báo cáo
                             </button>
                         </div>
                     </div>
