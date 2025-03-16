@@ -7,7 +7,6 @@ import axios from '../../Utils/Axios';
 const FeedbackManagement = () => {
     const [feedbacks, setFeedbacks] = useState([]);
     const navigate = useNavigate();
-    const [doctorFeedback, setDoctorFeedback] = useState('');
 
     // Hàm lấy danh sách feedback
     const fetchFeedbacks = async () => {
