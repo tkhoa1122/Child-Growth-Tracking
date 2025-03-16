@@ -13,11 +13,11 @@ export const RequestManagement = () => {
         const fetchRequests = async () => {
             try {
                 const pendingResponse = await axios.get('reports/pending');
-                const activeResponse = await axios.get('reports/active');
+                //const activeResponse = await axios.get('reports/active');
                 console.log(pendingResponse)
 
                 // Kết hợp cả hai loại yêu cầu
-                const allRequests = [...pendingResponse.data, ...activeResponse.data];
+                const allRequests = [...pendingResponse.data]; //, ...activeResponse.data
 
                 // Lấy thông tin trẻ từ API Parent/child-info/{childId}
                 const requestsWithChildInfo = await Promise.all(allRequests.map(async (request) => {

@@ -7,16 +7,25 @@ import axios from '../../Utils/Axios';
 const FeedbackManagement = () => {
     const [feedbacks, setFeedbacks] = useState([]);
     const navigate = useNavigate();
+    const [doctorFeedback, setDoctorFeedback] = useState('');
 
     // Hàm lấy danh sách feedback
     const fetchFeedbacks = async () => {
         try {
             const response = await axios.get('feedback/get-list-feedback');
+            console.log(response);
+
+            // Kiểm tra nếu response.data tồn tại và là một mảng
+            if (!response.data || !Array.isArray(response.data)) {
+                throw new Error('Dữ liệu feedback không hợp lệ');
+            }
+
             // Lọc các feedback có feedbackIsActive là false
-            const inactiveFeedbacks = response.data.result.filter(f => f.feedbackIsActive === false);
+            const inactiveFeedbacks = response.data.filter(f => f.feedbackIsActive === false);
             setFeedbacks(inactiveFeedbacks);
         } catch (error) {
             console.error('Error fetching feedbacks:', error);
+            setFeedbacks([]); // Đặt feedbacks thành mảng rỗng nếu có lỗi
         }
     };
 
@@ -27,6 +36,28 @@ const FeedbackManagement = () => {
     // Hàm chuyển hướng đến trang chi tiết tư vấn
     const handleViewConsultation = (childId) => {
         navigate(`/consultation-detail/${childId}`);
+    };
+
+    const handleSubmitFeedback = async (feedbackId) => {
+        try {
+            if (!doctorFeedback.trim()) {
+                alert('Vui lòng nhập phản hồi');
+                return;
+            }
+
+            // Cập nhật feedback
+            await axios.put(`feedback/update-feedback/${feedbackId}`, {
+                feedbackContentResponse: doctorFeedback
+            });
+
+            // Lấy lại danh sách feedback mới nhất
+            await fetchFeedbacks();
+
+            alert('Gửi phản hồi thành công!');
+        } catch (error) {
+            console.error('Error submitting feedback:', error);
+            alert('Đã xảy ra lỗi khi gửi phản hồi');
+        }
     };
 
     return (
