@@ -18,6 +18,20 @@ const formatDate = (date) => {
     return moment(date).format('DD-MM-YYYY');
 };
 
+// Thêm hàm tính tuổi
+const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    
+    return age;
+};
+
 const DetailChildByChildId = () => {
     const { childId, parentId } = useParams();
     const [childData, setChildData] = useState(null);
@@ -285,7 +299,10 @@ const DetailChildByChildId = () => {
                                     label="Ngày sinh" 
                                     value={new Date(childData.dob).toLocaleDateString('vi-VN')} 
                                 />
-                                
+                                <InfoRow 
+                                    label="Tuổi của trẻ" 
+                                    value={`${calculateAge(childData.dob)} tuổi`} 
+                                />
                             </div>
                         </div>
 
@@ -477,7 +494,7 @@ const DetailChildByChildId = () => {
                                                 (date) => formatDate(date)
                                             )}
                                         </p>
-                                        <div className="flex justify-between hidden">
+                                        <div className="flex justify-between ">
                                             <span className="font-medium">Id Report:</span>
                                             <span>{report.reportId}</span>
                                         </div>
@@ -610,9 +627,9 @@ const DetailChildByChildId = () => {
                                                 {product.productDescription}
                                             </p>
                                         </div>
-                                        <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors w-full">
+                                        {/* <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors w-full">
                                             Xem chi tiết
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             ))}

@@ -5,6 +5,8 @@ import { Header } from "./Header";
 import { Footer } from "./Footer";
 import backgroundImage from '../../public/Images/background.jpg';
 import api from "../components/Utils/Axios";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -42,6 +44,7 @@ export const RegisterPage = () => {
   const validateForm = () => {
     let tempErrors = {};
     const emailRegex = /^[A-Za-z0-9._%+-]+@((fpt\.edu\.vn)|([A-Za-z0-9.-]+\.[A-Za-z]{2,}))$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9])(?=.*[a-z]).{6,}$/;
 
     if (!formData.firstName || formData.firstName.trim() === "") {
       tempErrors.firstName = "Họ là bắt buộc";
@@ -61,12 +64,16 @@ export const RegisterPage = () => {
       tempErrors.password = "Mật khẩu là bắt buộc";
     } else if (formData.password.length < 6) {
       tempErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+    } else if (!passwordRegex.test(formData.password)) {
+      tempErrors.password = "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt";
     }
 
     if (!formData.confirmPassword || formData.confirmPassword.trim() === "") {
       tempErrors.confirmPassword = "Xác nhận mật khẩu là bắt buộc";
     } else if (formData.confirmPassword !== formData.password) {
       tempErrors.confirmPassword = "Mật khẩu không khớp";
+    } else if (!passwordRegex.test(formData.confirmPassword)) {
+      tempErrors.confirmPassword = "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt";
     }
 
     if (!formData.phoneNumber || formData.phoneNumber.trim() === "") {
@@ -97,21 +104,21 @@ export const RegisterPage = () => {
                 address: formData.address.trim()
             };
 
-            console.log("Sending registration data:", registerData);
-
             const response = await api.post("Auth/register", registerData);
             
-            console.log("Server response:", response);
-
-            setNotification({
-                show: true,
-                message: response.data.message || "Đăng ký thành công! Vui lòng kiểm tra email để nhập mã OTP",
-                type: "success"
+            // Hiển thị toast thành công
+            toast.success('Đăng ký thành công! Vui lòng kiểm tra email để nhập mã OTP', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true
             });
 
             setTimeout(() => {
                 navigate(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
-            }, 500);
+            }, 1000);
 
         } catch (error) {
             console.error("Registration error:", error);
@@ -128,15 +135,15 @@ export const RegisterPage = () => {
                 }));
             }
 
-            setNotification({
-                show: true,
-                message: error.response?.data?.message || "Đăng ký thất bại! Vui lòng thử lại.",
-                type: "error"
+            // Hiển thị toast thất bại
+            toast.error(error.response?.data?.message || "Đăng ký thất bại! Vui lòng thử lại.", {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true
             });
-
-            setTimeout(() => {
-                setNotification(prev => ({ ...prev, show: false }));
-            }, 3000);
         }
     } else {
         console.log("Form validation failed:", errors);
@@ -162,6 +169,7 @@ export const RegisterPage = () => {
 
   return (
     <>
+      <ToastContainer />
       <Header />
       <div
         className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
