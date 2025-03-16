@@ -31,8 +31,8 @@ export const RequestManagement = () => {
 
                 // Kết hợp các yêu cầu và lọc theo reportId
                 const allRequests = [
-                    ...pendingResponse.data.filter(request => reportIds.includes(request.reportId))//,
-                    //...activeResponse.data.filter(request => reportIds.includes(request.reportId))
+                    ...pendingResponse.data.filter(request => reportIds.includes(request.reportId)),
+                    ...activeResponse.data.filter(request => reportIds.includes(request.reportId))
                 ];
                 
                 // Lấy thông tin trẻ từ API Parent/child-info/{childId}
