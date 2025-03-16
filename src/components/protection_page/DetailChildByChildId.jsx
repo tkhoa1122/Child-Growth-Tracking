@@ -8,7 +8,7 @@ import { DatePicker } from 'antd';
 import moment from 'moment';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { FaStar } from 'react-icons/fa';
+import { FaStar, FaUserMd } from 'react-icons/fa';
 
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -82,6 +82,8 @@ const DetailChildByChildId = () => {
         feedbackName: '',
         feedbackContentRequest: '',
     });
+    const [doctors, setDoctors] = useState([]);
+    const [loadingDoctors, setLoadingDoctors] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -173,6 +175,24 @@ const DetailChildByChildId = () => {
             setChartData(chartData);
         }
     }, [reports]);
+
+    // Thêm useEffect để fetch danh sách bác sĩ
+    useEffect(() => {
+        const fetchDoctors = async () => {
+            try {
+                setLoadingDoctors(true);
+                const response = await api.get('/Doctor/get-all');
+                setDoctors(response.data);
+            } catch (error) {
+                console.error('Lỗi khi tải danh sách bác sĩ:', error);
+                toast.error('Không thể tải danh sách bác sĩ');
+            } finally {
+                setLoadingDoctors(false);
+            }
+        };
+
+        fetchDoctors();
+    }, []);
 
     const handleMakeReport = () => {
         if (!serviceStatus.isValid) {
@@ -597,17 +617,32 @@ const DetailChildByChildId = () => {
                             <h4 className="text-lg font-semibold mb-4">Tham vấn bác sĩ</h4>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">ID Bác sĩ</label>
-                                    <input
-                                        type="text"
-                                        value={feedbackData.doctorId}
-                                        onChange={(e) => setFeedbackData(prev => ({
-                                            ...prev,
-                                            doctorId: e.target.value
-                                        }))}
-                                        className="w-full p-2 border rounded"
-                                        placeholder="Nhập ID bác sĩ"
-                                    />
+                                    <label className="block text-sm font-medium mb-1 text-gray-700">
+                                        <FaUserMd className="inline mr-2" />
+                                        Bác sĩ
+                                    </label>
+                                    {loadingDoctors ? (
+                                        <div className="w-full p-2 border rounded bg-gray-100">
+                                            Đang tải danh sách bác sĩ...
+                                        </div>
+                                    ) : (
+                                        <select
+                                            value={feedbackData.doctorId}
+                                            onChange={(e) => setFeedbackData(prev => ({
+                                                ...prev,
+                                                doctorId: e.target.value
+                                            }))}
+                                            className="w-full p-2 border rounded text-gray-700"
+                                            required
+                                        >
+                                            <option value="">Chọn bác sĩ</option>
+                                            {doctors.map(doctor => (
+                                                <option key={doctor.doctorId} value={doctor.doctorId}>
+                                                    {`${doctor.firstName} ${doctor.lastName}`}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
                                 </div>
 
                                 <div>
