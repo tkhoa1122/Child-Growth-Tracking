@@ -32,6 +32,20 @@ const calculateAge = (dob) => {
     return age;
 };
 
+// Thêm hàm tính tuổi tại thời điểm báo cáo
+const calculateAgeAtReport = (dob, reportDate) => {
+    const birthDate = new Date(dob);
+    const recordDate = new Date(reportDate);
+    let age = recordDate.getFullYear() - birthDate.getFullYear();
+    const monthDiff = recordDate.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && recordDate.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    
+    return age;
+};
+
 const DetailChildByChildId = () => {
     const { childId, parentId } = useParams();
     const [childData, setChildData] = useState(null);
@@ -50,11 +64,24 @@ const DetailChildByChildId = () => {
     const [reportsLoading, setReportsLoading] = useState(true);
     const [chartData, setChartData] = useState(null);
     const [selectedReport, setSelectedReport] = useState(null);
+    const [showProductSuggestions, setShowProductSuggestions] = useState(false);
+    const [showDoctorConsultForm, setShowDoctorConsultForm] = useState(false);
+    const [showEditReport, setShowEditReport] = useState(false);
     const [editHeight, setEditHeight] = useState('');
     const [editWeight, setEditWeight] = useState('');
     const [editDate, setEditDate] = useState(moment());
+    const [consultationData, setConsultationData] = useState({
+        description: '',
+        urgency: 'normal',
+        preferredDateTime: moment()
+    });
     const [products, setProducts] = useState([]);
     const [editMode, setEditMode] = useState(false);
+    const [feedbackData, setFeedbackData] = useState({
+        doctorId: '',
+        feedbackName: '',
+        feedbackContentRequest: '',
+    });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -211,13 +238,67 @@ const DetailChildByChildId = () => {
 
     const handleSelectReport = (report) => {
         setSelectedReport(report);
-        setEditMode(false);
+        // Reset các state khác khi chọn report mới
+        setShowProductSuggestions(false);
+        setShowDoctorConsultForm(false);
+        setShowEditReport(false);
         fetchProducts(report.reportMark);
     };
 
-    const handleDoubleClickReport = (report) => {
-        setSelectedReport(report);
-        setEditMode(true);
+    const handleShowProducts = () => {
+        if (!selectedReport) {
+            toast.warning('Vui lòng chọn một báo cáo trước');
+            return;
+        }
+        setShowProductSuggestions(true);
+        setShowDoctorConsultForm(false);
+        setShowEditReport(false);
+    };
+
+    const handleShowConsultForm = () => {
+        if (!selectedReport) {
+            toast.warning('Vui lòng chọn một báo cáo trước');
+            return;
+        }
+        setShowDoctorConsultForm(true);
+        setShowProductSuggestions(false);
+        setShowEditReport(false);
+    };
+
+    const handleShowEditForm = () => {
+        if (!selectedReport) {
+            toast.warning('Vui lòng chọn một báo cáo trước');
+            return;
+        }
+        setEditHeight(selectedReport.height);
+        setEditWeight(selectedReport.weight);
+        setEditDate(moment(selectedReport.reportCreateDate));
+        setShowEditReport(true);
+        setShowProductSuggestions(false);
+        setShowDoctorConsultForm(false);
+    };
+
+    const handleSubmitConsultation = async () => {
+        try {
+            const consultData = {
+                reportId: selectedReport.reportId,
+                childId: childId,
+                description: consultationData.description,
+                urgency: consultationData.urgency,
+                preferredDateTime: consultationData.preferredDateTime.format('YYYY-MM-DD HH:mm:ss')
+            };
+
+            await api.post('/consultation/create', consultData);
+            toast.success('Đã gửi yêu cầu tham vấn thành công!');
+            setShowDoctorConsultForm(false);
+            setConsultationData({
+                description: '',
+                urgency: 'normal',
+                preferredDateTime: moment()
+            });
+        } catch (error) {
+            toast.error('Không thể gửi yêu cầu tham vấn: ' + error.response?.data?.message);
+        }
     };
 
     const fetchProducts = async (productType) => {
@@ -250,6 +331,35 @@ const DetailChildByChildId = () => {
         } catch (error) {
             console.error('Lỗi khi cập nhật:', error);
             toast.error(error.response?.data?.message || 'Cập nhật thất bại!');
+        }
+    };
+
+    const handleSubmitFeedback = async () => {
+        try {
+            const feedbackRequest = {
+                reportId: selectedReport.reportId,
+                doctorId: feedbackData.doctorId,
+                feedbackContentRequest: feedbackData.feedbackContentRequest,
+                feedbackIsActive: true,
+                feedbackName: feedbackData.feedbackName,
+                feedbackContentResponse: "string"
+            };
+
+            const response = await api.post('/feedback/create-feedback', feedbackRequest);
+            
+            if (response.status === 200) {
+                toast.success('Gửi yêu cầu tham vấn thành công!');
+                setShowDoctorConsultForm(false);
+                // Reset form
+                setFeedbackData({
+                    doctorId: '',
+                    feedbackName: '',
+                    feedbackContentRequest: '',
+                });
+            }
+        } catch (error) {
+            console.error('Lỗi khi gửi yêu cầu:', error);
+            toast.error(error.response?.data?.message || 'Gửi yêu cầu thất bại!');
         }
     };
 
@@ -449,40 +559,172 @@ const DetailChildByChildId = () => {
                 <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl font-bold text-green-500">Lịch sử báo cáo BMI</h3>
-                        <button
-                            onClick={handleRefreshReports}
-                            disabled={reportsLoading}
-                            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                        >
-                            <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                className="h-5 w-5 mr-2" 
-                                fill="none" 
-                                viewBox="0 0 24 24" 
-                                stroke="currentColor"
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={handleRefreshReports}
+                                disabled={reportsLoading}
+                                className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
                             >
-                                <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    strokeWidth={2} 
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
-                                />
-                            </svg>
-                            Tải lại
-                        </button>
+                                <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Tải lại
+                            </button>
+                            <button
+                                onClick={handleShowProducts}
+                                className={`px-4 py-2 rounded ${selectedReport ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-300'} text-white`}
+                            >
+                                Sản phẩm gợi ý
+                            </button>
+                            <button
+                                onClick={handleShowConsultForm}
+                                className={`px-4 py-2 rounded ${selectedReport ? 'bg-purple-500 hover:bg-purple-600' : 'bg-gray-300'} text-white`}
+                            >
+                                Tham vấn bác sĩ
+                            </button>
+                            <button
+                                onClick={handleShowEditForm}
+                                className={`px-4 py-2 rounded ${selectedReport ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-300'} text-white`}
+                            >
+                                Chỉnh sửa báo cáo
+                            </button>
+                        </div>
                     </div>
                     
+                    {/* Form tham vấn bác sĩ */}
+                    {showDoctorConsultForm && selectedReport && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg text-black">
+                            <h4 className="text-lg font-semibold mb-4">Tham vấn bác sĩ</h4>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">ID Bác sĩ</label>
+                                    <input
+                                        type="text"
+                                        value={feedbackData.doctorId}
+                                        onChange={(e) => setFeedbackData(prev => ({
+                                            ...prev,
+                                            doctorId: e.target.value
+                                        }))}
+                                        className="w-full p-2 border rounded"
+                                        placeholder="Nhập ID bác sĩ"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Tiêu đề tham vấn</label>
+                                    <input
+                                        type="text"
+                                        value={feedbackData.feedbackName}
+                                        onChange={(e) => setFeedbackData(prev => ({
+                                            ...prev,
+                                            feedbackName: e.target.value
+                                        }))}
+                                        className="w-full p-2 border rounded"
+                                        placeholder="Nhập tiêu đề ngắn gọn"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Nội dung tham vấn</label>
+                                    <textarea
+                                        value={feedbackData.feedbackContentRequest}
+                                        onChange={(e) => setFeedbackData(prev => ({
+                                            ...prev,
+                                            feedbackContentRequest: e.target.value
+                                        }))}
+                                        className="w-full p-2 border rounded"
+                                        rows="4"
+                                        placeholder="Mô tả chi tiết vấn đề cần tham vấn"
+                                    />
+                                </div>
+
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        onClick={() => {
+                                            setShowDoctorConsultForm(false);
+                                            setFeedbackData({
+                                                doctorId: '',
+                                                feedbackName: '',
+                                                feedbackContentRequest: '',
+                                            });
+                                        }}
+                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                    >
+                                        Hủy
+                                    </button>
+                                    <button
+                                        onClick={handleSubmitFeedback}
+                                        disabled={!feedbackData.doctorId || !feedbackData.feedbackName || !feedbackData.feedbackContentRequest}
+                                        className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                    >
+                                        Gửi yêu cầu
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Form chỉnh sửa báo cáo */}
+                    {showEditReport && selectedReport && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg text-black">
+                            <h4 className="text-lg font-semibold mb-4">Chỉnh sửa báo cáo</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Chiều cao (cm)</label>
+                                    <input
+                                        type="number"
+                                        value={editHeight}
+                                        onChange={(e) => setEditHeight(e.target.value)}
+                                        className="w-full p-2 border rounded"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Cân nặng (kg)</label>
+                                    <input
+                                        type="number"
+                                        value={editWeight}
+                                        onChange={(e) => setEditWeight(e.target.value)}
+                                        className="w-full p-2 border rounded"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Ngày đo</label>
+                                    <DatePicker
+                                        format="DD-MM-YYYY"
+                                        value={editDate}
+                                        onChange={setEditDate}
+                                        className="w-full"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex justify-end space-x-2 mt-4">
+                                <button
+                                    onClick={() => setShowEditReport(false)}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    onClick={handleUpdateReport}
+                                    className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                                >
+                                    Cập nhật
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {reportsLoading ? (
                         <div className="flex justify-center py-4 text-black">
                             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                         </div>
-                    ) : reports.length > 0 ? (
+                    ) : reports.length > 0 && childData ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-black">
                             {reports.map((report) => (
                                 <div
                                     key={report.reportId}
                                     onClick={() => handleSelectReport(report)}
-                                    onDoubleClick={() => handleDoubleClickReport(report)}
+                                    onDoubleClick={() => handleShowEditForm()}
                                     className={`bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
                                         selectedReport?.reportId === report.reportId ? 'ring-2 ring-blue-500' : ''
                                     }`}
@@ -494,7 +736,7 @@ const DetailChildByChildId = () => {
                                                 (date) => formatDate(date)
                                             )}
                                         </p>
-                                        <div className="flex justify-between ">
+                                        <div className="flex justify-between">
                                             <span className="font-medium">Id Report:</span>
                                             <span>{report.reportId}</span>
                                         </div>
@@ -513,6 +755,12 @@ const DetailChildByChildId = () => {
                                             </span>
                                         </div>
                                         <div className="flex justify-between">
+                                            <span className="font-medium">Độ tuổi ghi nhận:</span>
+                                            <span>
+                                                {calculateAgeAtReport(childData.dob, report.reportContent.split(' ')[3])} tuổi
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
                                             <span className="font-medium">Nhận xét:</span>
                                             <span className="text-sm text-gray-600">{report.reportMark}</span>
                                         </div>
@@ -525,67 +773,9 @@ const DetailChildByChildId = () => {
                     )}
                 </div>
 
-                {editMode && selectedReport && (
-                    <div className="mt-4 bg-white rounded-xl shadow-lg p-6">
-                        <h3 className="text-xl font-bold mb-4 text-green-500">Chỉnh sửa báo cáo</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1 text-black">Chiều cao (cm)</label>
-                                <input
-                                    type="number"
-                                    value={editHeight}
-                                    onChange={(e) => setEditHeight(e.target.value)}
-                                    className="w-full p-2 border rounded text-black"
-                                    min="50"
-                                    max="250"
-                                    step="0.1"
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium mb-1 text-black">Cân nặng (kg)</label>
-                                <input
-                                    type="number"
-                                    value={editWeight}
-                                    onChange={(e) => setEditWeight(e.target.value)}
-                                    className="w-full p-2 border rounded text-black"
-                                    min="2"
-                                    max="300"
-                                    step="0.1"
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium mb-1 text-black">Ngày đo</label>
-                                <DatePicker
-                                    format="DD-MM-YYYY"
-                                    value={editDate}
-                                    onChange={setEditDate}
-                                    className="w-full text-black"
-                                    disabledDate={current => current > moment().endOf('day')}
-                                />
-                            </div>
-                        </div>
-                        
-                        <div className="flex justify-end space-x-2 mt-4">
-                            <button
-                                onClick={() => setSelectedReport(null)}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                onClick={handleUpdateReport}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                            >
-                                Cập nhật
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {products.length > 0 && (
-                    <section className="py-8">
+                {/* Section sản phẩm gợi ý */}
+                {showProductSuggestions && selectedReport && (
+                    <section className="mt-8">
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">Sản phẩm gợi ý</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {products.map(product => (

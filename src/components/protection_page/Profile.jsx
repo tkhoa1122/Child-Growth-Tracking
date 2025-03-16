@@ -253,12 +253,29 @@ const Profile = () => {
                             <div className="flex justify-between items-center mb-2">
                                 <p className="font-medium text-gray-900">Đơn hàng:</p>
                                 <div className="space-x-2">
-                                    <Link 
-                                        to="/buy-service" 
-                                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
-                                    >
-                                        Mua dịch vụ
-                                    </Link>
+                                    {checkingRights ? (
+                                        <button 
+                                            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+                                            disabled
+                                        >
+                                            Đang kiểm tra...
+                                        </button>
+                                    ) : hasServiceRights ? (
+                                        <button 
+                                            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+                                            disabled
+                                            title="Bạn đã có dịch vụ đang hoạt động"
+                                        >
+                                            Đã có dịch vụ
+                                        </button>
+                                    ) : (
+                                        <Link 
+                                            to="/buy-service" 
+                                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
+                                        >
+                                            Mua dịch vụ
+                                        </Link>
+                                    )}
                                     <Link 
                                         to={`/history-orders/${profileData.parentId}`} 
                                         className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
