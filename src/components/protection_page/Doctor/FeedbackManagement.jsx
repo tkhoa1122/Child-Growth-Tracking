@@ -12,11 +12,19 @@ const FeedbackManagement = () => {
     const fetchFeedbacks = async () => {
         try {
             const response = await axios.get('feedback/get-list-feedback');
+            console.log(response);
+
+            // Kiểm tra nếu response.data tồn tại và là một mảng
+            if (!response.data || !Array.isArray(response.data)) {
+                throw new Error('Dữ liệu feedback không hợp lệ');
+            }
+
             // Lọc các feedback có feedbackIsActive là false
-            const inactiveFeedbacks = response.data.result.filter(f => f.feedbackIsActive === false);
+            const inactiveFeedbacks = response.data.filter(f => f.feedbackIsActive === false);
             setFeedbacks(inactiveFeedbacks);
         } catch (error) {
             console.error('Error fetching feedbacks:', error);
+            setFeedbacks([]); // Đặt feedbacks thành mảng rỗng nếu có lỗi
         }
     };
 

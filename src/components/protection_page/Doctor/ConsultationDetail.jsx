@@ -21,6 +21,8 @@ export const ConsultationDetail = () => {
         message: '',
         type: ''
     });
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
 
     useEffect(() => {
         if (!childId) {
@@ -42,7 +44,6 @@ export const ConsultationDetail = () => {
                     console.log("parentAccountInfo:", parentAccountInfo);
                 }
 
-
                 // Fetch Child Info
                 const childInfoResponse = await axios.get(`Parent/child-info/${childId}`);
                 const childData = childInfoResponse.data;
@@ -51,8 +52,12 @@ export const ConsultationDetail = () => {
                 // Fetch BMI Reports
                 const bmiReportsResponse = await axios.get(`reports/child/${childId}`);
                 const bmiReportsData = Array.isArray(bmiReportsResponse.data) ? bmiReportsResponse.data : [];
-                console.log(bmiReportsData);
-                
+
+                // Lọc các report có reportIsActive là Pending hoặc Active
+                const filteredBmiReports = bmiReportsData.filter(report =>
+                    report.reportIsActive === 'Pending' || report.reportIsActive === 'Active'
+                );
+
                 // Cập nhật state
                 setParentInfo(parentAccountInfo ? {
                     firstName: parentAccountInfo.firstName,
@@ -71,15 +76,13 @@ export const ConsultationDetail = () => {
                     imageUrl: childData.imageUrl
                 });
 
-                setBmiReports(bmiReportsData.map(report => ({
+                setBmiReports(filteredBmiReports.map(report => ({
                     reportCreateDate: report.reportCreateDate,
                     weight: report.weight,
                     height: report.height,
                     bmi: report.bmi,
                     reportMark: report.reportMark
                 })));
-                console.log(bmiReports);
-                
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -92,7 +95,7 @@ export const ConsultationDetail = () => {
     const fetchFeedback = async () => {
         try {
             const response = await axios.get('feedback/get-list-feedback');
-            const feedbackData = response.data.result.find(f => f.report.childId === childId);
+            const feedbackData = response.data.find(f => f.report.childId === childId);
             if (feedbackData) {
                 setFeedback(feedbackData);
             }
@@ -131,6 +134,20 @@ export const ConsultationDetail = () => {
 
             // Lấy lại dữ liệu feedback mới nhất
             await fetchFeedback();
+
+            // Lấy lại danh sách BMI Reports để cập nhật UI
+            const bmiReportsResponse = await axios.get(`reports/child/${childId}`);
+            const bmiReportsData = Array.isArray(bmiReportsResponse.data) ? bmiReportsResponse.data : [];
+            const filteredBmiReports = bmiReportsData.filter(report =>
+                report.reportIsActive === 'Pending' || report.reportIsActive === 'Active'
+            );
+            setBmiReports(filteredBmiReports.map(report => ({
+                reportCreateDate: report.reportCreateDate,
+                weight: report.weight,
+                height: report.height,
+                bmi: report.bmi,
+                reportMark: report.reportMark
+            })));
         } catch (error) {
             console.error('Error submitting feedback:', error);
             setNotification({
@@ -153,11 +170,16 @@ export const ConsultationDetail = () => {
         return 'bg-red-100 text-red-800';
     };
 
+    const filteredBmiReports = bmiReports.filter(report => {
+        const reportDate = new Date(report.reportCreateDate);
+        return (!startDate || reportDate >= startDate) && (!endDate || reportDate <= endDate);
+    });
+
     const chartData = {
-        labels: bmiReports.map(report => report.reportCreateDate),
+        labels: filteredBmiReports.map(report => new Date(report.reportCreateDate).toLocaleDateString()),
         datasets: [{
             label: 'Chỉ số BMI',
-            data: bmiReports.map(report => report.bmi),
+            data: filteredBmiReports.map(report => report.bmi),
             fill: false,
             borderColor: 'rgb(75, 192, 192)',
             tension: 0.1
@@ -266,6 +288,36 @@ export const ConsultationDetail = () => {
                             </div>
                         </div>
 
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-gray-800 mb-4">Bộ lọc theo ngày</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
+                                    <input
+                                        type="date"
+                                        value={startDate ? startDate.toISOString().split('T')[0] : ''}
+                                        onChange={(e) => {
+                                            const newDate = e.target.value ? new Date(e.target.value) : null;
+                                            setStartDate(isNaN(newDate.getTime()) ? null : newDate);
+                                        }}
+                                        className="w-full p-2 border border-gray-300 rounded-lg text-black"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label>
+                                    <input
+                                        type="date"
+                                        value={endDate ? endDate.toISOString().split('T')[0] : ''}
+                                        onChange={(e) => {
+                                            const newDate = e.target.value ? new Date(e.target.value) : null;
+                                            setEndDate(isNaN(newDate.getTime()) ? null : newDate);
+                                        }}
+                                        className="w-full p-2 border border-gray-300 rounded-lg text-black"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="h-96 mb-6">
                             <Line data={chartData} options={{
                                 responsive: true,
@@ -316,7 +368,7 @@ export const ConsultationDetail = () => {
                 {/* Feedback Section */}
                 <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
                     <h2 className="text-xl font-bold text-gray-800 mb-4">Phản hồi</h2>
-                    
+
                     {feedback ? (
                         <>
                             <div className="mb-6">
