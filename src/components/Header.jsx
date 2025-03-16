@@ -72,12 +72,12 @@ export const Header = () => {
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center">
                             <span className="font-mono text-xl font-bold text-black">
-                                Thonglnse<span className="text-blue-500">.tech</span>
+                                SWP_G3_P5<span className="text-blue-500">.tech</span>
                             </span>
                         </Link>
                     </div>
 
-                    {/* Search Bar */}
+                    {/* Search Bar
                     <div className="flex-1 max-w-2xl mx-8">
                         <form onSubmit={handleSearch} className="relative">
                             <input
@@ -94,7 +94,7 @@ export const Header = () => {
                                 <FaSearch className="h-4 w-4" />
                             </button>
                         </form>
-                    </div>
+                    </div> */}
 
                     {/* Auth Buttons or User Menu */}
                     <div className="flex items-center space-x-4">

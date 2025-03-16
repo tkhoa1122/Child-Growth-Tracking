@@ -11,7 +11,7 @@ export const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {/* About Section */}
                     <div className="space-y-4">
-                        <h3 className="text-white text-lg font-bold mb-4">Về Thonglnse.tech</h3>
+                        <h3 className="text-white text-lg font-bold mb-4">Về SWP_G3_P5.tech</h3>
                         <p className="text-sm leading-relaxed">
                             Chúng tôi là nền tảng chia sẻ kiến thức và kinh nghiệm về công nghệ, 
                             lập trình và phát triển phần mềm. Sứ mệnh của chúng tôi là đem đến 
@@ -112,7 +112,7 @@ export const Footer = () => {
                         <div className="space-y-4">
                             <div className="flex items-center space-x-3">
                                 <FaMapMarkerAlt className="text-gray-400" />
-                                <span>123 Đường ABC, Quận XYZ, TP.HCM</span>
+                                <span>123 Đường Dài, Huyện Ngắn, HCM</span>
                             </div>
                             <div className="flex items-center space-x-3">
                                 <FaPhone className="text-gray-400" />
@@ -120,14 +120,14 @@ export const Footer = () => {
                             </div>
                             <div className="flex items-center space-x-3">
                                 <FaEnvelope className="text-gray-400" />
-                                <span>contact@thonglnse.tech</span>
+                                <span>thonglyngocse@gmail.com</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Newsletter Subscription */}
-                <div className="mt-12 border-t border-gray-800 pt-8">
+                {/* <div className="mt-12 border-t border-gray-800 pt-8">
                     <div className="max-w-md mx-auto">
                         <h3 className="text-white text-lg font-bold mb-4 text-center">Đăng Ký Nhận Tin</h3>
                         <form className="flex space-x-2">
@@ -144,7 +144,7 @@ export const Footer = () => {
                             </button>
                         </form>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Bottom Footer */}
                 <div className="mt-12 border-t border-gray-800 pt-8">
