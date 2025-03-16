@@ -15,13 +15,21 @@ const FeedbackManagement = () => {
             const response = await axios.get('feedback/get-list-feedback');
             console.log(response);
 
+            const accountId = localStorage.getItem('userId');
+            const responseId = await axios.get(`Doctor/${accountId}`);
+            const currentDoctorId = responseId.data.doctorId;
+
+            console.log("Current doctorId: ", currentDoctorId);
+
             // Kiểm tra nếu response.data tồn tại và là một mảng
             if (!response.data || !Array.isArray(response.data)) {
                 throw new Error('Dữ liệu feedback không hợp lệ');
             }
 
-            // Lọc các feedback có feedbackIsActive là false
-            const inactiveFeedbacks = response.data.filter(f => f.feedbackIsActive === false);
+            // Lọc các feedback có feedbackIsActive là false và doctorId trùng với doctorId hiện tại
+            const inactiveFeedbacks = response.data.filter(f =>
+                f.feedbackIsActive === false && f.doctorId === currentDoctorId
+            );
             setFeedbacks(inactiveFeedbacks);
         } catch (error) {
             console.error('Error fetching feedbacks:', error);
@@ -36,28 +44,6 @@ const FeedbackManagement = () => {
     // Hàm chuyển hướng đến trang chi tiết tư vấn
     const handleViewConsultation = (childId) => {
         navigate(`/consultation-detail/${childId}`);
-    };
-
-    const handleSubmitFeedback = async (feedbackId) => {
-        try {
-            if (!doctorFeedback.trim()) {
-                alert('Vui lòng nhập phản hồi');
-                return;
-            }
-
-            // Cập nhật feedback
-            await axios.put(`feedback/update-feedback/${feedbackId}`, {
-                feedbackContentResponse: doctorFeedback
-            });
-
-            // Lấy lại danh sách feedback mới nhất
-            await fetchFeedbacks();
-
-            alert('Gửi phản hồi thành công!');
-        } catch (error) {
-            console.error('Error submitting feedback:', error);
-            alert('Đã xảy ra lỗi khi gửi phản hồi');
-        }
     };
 
     return (
@@ -91,7 +77,7 @@ const FeedbackManagement = () => {
                                 </button>
                             </div>
                             <p className="text-gray-700 mb-4">{feedback.feedbackContentRequest}</p>
-                            
+
                             {feedback.feedbackContentResponse && (
                                 <div className="bg-blue-50 p-4 rounded-lg">
                                     <p className="text-blue-800">
