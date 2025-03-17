@@ -3,6 +3,7 @@ import { Navbar } from './Navbar';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const childHealth = '/Images/child-health.jpg';
 
@@ -166,9 +167,9 @@ export const Home = () => {
                             Cung cấp thông tin và hướng dẫn toàn diện về sức khỏe trẻ em, 
                             giúp các bậc phụ huynh chăm sóc con yêu tốt nhất.
                         </p>
-                        <button className="bg-blue-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-600 transition-colors">
+                        <Link to="/about" className="bg-blue-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-600 transition-colors inline-block">
                             Tìm hiểu thêm
-                        </button>
+                        </Link>
                     </div>
                 </motion.div>
             </section>
@@ -322,9 +323,9 @@ export const Home = () => {
                     <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
                         Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
                     </p>
-                    <button className="bg-white text-blue-900 px-8 py-3 rounded-full font-semibold hover:bg-blue-100 transition-colors">
+                    <Link to="/contact" className="bg-white text-blue-900 px-8 py-3 rounded-full font-semibold hover:bg-blue-100 transition-colors inline-block">
                         Liên hệ ngay
-                    </button>
+                    </Link>
                 </div>
             </motion.section>
             <Footer />
