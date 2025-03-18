@@ -39,6 +39,7 @@ const Profile = () => {
     const [editingChild, setEditingChild] = useState(false);
     const [checkingRights, setCheckingRights] = useState(false);
     const [hasServiceRights, setHasServiceRights] = useState(false);
+    const [deletingChild, setDeletingChild] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -201,6 +202,34 @@ const Profile = () => {
         }
     };
 
+    // Thêm hàm xử lý xóa trẻ
+    const handleDeleteChild = async () => {
+        if (!selectedChild?.childId) return;
+        
+        // Hiển thị confirm trước khi xóa
+        if (!window.confirm('Bạn có chắc chắn muốn xóa thông tin trẻ này? Hành động này không thể hoàn tác.')) {
+            return;
+        }
+
+        try {
+            setDeletingChild(true);
+            const response = await api.delete(`/Parent/children/${selectedChild.childId}`);
+            
+            if (response.status === 200) {
+                toast.success('Xóa thông tin trẻ thành công');
+                // Cập nhật lại danh sách trẻ
+                setChildren(children.filter(child => child.childId !== selectedChild.childId));
+                // Đóng form chỉnh sửa
+                setSelectedChild(null);
+            }
+        } catch (error) {
+            console.error('Lỗi khi xóa thông tin trẻ:', error);
+            toast.error(error.response?.data?.message || 'Xóa thông tin trẻ thất bại');
+        } finally {
+            setDeletingChild(false);
+        }
+    };
+
     if (loading) return <div>Loading...</div>;
 
     return (
@@ -253,12 +282,29 @@ const Profile = () => {
                             <div className="flex justify-between items-center mb-2">
                                 <p className="font-medium text-gray-900">Đơn hàng:</p>
                                 <div className="space-x-2">
-                                    <Link 
-                                        to="/buy-service" 
-                                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
-                                    >
-                                        Mua dịch vụ
-                                    </Link>
+                                    {checkingRights ? (
+                                        <button 
+                                            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+                                            disabled
+                                        >
+                                            Đang kiểm tra...
+                                        </button>
+                                    ) : hasServiceRights ? (
+                                        <button 
+                                            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+                                            disabled
+                                            title="Bạn đã có dịch vụ đang hoạt động"
+                                        >
+                                            Đã có dịch vụ
+                                        </button>
+                                    ) : (
+                                        <Link 
+                                            to="/buy-service" 
+                                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
+                                        >
+                                            Mua dịch vụ
+                                        </Link>
+                                    )}
                                     <Link 
                                         to={`/history-orders/${profileData.parentId}`} 
                                         className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
@@ -454,7 +500,7 @@ const Profile = () => {
                                     </div>
                                     <div className="space-y-2">
                                         <p className="font-medium text-gray-900">
-                                            {child.firstName} {child.lastName}
+                                            {child.lastName} {child.firstName}
                                         </p>
                                         <p className="text-sm">
                                             <span className="font-medium">ID:</span> 
@@ -480,7 +526,16 @@ const Profile = () => {
 
 {selectedChild && (
                         <div className="bg-gray-50 p-4 rounded-lg mt-4">
-                            <h3 className="text-lg font-medium mb-4">Chỉnh sửa thông tin trẻ</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-medium">Chỉnh sửa thông tin trẻ</h3>
+                                <button
+                                    onClick={handleDeleteChild}
+                                    disabled={deletingChild}
+                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                >
+                                    {deletingChild ? 'Đang xóa...' : 'Xóa thông tin trẻ'}
+                                </button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Họ</label>
