@@ -84,6 +84,8 @@ const DetailChildByChildId = () => {
     });
     const [doctors, setDoctors] = useState([]);
     const [loadingDoctors, setLoadingDoctors] = useState(true);
+    const [feedbacks, setFeedbacks] = useState([]);
+    const [loadingFeedbacks, setLoadingFeedbacks] = useState(true);
 
     // Đặt hàm disabledDate vào trong component để có thể truy cập childData
     const disabledDate = (current) => {
@@ -211,6 +213,24 @@ const DetailChildByChildId = () => {
 
         fetchDoctors();
     }, []);
+
+    useEffect(() => {
+        const fetchFeedbacks = async () => {
+            try {
+                const response = await api.get(`/feedback/get-list-feedback-by-childId/${childId}`);
+                if (response.status === 200) {
+                    setFeedbacks(response.data);
+                }
+            } catch (error) {
+                console.error('Lỗi tải phản hồi:', error);
+                toast.error('Không thể tải danh sách phản hồi.');
+            } finally {
+                setLoadingFeedbacks(false);
+            }
+        };
+
+        fetchFeedbacks();
+    }, [childId]);
 
     const handleMakeReport = () => {
         if (!serviceStatus.isValid) {
@@ -888,6 +908,28 @@ const DetailChildByChildId = () => {
                         </div>
                     </section>
                 )}
+
+                {/* Section hiển thị danh sách phản hồi dưới dạng thẻ card */}
+                <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-xl font-bold mb-4 text-green-500">Danh sách phản hồi</h3>
+                    {loadingFeedbacks ? (
+                        <div className="flex justify-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {feedbacks.map(feedback => (
+                                <div key={feedback.feedbackId} className="bg-white rounded-lg p-4 shadow-lg transition-transform transform hover:scale-105 hover:shadow-xl">
+                                    <h4 className="font-semibold text-2xl text-blue-600">{feedback.feedbackName}</h4>
+                                    <p className="text-m text-gray-700">Nội dung yêu cầu: <span className="font-medium">{feedback.feedbackContentRequest}</span></p>
+                                    <p className="text-m text-gray-500">Ngày tạo: {new Date(feedback.feedbackCreateDate).toLocaleString()}</p>
+                                    <p className="text-m text-gray-500">Trạng thái: <span className={feedback.feedbackIsActive ? 'text-green-500' : 'text-red-500'}>{feedback.feedbackIsActive ? 'Hoạt động' : 'Không hoạt động'}</span></p>
+                                    <p className="text-m text-gray-700">Nội dung phản hồi: <span className="italic">{feedback.feedbackContentResponse}</span></p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
             </main>
             <Footer />
