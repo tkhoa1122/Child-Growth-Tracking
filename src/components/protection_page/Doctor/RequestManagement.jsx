@@ -19,21 +19,19 @@ export const RequestManagement = () => {
 
                 // Lấy danh sách feedback
                 const feedbackResponse = await axios.get('feedback/get-list-feedback');
-                console.log(feedbackResponse);
-                
                 const relevantFeedbacks = feedbackResponse.data.filter(f => f.doctorId === currentDoctorId);
                 const reportIds = relevantFeedbacks.map(f => f.reportId);
 
                 // Lấy các yêu cầu đang chờ và đã xử lý
                 const pendingResponse = await axios.get('reports/pending');
-                //const activeResponse = await axios.get('reports/active');
-                console.log(pendingResponse)
+                const activeResponse = await axios.get('reports/active');
 
                 // Kết hợp các yêu cầu và lọc theo reportId
                 const allRequests = [
                     ...pendingResponse.data.filter(request => reportIds.includes(request.reportId)),
                     ...activeResponse.data.filter(request => reportIds.includes(request.reportId))
                 ];
+                console.log(allRequests)
                 
                 // Lấy thông tin trẻ từ API Parent/child-info/{childId}
                 const requestsWithChildInfo = await Promise.all(allRequests.map(async (request) => {
@@ -48,7 +46,7 @@ export const RequestManagement = () => {
                 }));
 
                 setRequests(requestsWithChildInfo);
-                setUnreadCount(pendingResponse.data.filter(request => request.reportIsActive === "0").length);
+                setUnreadCount(requestsWithChildInfo.length);
             } catch (error) {
                 console.error('Error fetching requests:', error);
                 // Có thể thêm thông báo cho người dùng ở đây

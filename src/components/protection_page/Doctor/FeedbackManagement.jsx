@@ -25,9 +25,11 @@ const FeedbackManagement = () => {
                 throw new Error('Dữ liệu feedback không hợp lệ');
             }
 
-            // Lọc các feedback có feedbackIsActive là false và doctorId trùng với doctorId hiện tại
-            const inactiveFeedbacks = response.data.filter(f =>
-                f.feedbackIsActive === false && f.doctorId === currentDoctorId
+            // Lọc các feedback có feedbackIsActive là false, doctorId trùng khớp và isResponsed là true
+            const inactiveFeedbacks = response.data.filter(f => 
+                f.feedbackIsActive === false && 
+                f.doctorId === currentDoctorId &&
+                f.report.feedbacks[0]?.isResponsed === true
             );
             setFeedbacks(inactiveFeedbacks);
         } catch (error) {
@@ -50,11 +52,11 @@ const FeedbackManagement = () => {
             <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-800">Quản lý đánh giá</h2>
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                         <FaStar className="text-yellow-400" />
-                        <span className="font-bold text-xl">4.8</span>
+                        <span className="font-bold text-gray-500 text-xl">4.8</span>
                         <span className="text-gray-500">(256 đánh giá)</span>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="space-y-6">
