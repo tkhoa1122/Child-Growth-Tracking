@@ -156,17 +156,20 @@ const DetailChildByChildId = () => {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const response = await api.get(`/reports/${childId}`);
-                setReports(response.data);
+                const response = await api.get(`https://localhost:7190/api/reports/child/${childId}`);
+                if (response.status === 200) {
+                    // Hiển thị trực tiếp dữ liệu từ API trả về mà không cần lọc
+                    setReports(response.data);
+                }
             } catch (error) {
                 console.error('Lỗi tải báo cáo:', error);
-                toast.error('Không thể tải lịch sử báo cáo');
+                toast.error('Không thể tải báo cáo.');
             } finally {
                 setReportsLoading(false);
             }
         };
-        
-        if (childId) fetchReports();
+
+        fetchReports(); // Gọi hàm fetchReports khi component được mount
     }, [childId]);
 
     // Xử lý dữ liệu cho biểu đồ
@@ -247,7 +250,7 @@ const DetailChildByChildId = () => {
                 height: parseFloat(height),
                 weight: parseFloat(weight),
                 reportCreateDate: selectedDate.format('YYYY-MM-DD'),
-                reportIsActive: "string",
+                reportIsActive: "1",
                 reportMark: comment,
                 reportContent: `Báo cáo BMI ngày ${selectedDate.format('DD-MM-YYYY')}`,
                 reportName: `Báo cáo BMI - ${childData.lastName} ${childData.firstName}`,
@@ -418,6 +421,24 @@ const DetailChildByChildId = () => {
         } catch (error) {
             console.error('Lỗi khi gửi yêu cầu:', error);
             toast.error(error.response?.data?.message || 'Gửi yêu cầu thất bại!');
+        }
+    };
+
+    // Hàm xóa báo cáo
+    const handleDeleteReport = async (reportId) => {
+        if (!reportId) return; // Kiểm tra xem reportId có hợp lệ không
+
+        try {
+            const response = await api.delete(`https://localhost:7190/api/reports/${reportId}`);
+            if (response.status === 204) {
+                toast.success('Xoá báo cáo thành công!'); // Hiển thị thông báo thành công
+                await handleRefreshReports(); // Gọi lại hàm handleRefreshReports để làm mới danh sách báo cáo
+            } else {
+                toast.error('Không thể xoá báo cáo.'); // Thông báo lỗi nếu không phải 204
+            }
+        } catch (error) {
+            console.error('Lỗi khi xoá báo cáo:', error);
+            toast.error('Không thể xoá báo cáo.'); // Thông báo lỗi nếu có lỗi xảy ra
         }
     };
 
@@ -655,6 +676,14 @@ const DetailChildByChildId = () => {
                             >
                                 Chỉnh sửa báo cáo
                             </button>
+                            {/* Nút Xoá báo cáo */}
+                            <button
+                                onClick={() => handleDeleteReport(selectedReport?.reportId)}
+                                disabled={!selectedReport}
+                                className={`px-4 py-2 rounded ${selectedReport ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-300'} text-white`}
+                            >
+                                Xoá báo cáo
+                            </button>
                         </div>
                     </div>
                     
@@ -846,12 +875,20 @@ const DetailChildByChildId = () => {
                                             <span className="font-medium">Nhận xét:</span>
                                             <span className="text-sm text-gray-600">{report.reportMark}</span>
                                         </div>
+                                        <div className="flex justify-between mt-2">
+                                            <span className="font-medium">Ngày tạo:</span>
+                                            <span className="text-sm text-gray-500">{new Date(report.reportCreateDate).toLocaleDateString()}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-medium">Thời gian:</span>
+                                            <span className="text-sm text-gray-500">{new Date(report.reportCreateDate).toLocaleTimeString()}</span>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-gray-600 italic">Chưa có báo cáo nào được tạo</p>
+                        <p className="text-gray-600">Không có báo cáo nào.</p>
                     )}
                 </div>
 
