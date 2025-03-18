@@ -812,12 +812,12 @@ const DetailChildByChildId = () => {
                                     }`}
                                 >
                                     <div className="space-y-2">
-                                        <p className="text-sm text-gray-600 font-medium">
+                                        {/* <p className="text-sm text-gray-600 font-medium">
                                             {report.reportContent.replace(
                                                 /(\d{4}-\d{2}-\d{2})/,
                                                 (date) => formatDate(date)
                                             )}
-                                        </p>
+                                        </p> */}
                                         <div className="flex justify-between">
                                             <span className="font-medium">Id Report:</span>
                                             <span>{report.reportId}</span>
@@ -846,12 +846,20 @@ const DetailChildByChildId = () => {
                                             <span className="font-medium">Nhận xét:</span>
                                             <span className="text-sm text-gray-600">{report.reportMark}</span>
                                         </div>
+                                        <div className="flex justify-between mt-2">
+                                            <span className="font-medium">Ngày tạo:</span>
+                                            <span className="text-sm text-gray-500">{new Date(report.reportCreateDate).toLocaleDateString()}</span>
+                                        </div>
+                                        {/* <div className="flex justify-between">
+                                            <span className="font-medium">Thời gian:</span>
+                                            <span className="text-sm text-gray-500">{new Date(report.reportCreateDate).toLocaleTimeString()}</span>
+                                        </div> */}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-gray-600 italic">Chưa có báo cáo nào được tạo</p>
+                        <p className="text-gray-600">Không có báo cáo nào.</p>
                     )}
                 </div>
 
