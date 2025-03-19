@@ -76,14 +76,17 @@ export const ProductManagement = () => {
             newErrors.price = 'Giá sản phẩm phải là số dương';
         }
 
-        if (!product.minAge || isNaN(product.minAge) || product.minAge < 0) {
-            newErrors.minAge = 'Độ tuổi tối thiểu không hợp lệ';
+        // Validate minAge (0-18 tuổi)
+        if (!product.minAge || isNaN(product.minAge) || product.minAge < 0 || product.minAge > 18) {
+            newErrors.minAge = 'Độ tuổi tối thiểu phải từ 0 đến 18';
         }
 
-        if (!product.maxAge || isNaN(product.maxAge) || product.maxAge < 0) {
-            newErrors.maxAge = 'Độ tuổi tối đa không hợp lệ';
+        // Validate maxAge (0-18 tuổi)
+        if (!product.maxAge || isNaN(product.maxAge) || product.maxAge < 0 || product.maxAge > 18) {
+            newErrors.maxAge = 'Độ tuổi tối đa phải từ 0 đến 18';
         }
 
+        // Kiểm tra minAge và maxAge hợp lý
         if (product.minAge && product.maxAge && Number(product.minAge) >= Number(product.maxAge)) {
             newErrors.maxAge = 'Độ tuổi tối đa phải lớn hơn độ tuổi tối thiểu';
         }
@@ -135,6 +138,23 @@ export const ProductManagement = () => {
             showNotification('Sản phẩm đã được thêm thành công!', 'success');
             setIsModalOpen(false);
             setErrors({});
+            
+            // Reset newProduct về giá trị mặc định
+            setNewProduct({
+                productName: '',
+                productDescription: '',
+                price: 0,
+                minAge: '',
+                maxAge: '',
+                safetyFeature: '',
+                rating: 0,
+                recommendedBy: '',
+                imageUrl: '',
+                brand: '',
+                isActive: true,
+                productType: ''
+            });
+            
             fetchProducts();
         } catch (error) {
             console.error('Error adding product:', error);
@@ -417,24 +437,27 @@ export const ProductManagement = () => {
                                 placeholder="Giá"
                                 value={newProduct.price}
                                 onChange={handleInputChange}
-                                className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full"
+                                className={`border text-gray-700 border-gray-300 rounded-lg p-3 w-full ${errors.price ? 'border-red-500' : ''}`}
                             />
+                            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
                             <input
                                 type="text"
                                 name="minAge"
                                 placeholder="Độ tuổi tối thiểu"
                                 value={newProduct.minAge}
                                 onChange={handleInputChange}
-                                className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full"
+                                className={`border text-gray-700 border-gray-300 rounded-lg p-3 w-full ${errors.minAge ? 'border-red-500' : ''}`}
                             />
+                            {errors.minAge && <p className="text-red-500 text-sm mt-1">{errors.minAge}</p>}
                             <input
                                 type="text"
                                 name="maxAge"
                                 placeholder="Độ tuổi tối đa"
                                 value={newProduct.maxAge}
                                 onChange={handleInputChange}
-                                className="border text-gray-700 border-gray-300 rounded-lg p-3 w-full"
+                                className={`border text-gray-700 border-gray-300 rounded-lg p-3 w-full ${errors.maxAge ? 'border-red-500' : ''}`}
                             />
+                            {errors.maxAge && <p className="text-red-500 text-sm mt-1">{errors.maxAge}</p>}
                             <input
                                 type="text"
                                 name="safetyFeature"
@@ -562,8 +585,9 @@ export const ProductManagement = () => {
                                             name="price"
                                             value={selectedProduct.price}
                                             onChange={handleEditInputChange}
-                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                            className={`border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm ${errors.price ? 'border-red-500' : ''}`}
                                         />
+                                        {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
                                     </div>
 
                                     <div>
@@ -593,8 +617,9 @@ export const ProductManagement = () => {
                                             name="minAge"
                                             value={selectedProduct.minAge}
                                             onChange={handleEditInputChange}
-                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                            className={`border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm ${errors.minAge ? 'border-red-500' : ''}`}
                                         />
+                                        {errors.minAge && <p className="text-red-500 text-sm mt-1">{errors.minAge}</p>}
                                     </div>
 
                                     <div>
@@ -604,8 +629,9 @@ export const ProductManagement = () => {
                                             name="maxAge"
                                             value={selectedProduct.maxAge}
                                             onChange={handleEditInputChange}
-                                            className="border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm"
+                                            className={`border text-gray-700 border-gray-300 rounded-lg p-1.5 w-full text-sm ${errors.maxAge ? 'border-red-500' : ''}`}
                                         />
+                                        {errors.maxAge && <p className="text-red-500 text-sm mt-1">{errors.maxAge}</p>}
                                     </div>
 
                                     <div className="col-span-2">
