@@ -27,10 +27,12 @@ const FeedbackManagement = () => {
 
             // Lọc các feedback có feedbackIsActive là false, doctorId trùng khớp và isResponsed là true
             const inactiveFeedbacks = response.data.filter(f => 
-                f.feedbackIsActive === false && 
+                f.feedbackIsActive === true && 
                 f.doctorId === currentDoctorId &&
                 f.report.feedbacks[0]?.isResponsed === true
             );
+            console.log(inactiveFeedbacks);
+            
             setFeedbacks(inactiveFeedbacks);
         } catch (error) {
             console.error('Error fetching feedbacks:', error);
