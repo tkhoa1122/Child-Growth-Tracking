@@ -379,7 +379,7 @@ const Profile = () => {
                 </div>
 
                 {/* Section Quản lý trẻ em */}
-                <div className="bg-white rounded-lg shadow p-6 mt-4">
+                <div className="bg-white rounded-lg shadow p-6 mt-4 mb-5">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-gray-900">Quản lý trẻ em</h2>
                         <div className="space-x-2">
@@ -604,12 +604,10 @@ const Profile = () => {
                             </div>
                         </div>
                     )}
-
-
-
                 </div>
-                <Footer />
+               
             </div>
+            <Footer />
         </div>
     );
 };
