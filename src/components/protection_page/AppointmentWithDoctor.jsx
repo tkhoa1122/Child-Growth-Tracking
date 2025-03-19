@@ -468,6 +468,20 @@ const AppointmentWithDoctor = () => {
         }
     };
 
+    // Hàm helper để xác định lớp CSS cho trạng thái
+    const getStatusClass = (status) => {
+        switch (status) {
+            case 'Pending':
+                return 'text-yellow-500'; // Màu vàng cho trạng thái đang chờ
+            case 'Confirmed':
+                return 'text-green-500'; // Màu xanh cho trạng thái đã xác nhận
+            case 'Canceled':
+                return 'text-red-500'; // Màu đỏ cho trạng thái đã hủy
+            default:
+                return 'text-gray-500'; // Màu xám cho trạng thái không xác định
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F8F3D9' }}>
@@ -723,11 +737,9 @@ const AppointmentWithDoctor = () => {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                    ${appointment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                                      appointment.status === 'Approved' ? 'bg-green-100 text-green-800' : 
-                                                      'bg-red-100 text-red-800'}`}>
+                                                    ${getStatusClass(appointment.status)}`}>
                                                     {appointment.status === 'Pending' ? 'Đang chờ' :
-                                                     appointment.status === 'Approved' ? 'Đã duyệt' : 
+                                                     appointment.status === 'Confirmed' ? 'Đã duyệt' : 
                                                      'Đã hủy'}
                                                 </span>
                                             </td>
