@@ -462,6 +462,21 @@ const DetailChildByChildId = () => {
         }
     };
 
+    const handleRefreshFeedbacks = async () => {
+        setLoadingFeedbacks(true);
+        try {
+            const response = await api.get(`/feedback/get-list-feedback-by-childId/${childId}`);
+            if (response.status === 200) {
+                setFeedbacks(response.data);
+            }
+        } catch (error) {
+            console.error('Lỗi tải phản hồi:', error);
+            toast.error('Không thể tải danh sách phản hồi.');
+        } finally {
+            setLoadingFeedbacks(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#F8F3D9]">
             <Header />
@@ -974,6 +989,17 @@ const DetailChildByChildId = () => {
                 {/* Section hiển thị danh sách phản hồi dưới dạng thẻ card */}
                 <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
                     <h3 className="text-xl font-bold mb-4 text-green-500">Danh sách phản hồi</h3>
+                    
+                    {/* Nút tải lại */}
+                    <div className="flex justify-end mb-4">
+                        <button
+                            onClick={handleRefreshFeedbacks} // Hàm để tải lại danh sách phản hồi
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                        >
+                            Tải lại
+                        </button>
+                    </div>
+
                     {loadingFeedbacks ? (
                         <div className="flex justify-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
