@@ -36,10 +36,18 @@ const DoctorDashboard = () => {
     useEffect(() => {
         const fetchDoctorData = async () => {
             try {
-                const response = await axios.get('Doctor/get-all');
-                console.log(response);
-                const data = response.data[0]; // Giả sử API trả về một mảng, lấy phần tử đầu tiên
+                // Lấy accountId từ localStorage
+                const accountId = localStorage.getItem('userId');
+                if (!accountId) {
+                    console.error("Không tìm thấy accountId trong localStorage");
+                    return;
+                }
 
+                // Gọi API để lấy thông tin bác sĩ dựa trên accountId
+                const response = await axios.get(`Doctor/${accountId}`);
+                const data = response.data; // Dữ liệu trả về là thông tin của bác sĩ cụ thể
+
+                // Cập nhật state với thông tin bác sĩ
                 setDoctorInfo({
                     accountId: data.accountId,
                     doctorId: data.doctorId,
@@ -84,6 +92,9 @@ const DoctorDashboard = () => {
             timeoutId
         });
     };
+
+    console.log(doctorInfo);
+    
 
     const handleUpdateClick = () => {
         setUpdatedInfo({
@@ -216,7 +227,9 @@ const DoctorDashboard = () => {
                     <div className="w-3/5">
                         <div className="flex justify-between items-center mb-10">
                             <div>
-                                <h2 className="text-4xl font-bold text-gray-800">{doctorInfo.fullName}</h2>
+                                <h2 className="text-4xl font-bold text-gray-800">
+                                    {doctorInfo.fullName || `${doctorInfo.firstName} ${doctorInfo.lastName}`}
+                                </h2>
                                 <p className="text-gray-600 text-1x1">{doctorInfo.specialization} tại {doctorInfo.hospitalAddressWork}</p>
                             </div>
                             <div className="flex flex-col gap-2">
