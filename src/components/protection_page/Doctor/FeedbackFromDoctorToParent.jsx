@@ -82,9 +82,32 @@ const FeedbackFromDoctorToParent = () => {
 
     return (
         <DoctorLayout>
-            <div className="container mx-auto mt-10 p-6">
-                <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Danh sách phản hồi từ bác sĩ</h1>
-                {userId && <p className="text-center text-gray-600">User ID: {userId}</p>}
+            <div className="container mx-auto mt-1 p-6">
+                <h1 className="text-3xl font-bold text-center text-blue-500 mb-8">Thông tin bác sĩ</h1>
+                {userId && <p className="text-center text-gray-600 hidden">User ID: {userId}</p>}
+                
+                {doctorInfo && (
+                    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+                        <div className="flex items-center">
+                            <img
+                                src={'/Images/doctor.png'}
+                                alt={`${doctorInfo.firstName} ${doctorInfo.lastName}`}
+                                className="w-24 h-24 rounded-full mr-4"
+                            />
+                            <div>
+                                <h2 className="text-2xl font-bold text-green-500">{doctorInfo.firstName} {doctorInfo.lastName}</h2>
+                                <p className="text-gray-600">User ID: {userId}</p>
+                                <p className="text-gray-600">Mã bác sĩ: {doctorInfo.doctorId}</p>
+                                <p className="text-gray-600">Email: {doctorInfo.email}</p>
+                                <p className="text-gray-600">Số điện thoại: {doctorInfo.phoneNumber}</p>
+                                <p className="text-gray-600">Chuyên khoa: {doctorInfo.specialization}</p>
+                                <p className="text-gray-600">Kinh nghiệm: {doctorInfo.experienceYears} năm</p>
+                                <p className="text-gray-600">Nơi làm việc: {doctorInfo.hospitalAddressWork}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                <h1 className="text-3xl font-bold text-center text-green-500 mb-8">Danh sách phản hồi cho bác sĩ</h1>
                 <div className="overflow-x-auto bg-white shadow-lg rounded-lg p-6">
                     <table className="w-full max-w-none border-collapse border border-gray-200 rounded-lg overflow-hidden">
                         <thead className="bg-blue-600 text-white">
@@ -92,7 +115,7 @@ const FeedbackFromDoctorToParent = () => {
                                 <th className="py-3 px-4 border-b text-left">STT</th>
                                 <th className="py-3 px-4 border-b text-left w-40">Ngày tạo</th>
                                 <th className="py-3 px-4 border-b text-left w-35">Feedback ID</th>
-                                <th className="py-3 px-4 border-b text-left w-110">Nội dung yêu cầu</th>
+                                <th className="py-3 px-4 border-b text-left w-100">Nội dung yêu cầu</th>
                                 <th className="py-3 px-4 border-b text-left w-100">Tên phản hồi</th>
                                 <th className="py-3 px-4 border-b text-left w-30">Chiều cao</th>
                                 <th className="py-3 px-4 border-b text-left w-30">Cân nặng</th>
@@ -140,7 +163,7 @@ const FeedbackFromDoctorToParent = () => {
 
                 {selectedFeedback && (
                     <div className="mt-6 bg-white p-6 rounded-lg shadow-lg text-gray-500">
-                        <h2 className="text-xl font-bold mb-4">Chỉnh sửa phản hồi</h2>
+                        <h2 className="text-xl font-bold mb-4 text-green-600">Chỉnh sửa phản hồi</h2>
                         <textarea
                             className="w-full p-3 border rounded-lg"
                             rows="4"
@@ -149,7 +172,7 @@ const FeedbackFromDoctorToParent = () => {
                         />
                         <div className="mt-4 flex justify-end">
                             <button
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg mr-2"
+                                className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2"
                                 onClick={handleUpdateFeedback}
                             >
                                 Cập nhật
