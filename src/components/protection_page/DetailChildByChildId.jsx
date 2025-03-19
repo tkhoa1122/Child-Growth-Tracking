@@ -447,6 +447,21 @@ const DetailChildByChildId = () => {
         }
     };
 
+    // Thêm hàm kiểm tra ngày hợp lệ
+    const isDateValid = (date) => {
+        if (!childData || !date) return false;
+        
+        try {
+            const birthDate = moment(childData.dob);
+            const today = moment().endOf('day');
+            
+            return date >= birthDate && date <= today;
+        } catch (error) {
+            console.error('Lỗi kiểm tra ngày:', error);
+            return false;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#F8F3D9]">
             <Header />
@@ -794,10 +809,10 @@ const DetailChildByChildId = () => {
                     {/* Form chỉnh sửa báo cáo */}
                     {showEditReport && selectedReport && (
                         <div className="mt-4 p-4 bg-gray-50 rounded-lg text-black">
-                            <h4 className="text-lg font-semibold mb-4">Chỉnh sửa báo cáo</h4>
+                            <h4 className="text-lg font-semibold mb-4">Chỉnh sửa chi tiết báo cáo</h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Chiều cao (cm)</label>
+                                    <label className="block text-sm font-medium mb-1">Chỉnh sửa chiều cao (cm)</label>
                                     <input
                                         type="number"
                                         value={editHeight}
@@ -806,7 +821,7 @@ const DetailChildByChildId = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Cân nặng (kg)</label>
+                                    <label className="block text-sm font-medium mb-1">Chỉnh sửa cân nặng (kg)</label>
                                     <input
                                         type="number"
                                         value={editWeight}
@@ -815,12 +830,13 @@ const DetailChildByChildId = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Ngày đo</label>
+                                    <label className="block text-sm font-medium mb-1">Chỉnh sửa ngày đo</label>
                                     <DatePicker
                                         format="DD-MM-YYYY"
                                         value={editDate}
                                         onChange={setEditDate}
                                         className="w-full"
+                                        disabledDate={(current) => !isDateValid(current)}
                                     />
                                 </div>
                             </div>
@@ -833,7 +849,8 @@ const DetailChildByChildId = () => {
                                 </button>
                                 <button
                                     onClick={handleUpdateReport}
-                                    className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                                    disabled={!isDateValid(editDate)}
+                                    className={`px-4 py-2 ${isDateValid(editDate) ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-300'} text-white rounded`}
                                 >
                                     Cập nhật
                                 </button>
