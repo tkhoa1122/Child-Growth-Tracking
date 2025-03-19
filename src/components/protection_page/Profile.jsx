@@ -242,20 +242,29 @@ const Profile = () => {
                 {/* Thông tin cơ bản */}
                 <div className="bg-white rounded-lg shadow p-6 mb-4 text-black">
                     <h2 className="text-xl font-semibold mb-4 text-gray-900">Thông tin tài khoản</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Cột 1: Avatar */}
+                        <div className="flex flex-col items-center">
+                            <img 
+                                src={'/Images/avatar.jpg'}
+                                alt="Avatar"
+                                className="h-35 w-35 rounded-full object-cover mb-2"
+                            />
+                            <p className="font-medium text-gray-900">Avatar</p>
+                        </div>
+                        
+                        {/* Cột 2: Họ và tên, Số điện thoại */}
+                        <div className="flex flex-col justify-center ">
                             <p className="font-medium text-gray-900">Họ và tên:</p>
-                            <p className="text-gray-800">{profileData.account.firstName} {profileData.account.lastName}</p>
-                        </div>
-                        <div>
-                            <p className="font-medium text-gray-900">Email:</p>
-                            <p className="text-gray-800">{profileData.account.email}</p>
-                        </div>
-                        <div>
+                            <p className="text-gray-800 mb-5">{profileData.account.firstName} {profileData.account.lastName}</p>
                             <p className="font-medium text-gray-900">Số điện thoại:</p>
                             <p className="text-gray-800">{profileData.account.phoneNumber}</p>
                         </div>
-                        <div>
+                        
+                        {/* Cột 3: Email và Địa chỉ */}
+                        <div className="flex flex-col justify-center">
+                            <p className="font-medium text-gray-900">Email:</p>
+                            <p className="text-gray-800 mb-5">{profileData.account.email}</p>
                             <p className="font-medium text-gray-900">Địa chỉ:</p>
                             <p className="text-gray-800">{profileData.account.address}</p>
                         </div>
@@ -273,10 +282,10 @@ const Profile = () => {
                             <span className="font-medium text-gray-900">Parent ID:</span> {profileData.parentId}
                         </p>
                         <p className="text-gray-800">
-                            <span className="font-medium text-gray-900">Vai trò:</span> {profileData.account.role === 1 ? 'Parent' : 'Khác'}
+                            <span className="font-medium text-gray-900">Vai trò:</span> {profileData.account.role === 1 ? 'Phụ Huynh' : 'Khác'}
                         </p>
                         <p className="text-gray-800">
-                            <span className="font-medium text-gray-900">Ngày tạo:</span> {new Date(profileData.account.dateCreateAt).toLocaleDateString()}
+                            <span className="font-medium text-gray-900">Ngày tạo tài khoản:</span> {moment(profileData.account.dateCreateAt).format('DD-MM-YYYY')}
                         </p>
                         <div className="pt-4">
                             <div className="flex justify-between items-center mb-2">

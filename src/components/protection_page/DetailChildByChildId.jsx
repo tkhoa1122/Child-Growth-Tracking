@@ -892,7 +892,7 @@ const DetailChildByChildId = () => {
                                                 {report.bmi.toFixed(2)}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between">
+                                        <div className="flex justify-between hidden">
                                             <span className="font-medium">Độ tuổi ghi nhận:</span>
                                             <span>
                                                 {calculateAgeAtReport(childData.dob, report.reportContent.split(' ')[3])} tuổi
@@ -904,7 +904,9 @@ const DetailChildByChildId = () => {
                                         </div>
                                         <div className="flex justify-between mt-2">
                                             <span className="font-medium">Ngày tạo:</span>
-                                            <span className="text-sm text-gray-500">{new Date(report.reportCreateDate).toLocaleDateString()}</span>
+                                            <span className="text-sm text-gray-500">
+                                                {moment(report.reportCreateDate).format('DD-MM-YYYY')}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -982,7 +984,7 @@ const DetailChildByChildId = () => {
                                 <div key={feedback.feedbackId} className="bg-white rounded-lg p-4 shadow-lg transition-transform transform hover:scale-105 hover:shadow-xl">
                                     <h4 className="font-semibold text-2xl text-blue-600">{feedback.feedbackName}</h4>
                                     <p className="text-m text-gray-700">Nội dung yêu cầu: <span className="font-medium">{feedback.feedbackContentRequest}</span></p>
-                                    <p className="text-m text-gray-500">Ngày tạo: {new Date(feedback.feedbackCreateDate).toLocaleString()}</p>
+                                    <p className="text-m text-gray-500">Ngày tạo: {moment(feedback.feedbackCreateDate).format('DD-MM-YYYY')}</p>
                                     <p className="text-m text-gray-500">Trạng thái: <span className={feedback.feedbackIsActive ? 'text-green-500' : 'text-red-500'}>{feedback.feedbackIsActive ? 'Hoạt động' : 'Không hoạt động'}</span></p>
                                     <p className="text-m text-gray-700">Nội dung phản hồi: <span className="italic">{feedback.feedbackContentResponse}</span></p>
                                 </div>
