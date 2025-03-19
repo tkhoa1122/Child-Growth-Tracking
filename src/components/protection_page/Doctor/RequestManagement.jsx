@@ -21,7 +21,7 @@ export const RequestManagement = () => {
                 const feedbackResponse = await axios.get('feedback/get-list-feedback');
                 const relevantFeedbacks = feedbackResponse.data.filter(f => f.doctorId === currentDoctorId);
                 const reportIds = relevantFeedbacks.map(f => f.reportId);
-
+                
                 // Lấy các yêu cầu đang chờ và đã xử lý
                 const pendingResponse = await axios.get('reports/pending');
                 const activeResponse = await axios.get('reports/active');
