@@ -71,6 +71,17 @@ export const DoctorLayout = ({ children }) => {
                             <FaComments />
                             <span>Quản lý feedback</span>
                         </Link>
+                        <Link
+                            to="/feedback-from-doctor-to-parent"
+                            className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                                location.pathname === '/feedback-from-doctor-to-parent'
+                                    ? 'bg-indigo-800 text-white'
+                                    : 'text-indigo-100 hover:bg-indigo-800'
+                            }`}
+                        >
+                            <FaComments />
+                            <span>Quản lý các tham vấn</span>
+                        </Link>
                     </div>
                 </div>
 

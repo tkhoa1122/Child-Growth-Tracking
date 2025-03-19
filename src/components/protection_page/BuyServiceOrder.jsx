@@ -32,15 +32,21 @@ const BuyServiceOrder = () => {
     const [checkingRights, setCheckingRights] = useState(false);
 
     const checkServiceRights = async () => {
-        const parentId = localStorage.getItem('userId'); // Giả sử userId là parentId
-        if (parentId) {
+        const userId = localStorage.getItem('userId');
+        if (userId) {
             try {
-                setCheckingRights(true); // Bắt đầu kiểm tra quyền
-                const response = await api.get(`/serviceorder/CheckServiceRights/${parentId}`);
-                if (response.status === 200 && response.data.isValid) {
-                    // Nếu có quyền truy cập, chuyển hướng về trang chính
-                    toast.info('Bạn không thể mua dịch vụ mới vì đã có quyền truy cập.');
-                    navigate('/'); // Hoặc trang khác mà bạn muốn
+                // Lấy thông tin tài khoản để lấy parentId
+                const userResponse = await api.get(`/Parent/by-accountId/${userId}`);
+                const parentId = userResponse.data.parentId;
+
+                if (parentId) {
+                    setCheckingRights(true); // Bắt đầu kiểm tra quyền
+                    const response = await api.get(`/serviceorder/CheckServiceRights/${parentId}`);
+                    if (response.status === 200 && response.data.isValid) {
+                        // Nếu có quyền truy cập, chuyển hướng về trang chính
+                        toast.info('Bạn không thể mua dịch vụ mới vì đang có dịch vụ hoạt động.');
+                        navigate('/'); // Hoặc trang khác mà bạn muốn
+                    }
                 }
             } catch (error) {
                 console.error('Lỗi kiểm tra quyền truy cập dịch vụ:', error);

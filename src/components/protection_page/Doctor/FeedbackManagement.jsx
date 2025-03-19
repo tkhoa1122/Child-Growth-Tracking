@@ -27,8 +27,8 @@ const FeedbackManagement = () => {
 
             // Lọc các feedback có feedbackIsActive là true, doctorId trùng khớp và isResponsed là true
             const inactiveFeedbacks = response.data.filter(f => 
-                f.doctorId === currentDoctorId &&
-                f.report.feedbacks[0]?.isResponsed === true
+                f.doctorId === currentDoctorId 
+                //&& f.report.feedbacks[2]?.isResponsed === false
             );
             console.log(inactiveFeedbacks);
             
