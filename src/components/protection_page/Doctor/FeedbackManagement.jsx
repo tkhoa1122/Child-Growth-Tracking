@@ -25,12 +25,13 @@ const FeedbackManagement = () => {
                 throw new Error('Dữ liệu feedback không hợp lệ');
             }
 
-            // Lọc các feedback có feedbackIsActive là false, doctorId trùng khớp và isResponsed là true
+            // Lọc các feedback có feedbackIsActive là true, doctorId trùng khớp và isResponsed là true
             const inactiveFeedbacks = response.data.filter(f => 
-                f.feedbackIsActive === false && 
                 f.doctorId === currentDoctorId &&
                 f.report.feedbacks[0]?.isResponsed === true
             );
+            console.log(inactiveFeedbacks);
+            
             setFeedbacks(inactiveFeedbacks);
         } catch (error) {
             console.error('Error fetching feedbacks:', error);
@@ -43,8 +44,8 @@ const FeedbackManagement = () => {
     }, []);
 
     // Hàm chuyển hướng đến trang chi tiết tư vấn
-    const handleViewConsultation = (childId) => {
-        navigate(`/consultation-detail/${childId}`);
+    const handleViewConsultation = (childId, reportId) => {
+        navigate(`/consultation-detail/${childId}?reportId=${reportId}`);
     };
 
     return (
@@ -70,7 +71,7 @@ const FeedbackManagement = () => {
                                     </p>
                                 </div>
                                 <button
-                                    onClick={() => handleViewConsultation(feedback.report.childId)}
+                                    onClick={() => handleViewConsultation(feedback.report.childId, feedback.report.reportId)}
                                     className="flex items-center gap-2 text-blue-500 hover:text-blue-700"
                                 >
                                     <span>Xem chi tiết</span>

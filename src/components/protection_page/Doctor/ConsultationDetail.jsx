@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaCalendar, FaMapMarkerAlt, FaVenusMars, FaPhone, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
@@ -10,10 +10,13 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 export const ConsultationDetail = () => {
     const { childId } = useParams();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const reportId = queryParams.get('reportId');
     const [parentInfo, setParentInfo] = useState(null);
     const [childInfo, setChildInfo] = useState(null);
     const [bmiReports, setBmiReports] = useState([]);
-    const [feedback, setFeedback] = useState(null);
+    const [feedbacks, setFeedbacks] = useState([]);
     const [doctorFeedback, setDoctorFeedback] = useState('');
     const [notification, setNotification] = useState({
         show: false,
@@ -44,7 +47,7 @@ export const ConsultationDetail = () => {
                 // Fetch Child Info
                 const childInfoResponse = await axios.get(`Parent/child-info/${childId}`);
                 const childData = childInfoResponse.data;
-                
+
                 // Fetch BMI Reports - Lấy tất cả report của trẻ
                 const bmiReportsResponse = await axios.get(`reports/child/${childId}`);
                 const bmiReportsData = Array.isArray(bmiReportsResponse.data) ? bmiReportsResponse.data : [];
@@ -68,7 +71,7 @@ export const ConsultationDetail = () => {
                 });
 
                 // Sắp xếp reports theo thời gian tạo, mới nhất lên đầu
-                const sortedReports = bmiReportsData.sort((a, b) => 
+                const sortedReports = bmiReportsData.sort((a, b) =>
                     new Date(b.reportCreateDate) - new Date(a.reportCreateDate)
                 );
 
@@ -89,26 +92,47 @@ export const ConsultationDetail = () => {
         fetchData();
     }, [childId]);
 
-    // Hàm lấy feedback
-    const fetchFeedback = async () => {
+    // Hàm lấy tất cả feedback của report
+    const fetchFeedbacksByReportId = async (reportId) => {
         try {
             const response = await axios.get('feedback/get-list-feedback');
-            const feedbackData = response.data.find(f => f.report.childId === childId);
-            if (feedbackData) {
-                // Lấy isResponsed từ report.feedbacks
-                const isResponsed = feedbackData.report.feedbacks[0]?.isResponsed || false;
-                setFeedback({
-                    ...feedbackData,
-                    isResponsed: isResponsed
-                });
-            }
+            const feedbacksForReport = response.data.filter(f => f.report.reportId === reportId);
+            setFeedbacks(feedbacksForReport);
         } catch (error) {
-            console.error('Error fetching feedback:', error);
+            console.error('Error fetching feedbacks:', error);
         }
     };
 
+    // Hàm lấy tất cả feedback của child
+    const fetchAllFeedbacks = async () => {
+        try {
+            const response = await axios.get('feedback/get-list-feedback');
+            const feedbacksForChild = response.data.filter(f => f.report.childId === childId);
+
+            if (feedbacksForChild.length > 0) {
+                // Lấy tất cả feedback có cùng reportId
+                const reportId = feedbacksForChild[0].report.reportId;
+                const allFeedbacksForReport = response.data.filter(f => f.report.reportId === reportId);
+
+                // Cập nhật state với tất cả feedback có cùng reportId
+                setFeedbacks(allFeedbacksForReport);
+            }
+        } catch (error) {
+            console.error('Error fetching feedbacks:', error);
+        }
+    };
+
+
+    useEffect(() => {
+        if (reportId) {
+            fetchFeedbacksByReportId(reportId);
+        } else {
+            fetchAllFeedbacks();
+        }
+    }, [childId, reportId]);
+
     // Hàm gửi feedback của bác sĩ
-    const handleSubmitFeedback = async () => {
+    const handleSubmitFeedback = async (feedbackId) => {
         try {
             if (!doctorFeedback.trim()) {
                 setNotification({
@@ -120,14 +144,14 @@ export const ConsultationDetail = () => {
             }
 
             // Cập nhật feedback
-            await axios.put(`feedback/update-feedback/${feedback.feedbackId}`, {
+            await axios.put(`feedback/update-feedback/${feedbackId}`, {
                 feedbackContentRequest: feedback.feedbackContentRequest,
                 feedbackName: feedback.feedbackName,
                 feedbackContentResponse: doctorFeedback
             });
 
             // Cập nhật trạng thái feedback
-            await axios.put(`feedback/change-active-feedback/${feedback.feedbackId}`);
+            await axios.put(`feedback/change-active-feedback/${feedbackId}`);
 
             setNotification({
                 show: true,
@@ -136,7 +160,7 @@ export const ConsultationDetail = () => {
             });
 
             // Lấy lại dữ liệu feedback mới nhất
-            await fetchFeedback();
+            await fetchAllFeedbacks();
 
             // Lấy lại danh sách BMI Reports để cập nhật UI
             const bmiReportsResponse = await axios.get(`reports/child/${childId}`);
@@ -161,36 +185,32 @@ export const ConsultationDetail = () => {
         }
     };
 
-    useEffect(() => {
-        fetchFeedback();
-    }, [childId]);
-
     const getBmiStatusColor = (bmi) => {
         // Gầy độ III (< 16)
         if (bmi < 16) return 'bg-red-100 text-red-800';
-        
+
         // Gầy độ II (16 - 16.99)
         if (bmi < 17) return 'bg-orange-100 text-orange-800';
-        
+
         // Gầy độ I (17 - 18.49)
         if (bmi < 18.5) return 'bg-yellow-100 text-yellow-800';
-        
+
         // Bình thường (18.5 - 24.99)
         if (bmi < 25) return 'bg-green-100 text-green-800';
-        
+
         // Thừa cân (25 - 29.99)
         if (bmi < 30) return 'bg-blue-100 text-blue-800';
-        
+
         // Béo phì độ I (30 - 34.99)
         if (bmi < 35) return 'bg-purple-100 text-purple-800';
-        
+
         // Béo phì độ II (35 - 39.99)
         if (bmi < 40) return 'bg-pink-100 text-pink-800';
-        
+
         // Béo phì độ III (≥ 40)
         return 'bg-red-200 text-red-900';
     };
-    
+
     // Thêm hàm mới để lấy text đánh giá
     const getBmiStatusText = (bmi) => {
         if (bmi < 16) return 'Gầy độ III - Nguy cơ cao';
@@ -235,7 +255,7 @@ export const ConsultationDetail = () => {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const year = date.getFullYear();
-        
+
         return `${hours}:${minutes} - ${day}/${month}/${year}`;
     };
 
@@ -251,9 +271,8 @@ export const ConsultationDetail = () => {
                                 Ngày yêu cầu: {bmiReports[0]?.reportCreateDate ? new Date(bmiReports[0].reportCreateDate).toLocaleDateString() : 'N/A'}
                             </p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full ${
-                            bmiReports[0]?.reportIsActive === "0" ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full ${bmiReports[0]?.reportIsActive === "0" ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                            }`}>
                             {bmiReports[0]?.reportIsActive === "0" ? 'Pending' : 'Active'}
                         </span>
                     </div>
@@ -417,48 +436,51 @@ export const ConsultationDetail = () => {
                 )}
 
                 {/* Feedback Section */}
+                {/* Feedback Section */}
                 <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
                     <h2 className="text-xl font-bold text-gray-800 mb-4">Phản hồi</h2>
 
-                    {feedback ? (
-                        <>
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi từ phụ huynh:</h3>
-                                <div className="bg-gray-50 p-4 rounded-lg">
-                                    <h4 className="font-medium text-gray-800">{feedback.feedbackName}</h4>
-                                    <p className="text-gray-600 mt-2">{feedback.feedbackContentRequest}</p>
+                    {feedbacks.length > 0 ? (
+                        feedbacks.map((feedback, index) => (
+                            <div key={index} className="mb-6">
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi từ phụ huynh:</h3>
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h4 className="font-medium text-gray-800">{feedback.feedbackName}</h4>
+                                        <p className="text-gray-600 mt-2">{feedback.feedbackContentRequest}</p>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {!feedback.isResponsed ? (
-                                <>
-                                    <div className="mb-6">
+                                {!feedback.report.feedbacks[0]?.isResponsed ? (
+                                    <>
+                                        <div className="mb-4">
+                                            <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi của bác sĩ:</h3>
+                                            <textarea
+                                                value={doctorFeedback}
+                                                onChange={(e) => setDoctorFeedback(e.target.value)}
+                                                className="w-full text-black p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                rows="4"
+                                                placeholder="Nhập phản hồi của bạn..."
+                                            />
+                                        </div>
+
+                                        <button
+                                            onClick={() => handleSubmitFeedback(feedback.feedbackId)}
+                                            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+                                        >
+                                            Gửi phản hồi
+                                        </button>
+                                    </>
+                                ) : (
+                                    <div className="mb-4">
                                         <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi của bác sĩ:</h3>
-                                        <textarea
-                                            value={doctorFeedback}
-                                            onChange={(e) => setDoctorFeedback(e.target.value)}
-                                            className="w-full text-black p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                            rows="4"
-                                            placeholder="Nhập phản hồi của bạn..."
-                                        />
+                                        <div className="bg-blue-50 p-4 rounded-lg">
+                                            <p className="text-gray-600">{feedback.feedbackContentResponse}</p>
+                                        </div>
                                     </div>
-
-                                    <button
-                                        onClick={handleSubmitFeedback}
-                                        className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
-                                    >
-                                        Gửi phản hồi
-                                    </button>
-                                </>
-                            ) : (
-                                <div className="mb-6">
-                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi của bác sĩ:</h3>
-                                    <div className="bg-blue-50 p-4 rounded-lg">
-                                        <p className="text-gray-600">{feedback.feedbackContentResponse}</p>
-                                    </div>
-                                </div>
-                            )}
-                        </>
+                                )}
+                            </div>
+                        ))
                     ) : (
                         <p className="text-gray-600">Chưa có phản hồi từ phụ huynh</p>
                     )}
