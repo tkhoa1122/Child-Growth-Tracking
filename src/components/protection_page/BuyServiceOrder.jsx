@@ -37,9 +37,9 @@ const BuyServiceOrder = () => {
             try {
                 setCheckingRights(true); // Bắt đầu kiểm tra quyền
                 const response = await api.get(`/serviceorder/CheckServiceRights/${parentId}`);
-                if (response.status === 200 && !response.data.isValid) {
-                    // Nếu không có quyền truy cập, chuyển hướng về trang chính
-                    toast.info('Bạn đã mua dịch vụ, không thể mua dịch vụ mới.');
+                if (response.status === 200 && response.data.isValid) {
+                    // Nếu có quyền truy cập, chuyển hướng về trang chính
+                    toast.info('Bạn không thể mua dịch vụ mới vì đã có quyền truy cập.');
                     navigate('/'); // Hoặc trang khác mà bạn muốn
                 }
             } catch (error) {

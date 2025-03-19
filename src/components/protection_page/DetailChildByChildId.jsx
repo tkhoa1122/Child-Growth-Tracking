@@ -281,24 +281,43 @@ const DetailChildByChildId = () => {
     };
 
     const handleRefreshReports = async () => {
-        setReportsLoading(true);
         try {
-            const response = await api.get(`/reports/${childId}`);
-            setReports(response.data);
-            // Tạo lại chart data
-            setChartData(null);
-            setTimeout(() => {
-                const sorted = [...response.data].sort((a, b) => 
-                    new Date(a.reportContent.split(' ')[3]) - new Date(b.reportContent.split(' ')[3])
-                );
-                setChartData({...chartData, labels: sorted.map(r => r.reportContent.split(' ')[3])});
-            }, 100);
-            toast.success('Đã cập nhật dữ liệu mới nhất');
+            setReportsLoading(true);
+            const response = await api.get(`reports/child/${childId}`);
+            if (response.status === 200) {
+                setReports(response.data);
+                updateChartData(response.data);
+            }
         } catch (error) {
             console.error('Lỗi tải báo cáo:', error);
-            toast.error('Cập nhật thất bại');
+            toast.error('Không thể tải báo cáo.');
         } finally {
             setReportsLoading(false);
+        }
+    };
+
+    const updateChartData = (reports) => {
+        if (reports.length > 0) {
+            const sortedReports = [...reports].sort((a, b) => {
+                const dateA = new Date(a.reportContent.split(' ')[3]);
+                const dateB = new Date(b.reportContent.split(' ')[3]);
+                return dateA - dateB;
+            });
+
+            const chartData = {
+                labels: sortedReports.map(report => report.reportContent.split(' ')[3]),
+                datasets: [
+                    {
+                        label: 'Chỉ số BMI',
+                        data: sortedReports.map(report => report.bmi),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        tension: 0.1,
+                    },
+                ],
+            };
+
+            setChartData(chartData);
         }
     };
 
