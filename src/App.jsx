@@ -46,6 +46,7 @@ import AppointmentWithDoctor from './components/protection_page/AppointmentWithD
 import PaymentSuccess from './components/protection_page/PaymentSuccess';
 import PaymentFail from './components/protection_page/PaymentFail';
 // import { EditDoctor } from './components/protection_page/Admin/EditDoctor'
+import FeedbackFromDoctorToParent from './components/protection_page/Doctor/FeedbackFromDoctorToParent'
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -169,6 +170,14 @@ function App() {
                   element={
                     <ProtectedRouteByRole allowedRoles={['Doctor']}>
                       <ConsultationDetail />
+                    </ProtectedRouteByRole>
+                  }
+                />
+                 <Route
+                  path="/feedback-from-doctor-to-parent"
+                  element={
+                    <ProtectedRouteByRole allowedRoles={['Doctor']}>
+                      <FeedbackFromDoctorToParent />
                     </ProtectedRouteByRole>
                   }
                 />
