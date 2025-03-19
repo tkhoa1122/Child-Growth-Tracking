@@ -40,6 +40,7 @@ const Profile = () => {
     const [checkingRights, setCheckingRights] = useState(false);
     const [hasServiceRights, setHasServiceRights] = useState(false);
     const [deletingChild, setDeletingChild] = useState(false);
+    const [latestOrder, setLatestOrder] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -91,6 +92,26 @@ const Profile = () => {
         
         fetchServiceRights();
     }, [profileData?.parentId]);
+
+    const fetchLatestOrder = async () => {
+        try {
+            const response = await api.get(`/serviceorder/GetLastestOrderByParentId/${profileData.parentId}`);
+            if (response.data && response.data.status === 'Completed') {
+                setLatestOrder(response.data);
+            } else {
+                setLatestOrder(null);
+            }
+        } catch (error) {
+            console.error('Lỗi tải đơn hàng mới nhất:', error);
+            setLatestOrder(null);
+        }
+    };
+
+    useEffect(() => {
+        if (profileData) {
+            fetchLatestOrder();
+        }
+    }, [profileData]);
 
     // Sửa lại hàm kiểm tra ngày sinh
     const disabledDate = (current) => {
@@ -291,6 +312,12 @@ const Profile = () => {
                             <div className="flex justify-between items-center mb-2">
                                 <p className="font-medium text-gray-900">Đơn hàng:</p>
                                 <div className="space-x-2">
+                                    <button 
+                                        onClick={fetchLatestOrder}
+                                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+                                    >
+                                        Tải lại
+                                    </button>
                                     {checkingRights ? (
                                         <button 
                                             className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm cursor-not-allowed"
@@ -322,57 +349,42 @@ const Profile = () => {
                                     </Link>
                                 </div>
                             </div>
-                            
-                            {serviceOrderLoading ? (
-                                <div className="flex justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                                </div>
-                            ) : serviceOrder && serviceOrder.status === 'Completed' ? (
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                            {latestOrder && latestOrder.status === 'Completed' && (
+                                <div className="mt-4 bg-white rounded-xl shadow-lg p-6">
+                                    <h2 className="text-2xl font-bold mb-4">Thông tin đơn hàng gần nhất</h2>
+                                    <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-50">
                                             <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đơn hàng</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dịch vụ</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giá</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày mua</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày kết thúc</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên gói</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số lượng</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn giá</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng giá</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày hết hạn</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200">
+                                        <tbody className="bg-white divide-y divide-gray-200">
                                             <tr>
-                                                <td className="px-6 py-4 text-sm text-gray-900">{serviceOrder.serviceOrderId}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-900">{serviceOrder.serviceId}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-900">
-                                                    {new Intl.NumberFormat('vi-VN', { 
-                                                        style: 'currency', 
-                                                        currency: 'VND' 
-                                                    }).format(serviceOrder.totalPrice)}
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{latestOrder.service.serviceName}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{latestOrder.quantity}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(latestOrder.unitPrice)}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-gray-900">
-                                                    {new Date(serviceOrder.createDate).toLocaleDateString('vi-VN', {
-                                                        day: '2-digit',
-                                                        month: '2-digit',
-                                                        year: 'numeric'
-                                                    }).split('/').join('-')}
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(latestOrder.totalPrice)}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-gray-900">
-                                                    {new Date(serviceOrder.endDate).toLocaleDateString('vi-VN', {
-                                                        day: '2-digit',
-                                                        month: '2-digit',
-                                                        year: 'numeric'
-                                                    }).split('/').join('-')}
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {new Date(latestOrder.createDate).toLocaleDateString('vi-VN')}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-gray-900">
-                                                    {serviceOrder.status === 'Completed' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {new Date(latestOrder.endDate).toLocaleDateString('vi-VN')}
                                                 </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{latestOrder.status}</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                            ) : (
-                                <p className="text-gray-600">Không có service orders</p>
                             )}
                         </div>
                     </div>
