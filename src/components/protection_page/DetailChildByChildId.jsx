@@ -86,6 +86,11 @@ const DetailChildByChildId = () => {
     const [loadingDoctors, setLoadingDoctors] = useState(true);
     const [feedbacks, setFeedbacks] = useState([]);
     const [loadingFeedbacks, setLoadingFeedbacks] = useState(true);
+    const [reportName, setReportName] = useState("BMI Report");
+    const [reportMark, setReportMark] = useState('');
+    const [reportContent, setReportContent] = useState('');
+    const [reportCreateDate, setReportCreateDate] = useState(new Date().toISOString());
+    const [reportIsActive, setReportIsActive] = useState('Active');
 
     // Đặt hàm disabledDate vào trong component để có thể truy cập childData
     const disabledDate = (current) => {
@@ -125,7 +130,7 @@ const DetailChildByChildId = () => {
                 setLoading(false);
                 setServiceStatus(prev => ({ ...prev, loading: false }));
             }
-        };
+        }
 
         fetchData();
     }, [childId, parentId]);
@@ -156,7 +161,7 @@ const DetailChildByChildId = () => {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const response = await api.get(`https://localhost:7190/api/reports/child/${childId}`);
+                const response = await api.get(`reports/child/${childId}`);
                 if (response.status === 200) {
                     // Hiển thị trực tiếp dữ liệu từ API trả về mà không cần lọc
                     setReports(response.data);
@@ -253,7 +258,7 @@ const DetailChildByChildId = () => {
                 reportIsActive: "1",
                 reportMark: comment,
                 reportContent: `Báo cáo BMI ngày ${selectedDate.format('DD-MM-YYYY')}`,
-                reportName: `Báo cáo BMI - ${childData.lastName} ${childData.firstName}`,
+                reportName: reportName,
                 bmi: parseFloat(bmi)
             };
 
@@ -526,6 +531,17 @@ const DetailChildByChildId = () => {
                         <h3 className="text-xl font-bold mb-4 text-black">Thông tin báo cáo</h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-black">
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-black">Tên báo cáo</label>
+                                <input
+                                    type="text"
+                                    value={reportName}
+                                    onChange={(e) => setReportName(e.target.value || "BMI Report")}
+                                    className="w-full p-2 border rounded"
+                                    placeholder="Nhập tên báo cáo"
+                                />
+                            </div>
+                            
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-black">Chiều cao (cm)</label>
                                 <input
@@ -841,14 +857,8 @@ const DetailChildByChildId = () => {
                                     }`}
                                 >
                                     <div className="space-y-2">
-                                        <p className="text-sm text-gray-600 font-medium">
-                                            {report.reportContent.replace(
-                                                /(\d{4}-\d{2}-\d{2})/,
-                                                (date) => formatDate(date)
-                                            )}
-                                        </p>
                                         <div className="flex justify-between">
-                                            <span className="font-medium">Id Report:</span>
+                                            <span className="font-medium">Mã báo cáo:</span>
                                             <span>{report.reportId}</span>
                                         </div>
                                         <div className="flex justify-between">
@@ -878,10 +888,6 @@ const DetailChildByChildId = () => {
                                         <div className="flex justify-between mt-2">
                                             <span className="font-medium">Ngày tạo:</span>
                                             <span className="text-sm text-gray-500">{new Date(report.reportCreateDate).toLocaleDateString()}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="font-medium">Thời gian:</span>
-                                            <span className="text-sm text-gray-500">{new Date(report.reportCreateDate).toLocaleTimeString()}</span>
                                         </div>
                                     </div>
                                 </div>
