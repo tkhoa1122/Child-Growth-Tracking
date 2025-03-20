@@ -135,18 +135,50 @@ const DoctorDashboard = () => {
         }
     };
 
+    // Thêm hàm validate mật khẩu
+    const validatePassword = (password) => {
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+        return hasLowerCase && hasUpperCase && hasSpecialChar;
+    };
+
     const handleChangePassword = async () => {
-        if (!oldPassword || !newPassword || newPassword !== confirmPassword) {
+        // Kiểm tra mật khẩu cũ, mới và xác nhận
+        if (!oldPassword || !newPassword || !confirmPassword) {
             showNotification('Vui lòng nhập mật khẩu cũ, mật khẩu mới và xác nhận mật khẩu.', 'error');
             return;
         }
+
+        // Kiểm tra mật khẩu mới không trùng với mật khẩu cũ
+        if (newPassword === oldPassword) {
+            showNotification('Mật khẩu mới không được trùng với mật khẩu cũ.', 'error');
+            return;
+        }
+
+        // Kiểm tra mật khẩu mới có đủ yêu cầu
+        if (!validatePassword(newPassword)) {
+            showNotification('Mật khẩu mới phải chứa ít nhất một ký tự thường, một ký tự hoa và một ký tự đặc biệt.', 'error');
+            return;
+        }
+
+        // Kiểm tra mật khẩu mới và xác nhận mật khẩu khớp nhau
+        if (newPassword !== confirmPassword) {
+            showNotification('Mật khẩu mới và xác nhận mật khẩu không khớp.', 'error');
+            return;
+        }
+
         try {
             await axios.post(`User/change-password/${doctorInfo.accountId}`, { 
                 oldPassword,
                 newPassword,
                 confirmPassword
             });
+            showNotification('Đổi mật khẩu thành công!', 'success');
             setIsModalPasswordOpen(false);
+            setOldPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
         } catch (error) {
             console.error('Lỗi khi đổi mật khẩu:', error);
             showNotification('Đã xảy ra lỗi khi đổi mật khẩu. Vui lòng thử lại.', 'error');
@@ -161,11 +193,20 @@ const DoctorDashboard = () => {
         };
     }, []);
 
+    // Thêm useEffect để reset giá trị khi mở modal đổi mật khẩu
+    useEffect(() => {
+        if (isModalPasswordOpen) {
+            setOldPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        }
+    }, [isModalPasswordOpen]);
+
     return (
         <DoctorLayout>
             {/* Notification Popup */}
             {notification.show && (
-                <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+                <div className={`fixed top-4 right-4 z-[1000] flex items-center p-4 rounded-lg shadow-lg ${notification.type === 'success' ? 'bg-green-100' : 'bg-red-100'
                     }`}>
                     {notification.type === 'success' ? (
                         <FaCheckCircle className="w-6 h-6 text-green-500 mr-2" />
