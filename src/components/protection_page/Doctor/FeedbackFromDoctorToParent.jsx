@@ -10,6 +10,9 @@ const FeedbackFromDoctorToParent = () => {
     const [doctorInfo, setDoctorInfo] = useState(null);
     const [selectedFeedback, setSelectedFeedback] = useState(null);
     const [responseContent, setResponseContent] = useState('');
+    const [selectedChildId, setSelectedChildId] = useState(null);
+    const [childInfo, setChildInfo] = useState(null);
+    const [bmiReports, setBmiReports] = useState([]);
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
     const [userId, setUserId] = useState(null);
@@ -55,10 +58,31 @@ const FeedbackFromDoctorToParent = () => {
         }
     };
 
+    const fetchChildInfo = async (childId) => {
+        try {
+            const response = await axios.get(`https://localhost:7190/api/reports/childs-info/${childId}`);
+            setChildInfo(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy thông tin của trẻ:', error);
+        }
+    };
+
+    const fetchBmiReports = async (childId) => {
+        try {
+            const response = await axios.get(`https://localhost:7190/api/reports/child/${childId}`);
+            setBmiReports(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy thông tin BMI:', error);
+        }
+    };
+
     const handleRowClick = (feedback) => {
         if (!feedback.feedbackContentResponse || feedback.feedbackContentResponse === 'string') {
             setSelectedFeedback(feedback);
             setResponseContent(feedback.feedbackContentResponse || '');
+            setSelectedChildId(feedback.report.childId);
+            fetchChildInfo(feedback.report.childId);
+            fetchBmiReports(feedback.report.childId);
         }
     };
 
@@ -74,6 +98,9 @@ const FeedbackFromDoctorToParent = () => {
                 toast.success('Cập nhật phản hồi thành công!');
                 fetchFeedbacks(doctorInfo.doctorId);
                 setSelectedFeedback(null);
+                setSelectedChildId(null);
+                setChildInfo(null);
+                setBmiReports([]);
             }
         } catch (error) {
             toast.error('Lỗi khi cập nhật phản hồi: ' + error.message);
@@ -85,7 +112,7 @@ const FeedbackFromDoctorToParent = () => {
             <div className="container mx-auto mt-1 p-6">
                 <h1 className="text-3xl font-bold text-center text-blue-500 mb-8">Thông tin bác sĩ</h1>
                 {userId && <p className="text-center text-gray-600 hidden">User ID: {userId}</p>}
-                
+
                 {doctorInfo && (
                     <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
                         <div className="flex items-center">
@@ -179,11 +206,70 @@ const FeedbackFromDoctorToParent = () => {
                             </button>
                             <button
                                 className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg"
-                                onClick={() => setSelectedFeedback(null)}
+                                onClick={() => {
+                                    setSelectedFeedback(null);
+                                    setSelectedChildId(null);
+                                    setChildInfo(null);
+                                    setBmiReports([]);
+                                }}
                             >
                                 Hủy
                             </button>
                         </div>
+                    </div>
+                )}
+
+                {selectedChildId && childInfo && (
+                    <div className="mt-4 p-4 bg-gray-100 rounded-lg shadow-md text-black">
+                        <h2 className="text-lg font-semibold">Thông tin của trẻ</h2>
+                        <div className="flex items-center">
+                            <img
+                                src={childInfo.gender === 'Female' ? '/Images/girl.png' : '/Images/boy.png'}
+                                alt={`${childInfo.firstName} ${childInfo.lastName}`}
+                                className="w-16 h-16 rounded-full mr-4"
+                            />
+                            <div>
+                                <p>Tên: {childInfo.firstName} {childInfo.lastName}</p>
+                                <p>Giới tính: {childInfo.gender == 'Female' ? 'Nữ' : 'Nam'}</p>
+                                <p>
+                                    Ngày sinh: {new Date(childInfo.dob).toLocaleDateString('vi-VN', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric'
+                                    }).replace(/\//g, ' - ')}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {selectedChildId && bmiReports.length > 0 && (
+                    <div className="mt-4 p-4 bg-gray-100 rounded-lg shadow-md text-black">
+                        <h2 className="text-lg font-semibold">Thông tin BMI tổng quát</h2>
+                        <table className="w-full mt-2">
+                            <thead>
+                                <tr className="bg-gray-200">
+                                    <th className="py-2 px-4">Chiều cao (cm)</th>
+                                    <th className="py-2 px-4">Cân nặng (kg)</th>
+                                    <th className="py-2 px-4">BMI</th>
+                                    <th className="py-2 px-4">Ngày tạo báo cáo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {bmiReports.map(report => (
+                                    <tr key={report.reportId}>
+                                        <td className="py-2 px-4 text-center">{report.height}</td>
+                                        <td className="py-2 px-4 text-center">{report.weight}</td>
+                                        <td className="py-2 px-4 text-center">{report.bmi.toFixed(2)}</td>
+                                        <td className="py-2 px-4 text-center">{new Date(report.reportCreateDate).toLocaleDateString('vi-VN', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        }).replace(/\//g, ' - ')}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
             </div>

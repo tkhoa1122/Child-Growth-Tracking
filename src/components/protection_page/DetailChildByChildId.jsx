@@ -453,7 +453,7 @@ const DetailChildByChildId = () => {
         if (!reportId) return; // Kiểm tra xem reportId có hợp lệ không
 
         try {
-            const response = await api.delete(`https://localhost:7190/api/reports/${reportId}`);
+            const response = await api.delete(`/reports/${reportId}`);
             if (response.status === 204) {
                 toast.success('Xoá báo cáo thành công!'); // Hiển thị thông báo thành công
                 await handleRefreshReports(); // Gọi lại hàm handleRefreshReports để làm mới danh sách báo cáo
@@ -535,9 +535,9 @@ const DetailChildByChildId = () => {
 
                             {/* Info Section */}
                             <div className="space-y-4">
-                                <InfoRow label="Mã phụ huynh" value={childData.parentId} />
-                                <InfoRow label="Mã trẻ" value={childData.childId} />
-                                <InfoRow label="Giới tính" value={childData.gender} />
+                                {/* <InfoRow label="Mã phụ huynh" value={childData.parentId} />
+                                <InfoRow label="Mã trẻ" value={childData.childId} /> */}
+                                <InfoRow label="Giới tính" value={childData.gender == 'Male' ? 'Nam' : 'Nữ'} />
                                 <InfoRow 
                                     label="Ngày sinh" 
                                     value={moment(childData.dob).format('DD-MM-YYYY')} 
@@ -580,7 +580,7 @@ const DetailChildByChildId = () => {
                         <h3 className="text-xl font-bold mb-4 text-black">Thông tin báo cáo</h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-black">
-                            <div>
+                            <div className='hidden'>
                                 <label className="block text-sm font-medium mb-1 text-black">Tên báo cáo</label>
                                 <input
                                     type="text"
@@ -908,9 +908,13 @@ const DetailChildByChildId = () => {
                                     }`}
                                 >
                                     <div className="space-y-2">
-                                        <div className="flex justify-between">
+                                        <div className="flex justify-between hidden">
                                             <span className="font-medium">Mã báo cáo:</span>
                                             <span>{report.reportId}</span>
+                                        </div>
+                                        <div className="flex justify-between hidden ">
+                                            <span className="font-medium">Tên báo cáo:</span>
+                                            <span>{report.reportName}</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="font-medium">Chiều cao:</span>
@@ -1031,7 +1035,13 @@ const DetailChildByChildId = () => {
                                     <p className="text-m text-gray-700">Nội dung yêu cầu: <span className="font-medium">{feedback.feedbackContentRequest}</span></p>
                                     <p className="text-m text-gray-500">Ngày tạo: {moment(feedback.feedbackCreateDate).format('DD-MM-YYYY')}</p>
                                     <p className="text-m text-gray-500">Trạng thái: <span className={feedback.feedbackIsActive ? 'text-green-500' : 'text-red-500'}>{feedback.feedbackIsActive ? 'Hoạt động' : 'Không hoạt động'}</span></p>
-                                    <p className="text-m text-gray-700">Nội dung phản hồi: <span className="italic">{feedback.feedbackContentResponse}</span></p>
+                                    <p className="text-m text-gray-700">Nội dung phản hồi: <span className="italic">{feedback.feedbackContentResponse === 'string' ? 'Đang chờ phản hồi từ bác sĩ' : feedback.feedbackContentResponse }</span></p>
+                                    <p className="text-m text-gray-700 hidden">Mã báo cáo: <span className="font-medium">{feedback.report.reportId}</span></p>
+                                    <p className="text-m text-gray-700 mt-4">Đánh giá báo cáo: <span className="font-medium">{feedback.report.reportMark}</span></p>
+                                    <p className="text-m text-gray-500">Ngày tạo báo cáo: {moment(feedback.report.reprotCreateDate).format('DD-MM-YYYY')}</p>
+                                    <p className="text-m text-gray-700">Chiều cao: <span className="italic">{feedback.report.height}</span></p>
+                                    <p className="text-m text-gray-700">Cân nặng: <span className="italic">{feedback.report.weight}</span></p>
+                                    <p className="text-m text-gray-700">BMI: <span className="italic">{feedback.report.bmi.toFixed(2)}</span></p>
                                 </div>
                             ))}
                         </div>

@@ -69,7 +69,7 @@ export const OwnHeader = () => {
                     <div className="flex-shrink-0">
                         <Link to={getProfilePath()} className="flex items-center">
                             <span className="font-mono text-xl font-bold text-black">
-                                Thonglnse<span className="text-blue-500">.tech</span>
+                                SWP_G3_P5<span className="text-blue-500">.tech</span>
                             </span>
                         </Link>
                     </div>
