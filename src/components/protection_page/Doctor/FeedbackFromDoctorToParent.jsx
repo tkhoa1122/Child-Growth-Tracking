@@ -60,7 +60,7 @@ const FeedbackFromDoctorToParent = () => {
 
     const fetchChildInfo = async (childId) => {
         try {
-            const response = await axios.get(`https://localhost:7190/api/reports/childs-info/${childId}`);
+            const response = await axios.get(`/reports/childs-info/${childId}`);
             setChildInfo(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy thông tin của trẻ:', error);
@@ -69,7 +69,7 @@ const FeedbackFromDoctorToParent = () => {
 
     const fetchBmiReports = async (childId) => {
         try {
-            const response = await axios.get(`https://localhost:7190/api/reports/child/${childId}`);
+            const response = await axios.get(`/reports/child/${childId}`);
             setBmiReports(response.data);
         } catch (error) {
             console.error('Lỗi khi lấy thông tin BMI:', error);

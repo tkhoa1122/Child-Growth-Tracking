@@ -601,7 +601,7 @@ const AppointmentWithDoctor = () => {
                                             <option value="">Chọn trẻ</option>
                                             {children.map((child) => (
                                                 <option key={child.childId} value={child.childId}>
-                                                    {`${child.firstName} ${child.lastName}`}
+                                                    {`${child.lastName} ${child.firstName}`}
                                                 </option>
                                             ))}
                                         </select>
