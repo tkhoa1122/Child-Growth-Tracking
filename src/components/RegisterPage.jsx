@@ -109,7 +109,7 @@ export const RegisterPage = () => {
             // Hiển thị toast thành công
             toast.success('Đăng ký thành công! Vui lòng kiểm tra email để nhập mã OTP', {
                 position: "top-right",
-                autoClose: 3000,
+                autoClose: 1000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,

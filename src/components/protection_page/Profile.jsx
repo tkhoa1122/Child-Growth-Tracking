@@ -296,11 +296,11 @@ const Profile = () => {
                 <div className="bg-white rounded-lg shadow p-6 text-black">
                     <h2 className="text-xl font-semibold mb-4 text-gray-900">Thông tin bổ sung</h2>
                     <div className="space-y-2">
-                        <p className="text-gray-800 ">
-                            <span className="font-medium text-gray-900">Account ID:</span> {profileData.accountId}
+                        <p className="text-gray-800 hidden ">
+                            <span className="font-medium text-gray-900 ">Account ID:</span> {profileData.accountId}
                         </p>
-                        <p className="text-gray-800">
-                            <span className="font-medium text-gray-900">Parent ID:</span> {profileData.parentId}
+                        <p className="text-gray-800 hidden">
+                            <span className="font-medium text-gray-900 ">Parent ID:</span> {profileData.parentId}
                         </p>
                         <p className="text-gray-800">
                             <span className="font-medium text-gray-900">Vai trò:</span> {profileData.account.role === 1 ? 'Phụ Huynh' : 'Khác'}
@@ -529,7 +529,7 @@ const Profile = () => {
                                         </p>
                                         <p className="text-sm">
                                             <span className="font-medium">Giới tính:</span> 
-                                            <span className="text-gray-600 ml-1">{child.gender}</span>
+                                            <span className="text-gray-600 ml-1">{child.gender == 'Female' ? 'Nữ' : 'Nam' }</span>
                                         </p>
                                         <p className="text-sm">
                                             <span className="font-medium">Ngày sinh:</span> 

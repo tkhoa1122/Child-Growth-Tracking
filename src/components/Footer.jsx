@@ -122,6 +122,10 @@ export const Footer = () => {
                                 <FaEnvelope className="text-gray-400" />
                                 <span>thonglyngocse@gmail.com</span>
                             </div>
+                            <div className="flex items-center space-x-3">
+                                <FaEnvelope className="text-gray-400" />
+                                <span>childtrackingsys@gmail.com</span>
+                            </div>
                         </div>
                     </div>
                 </div>

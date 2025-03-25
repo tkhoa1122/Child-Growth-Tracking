@@ -22,7 +22,32 @@ const ChangePasswordForUser = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        
+
+        // Kiểm tra điều kiện mật khẩu mới
+        if (formData.newPassword === formData.oldPassword) {
+            setMessage({ type: 'error', content: 'Mật khẩu mới không được trùng với mật khẩu cũ' });
+            setLoading(false);
+            return;
+        }
+
+        if (formData.newPassword.length <= 6) {
+            setMessage({ type: 'error', content: 'Mật khẩu mới phải dài hơn 6 ký tự' });
+            setLoading(false);
+            return;
+        }
+
+        if (!/[A-Z]/.test(formData.newPassword)) {
+            setMessage({ type: 'error', content: 'Mật khẩu mới phải có ít nhất một ký tự viết hoa' });
+            setLoading(false);
+            return;
+        }
+
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.newPassword)) {
+            setMessage({ type: 'error', content: 'Mật khẩu mới phải có ít nhất một ký tự đặc biệt' });
+            setLoading(false);
+            return;
+        }
+
         if (formData.newPassword !== formData.confirmPassword) {
             setMessage({ type: 'error', content: 'Mật khẩu mới và xác nhận không khớp' });
             setLoading(false);
@@ -113,7 +138,7 @@ const ChangePasswordForUser = () => {
 
                     <div className="relative">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Xác nhận mật khẩu
+                            Xác nhận mật khẩu mới
                         </label>
                         <input
                             type={showPassword.confirm ? "text" : "password"}
