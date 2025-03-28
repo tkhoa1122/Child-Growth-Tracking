@@ -75,7 +75,7 @@ const HistoryBuyingOrderByParentId = () => {
                             <tbody className="divide-y divide-gray-200">
                                 {orders.map((order) => (
                                     <tr key={order.serviceOrderId}>
-                                        <td className="px-6 py-4 text-sm text-gray-900">{order.serviceOrderId}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-900">{order.serviceOrderId.length > 8 ? order.serviceOrderId.slice(0,8) + "..." : order.serviceOrderId}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900">
                                             {order.service?.serviceName || 'N/A'}
                                         </td>

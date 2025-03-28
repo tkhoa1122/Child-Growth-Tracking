@@ -119,7 +119,7 @@ const AppointmentWithDoctor = () => {
     // Kiểm tra thời gian có hợp lệ không
     const isTimeSlotValid = (time) => {
         if (!selectedDate) return false;
-        
+
         const now = moment();
         const slotTime = moment(selectedDate).set({
             hour: parseInt(time.split(':')[0]),
@@ -139,9 +139,9 @@ const AppointmentWithDoctor = () => {
     // Xử lý style cho các ngày trong calendar
     const dayPropGetter = (date) => {
         const today = moment().startOf('day');
-        const isSelected = selectedDate && 
+        const isSelected = selectedDate &&
             moment(date).format('YYYY-MM-DD') === moment(selectedDate).format('YYYY-MM-DD');
-        
+
         if (moment(date).isBefore(today)) {
             return {
                 style: {
@@ -151,7 +151,7 @@ const AppointmentWithDoctor = () => {
                 }
             };
         }
-        
+
         if (isSelected) {
             return {
                 style: {
@@ -161,7 +161,7 @@ const AppointmentWithDoctor = () => {
                 }
             };
         }
-        
+
         return {};
     };
 
@@ -171,7 +171,7 @@ const AppointmentWithDoctor = () => {
             toast.error('Không thể chọn ngày trong quá khứ');
             return;
         }
-        
+
         setSelectedDate(date);
         setAppointmentForm(prev => ({
             ...prev,
@@ -184,22 +184,22 @@ const AppointmentWithDoctor = () => {
         return (
             <div className="flex justify-between items-center mb-4 p-2">
                 <div className="flex space-x-1">
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         onClick={() => toolbar.onNavigate('PREV')}
                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50"
                     >
                         Tháng trước
                     </button>
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         onClick={() => toolbar.onNavigate('TODAY')}
                         className="px-4 py-2 text-gray-700 bg-white border-t border-b border-gray-300 hover:bg-gray-50"
                     >
                         Hôm nay
                     </button>
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         onClick={() => toolbar.onNavigate('NEXT')}
                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50"
                     >
@@ -222,7 +222,7 @@ const AppointmentWithDoctor = () => {
         views: ['month'],
         defaultView: "month",
         selectable: true,
-        onSelectSlot: ({start}) => handleDateSelect(start),
+        onSelectSlot: ({ start }) => handleDateSelect(start),
         className: "bg-white rounded-lg p-4 text-black",
         dayPropGetter: dayPropGetter,
         date: currentDate,
@@ -244,7 +244,7 @@ const AppointmentWithDoctor = () => {
             dateFormat: 'DD',
             monthHeaderFormat: 'MMMM YYYY',
             dayHeaderFormat: 'dddd',
-            dayRangeHeaderFormat: ({ start, end }) => 
+            dayRangeHeaderFormat: ({ start, end }) =>
                 `${moment(start).format('DD/MM')} - ${moment(end).format('DD/MM/YYYY')}`
         }
     };
@@ -361,7 +361,7 @@ const AppointmentWithDoctor = () => {
                     childId: '',
                     appointmentTime: ''
                 }));
-                
+
                 // Tải lại lịch sử NGAY LẬP TỨC
                 try {
                     const historyResponse = await api.get(`/Appointment/appoiment-byid/${parentInfo.parentId}`);
@@ -372,8 +372,8 @@ const AppointmentWithDoctor = () => {
                 }
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.title 
-                || error.response?.data?.errors?.join(', ') 
+            const errorMessage = error.response?.data?.title
+                || error.response?.data?.errors?.join(', ')
                 || 'Đặt lịch thất bại';
             toast.error(errorMessage);
             console.error('Chi tiết lỗi:', error.response?.data);
@@ -384,7 +384,7 @@ const AppointmentWithDoctor = () => {
         try {
             const response = await api.get(`/Appointment/${appointmentId}`);
             const appointment = response.data;
-            
+
             // Chuyển đổi thời gian từ UTC sang múi giờ Việt Nam
             const utcMoment = moment.utc(appointment.appointmentDate);
             const localTime = utcMoment.tz('Asia/Ho_Chi_Minh');
@@ -397,7 +397,7 @@ const AppointmentWithDoctor = () => {
                 childId: appointment.childId,
                 appointmentTime: localTime.format('HH:mm') // Hiển thị giờ theo múi giờ Việt Nam
             });
-            
+
             // Cuộn lên phần form để người dùng dễ dàng chỉnh sửa
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (error) {
@@ -510,10 +510,10 @@ const AppointmentWithDoctor = () => {
                         <p className="text-gray-700">
                             Đặt lịch cho: <span className="font-semibold">{parentInfo.firstName} {parentInfo.lastName}</span>
                         </p>
-                        <p className="text-gray-600 text-sm mt-1">
+                        <p className="text-gray-600 text-sm mt-1 hidden">
                             Parent ID: <span className="font-mono">{parentInfo.parentId}</span>
                         </p>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-sm hidden">
                             Account ID: <span className="font-mono">{parentInfo.accountId}</span>
                         </p>
                     </div>
@@ -560,8 +560,8 @@ const AppointmentWithDoctor = () => {
                                         >
                                             <option value="">Chọn giờ</option>
                                             {timeSlots.map(time => (
-                                                <option 
-                                                    key={time} 
+                                                <option
+                                                    key={time}
                                                     value={time}
                                                     disabled={!isTimeSlotValid(time)}
                                                 >
@@ -615,7 +615,7 @@ const AppointmentWithDoctor = () => {
                                         </label>
                                         <select
                                             value={appointmentForm.doctorId}
-                                            onChange={(e) => setAppointmentForm({...appointmentForm, doctorId: e.target.value})}
+                                            onChange={(e) => setAppointmentForm({ ...appointmentForm, doctorId: e.target.value })}
                                             className="w-full p-2 border rounded  text-gray-700"
                                             required
                                         >
@@ -703,33 +703,39 @@ const AppointmentWithDoctor = () => {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bác sĩ</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phụ huynh</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trẻ</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã cuộc hẹn</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã bác sĩ</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã phụ huynh</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thông tin trẻ</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày hẹn</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {appointmentHistory.map((appointment) => (
-                                        <tr 
+                                        <tr
                                             key={appointment.appointmentId}
                                             onClick={() => handleAppointmentClick(appointment.appointmentId)}
                                             className="hover:bg-gray-50 cursor-pointer transition-colors"
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{appointment.appointmentId}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {appointment.doctorName || `${appointment.doctorId}`}
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {appointment.appointmentId.length > 6 ? appointment.appointmentId.slice(0, 6) + "..." : appointment.appointmentId}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {appointment.parentName || `${appointment.parentId}`}
+                                                {appointment.doctorName
+                                                    ? appointment.doctorName.length > 6 ? appointment.doctorName.slice(0, 6) + "..." : appointment.doctorName
+                                                    : appointment.doctorId.length > 6 ? appointment.doctorId.slice(0, 6) + "..." : appointment.doctorId}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {appointment.parentName
+                                                    ? appointment.parentName.length > 6 ? appointment.parentName.slice(0, 6) + "..." : appointment.parentName
+                                                    : appointment.parentId.length > 6 ? appointment.parentId.slice(0, 6) + "..." : appointment.parentId}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {appointment.childName}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {appointment.appointmentDate?.startsWith('0001-01-01') 
+                                                {appointment.appointmentDate?.startsWith('0001-01-01')
                                                     ? 'Chưa có ngày hẹn'
                                                     : moment.utc(appointment.appointmentDate) // Parse từ UTC
                                                         .tz('Asia/Ho_Chi_Minh') // Chuyển đổi sang múi giờ Việt Nam
@@ -739,8 +745,8 @@ const AppointmentWithDoctor = () => {
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                                     ${getStatusClass(appointment.status)}`}>
                                                     {appointment.status === 'Pending' ? 'Đang chờ' :
-                                                     appointment.status === 'Confirmed' ? 'Đã duyệt' : 
-                                                     'Đã hủy'}
+                                                        appointment.status === 'Confirmed' ? 'Đã duyệt' :
+                                                            'Đã hủy'}
                                                 </span>
                                             </td>
                                         </tr>
@@ -752,7 +758,7 @@ const AppointmentWithDoctor = () => {
                 </div>
             </div>
             <Footer />
-            <Toaster 
+            <Toaster
                 position="top-right"
                 toastOptions={{
                     duration: 3000,
