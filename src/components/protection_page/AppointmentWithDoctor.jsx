@@ -13,7 +13,6 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 moment.locale('vi');
-moment.tz.setDefault('Asia/Ho_Chi_Minh');
 const localizer = momentLocalizer(moment);
 
 const AppointmentWithDoctor = () => {
@@ -325,26 +324,24 @@ const AppointmentWithDoctor = () => {
         }
 
         try {
-            // Xử lý scheduledTime
-            const scheduledTime = moment(selectedDate)
-                .set({
-                    hour: parseInt(appointmentForm.appointmentTime.split(':')[0]),
-                    minute: parseInt(appointmentForm.appointmentTime.split(':')[1]),
-                    second: 0
-                })
-                .tz('Asia/Ho_Chi_Minh')
-                .utc()
-                .toISOString();
-
+            // Tạo thời gian không bị ảnh hưởng bởi múi giờ
+            const [hours, minutes] = appointmentForm.appointmentTime.split(':').map(Number);
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth();
+            const day = selectedDate.getDate();
+            
+            // Tạo chuỗi ISO trực tiếp với Z ở cuối để chỉ định UTC
+            const scheduledTime = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00.0000000Z`;
+            
             // Tạo createdAt
-            const createdAt = moment().utc().toISOString();
+            const createdAt = moment().toISOString();
 
             const requestBody = {
                 doctorId: appointmentForm.doctorId,
                 parentId: parentInfo.parentId,
                 childId: appointmentForm.childId,
                 status: "Pending",
-                scheduledTime: scheduledTime, // Đổi tên trường theo API
+                scheduledTime: scheduledTime,
                 createdAt: createdAt
             };
 
@@ -385,17 +382,16 @@ const AppointmentWithDoctor = () => {
             const response = await api.get(`/Appointment/${appointmentId}`);
             const appointment = response.data;
 
-            // Chuyển đổi thời gian từ UTC sang múi giờ Việt Nam
-            const utcMoment = moment.utc(appointment.appointmentDate);
-            const localTime = utcMoment.tz('Asia/Ho_Chi_Minh');
+            // Không cần chuyển đổi múi giờ
+            const appointmentTime = moment(appointment.appointmentDate);
 
             setSelectedAppointmentId(appointmentId);
-            setSelectedDate(localTime.toDate());
+            setSelectedDate(appointmentTime.toDate());
             setAppointmentForm({
                 fullName: `${parentInfo.firstName} ${parentInfo.lastName}`,
                 doctorId: appointment.doctorId,
                 childId: appointment.childId,
-                appointmentTime: localTime.format('HH:mm') // Hiển thị giờ theo múi giờ Việt Nam
+                appointmentTime: appointmentTime.format('HH:mm') // Lấy giờ trực tiếp
             });
 
             // Cuộn lên phần form để người dùng dễ dàng chỉnh sửa
@@ -414,19 +410,17 @@ const AppointmentWithDoctor = () => {
         }
 
         try {
-            // Chuyển đổi thời gian từ giờ địa phương sang UTC trước khi gửi API
-            const localDateTime = moment(selectedDate)
-                .set({
-                    hour: parseInt(appointmentForm.appointmentTime.split(':')[0]),
-                    minute: parseInt(appointmentForm.appointmentTime.split(':')[1]),
-                    second: 0
-                })
-                .tz('Asia/Ho_Chi_Minh');
-
-            const utcDateTime = localDateTime.utc().toISOString();
+            // Tạo thời gian không bị ảnh hưởng bởi múi giờ
+            const [hours, minutes] = appointmentForm.appointmentTime.split(':').map(Number);
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth();
+            const day = selectedDate.getDate();
+            
+            // Tạo chuỗi ISO trực tiếp với Z ở cuối để chỉ định UTC
+            const updatedDateTime = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00.0000000Z`;
 
             const response = await api.put(`/Appointment/${selectedAppointmentId}`, {
-                scheduledTime: utcDateTime,
+                scheduledTime: updatedDateTime,
                 status: 0
             });
 
@@ -737,9 +731,7 @@ const AppointmentWithDoctor = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {appointment.appointmentDate?.startsWith('0001-01-01')
                                                     ? 'Chưa có ngày hẹn'
-                                                    : moment.utc(appointment.appointmentDate) // Parse từ UTC
-                                                        .tz('Asia/Ho_Chi_Minh') // Chuyển đổi sang múi giờ Việt Nam
-                                                        .format('DD/MM/YYYY HH:mm')}
+                                                    : moment(appointment.appointmentDate).format('DD/MM/YYYY HH:mm')}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
