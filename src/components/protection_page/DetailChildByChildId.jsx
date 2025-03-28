@@ -456,15 +456,15 @@ const DetailChildByChildId = () => {
                 childId: childData.childId,
                 height: parseFloat(editHeight),
                 weight: parseFloat(editWeight),
-                date: editDate.toISOString()
+                date: editDate.format('YYYY-MM-DD')
             };
 
             const response = await api.put(`/reports/${selectedReport.reportId}`, requestData);
 
             if (response.status === 200) {
                 toast.success('Cập nhật thành công!');
-                // Gọi lại API để cập nhật dữ liệu mới nhất
                 await handleRefreshReports();
+                setShowEditReport(false);
                 setSelectedReport(null);
             }
         } catch (error) {
