@@ -25,14 +25,13 @@ const FeedbackManagement = () => {
                 throw new Error('Dữ liệu feedback không hợp lệ');
             }
 
-            // Lọc các feedback có feedbackIsActive là true, doctorId trùng khớp và isResponsed là true
-            const inactiveFeedbacks = response.data.filter(f => 
-                f.doctorId === currentDoctorId 
-                //&& f.report.feedbacks[2]?.isResponsed === false
+            // Lọc các feedback có doctorId trùng khớp
+            const filteredFeedbacks = response.data.filter(f => 
+                f.doctorId === currentDoctorId
             );
-            console.log(inactiveFeedbacks);
+            console.log(filteredFeedbacks);
             
-            setFeedbacks(inactiveFeedbacks);
+            setFeedbacks(filteredFeedbacks);
         } catch (error) {
             console.error('Error fetching feedbacks:', error);
             setFeedbacks([]); // Đặt feedbacks thành mảng rỗng nếu có lỗi
@@ -80,7 +79,13 @@ const FeedbackManagement = () => {
                             </div>
                             <p className="text-gray-700 mb-4">{feedback.feedbackContentRequest}</p>
 
-                            {feedback.feedbackContentResponse && (
+                            {!feedback.feedbackContentResponse || 
+                             feedback.feedbackContentResponse.trim() === '' || 
+                             feedback.feedbackContentResponse === 'string' ? (
+                                <div className="bg-yellow-50 p-4 rounded-lg">
+                                    <p className="text-yellow-800">Chưa phản hồi</p>
+                                </div>
+                            ) : (
                                 <div className="bg-blue-50 p-4 rounded-lg">
                                     <p className="text-blue-800">
                                         <span className="font-semibold">Phản hồi của bạn:</span> {feedback.feedbackContentResponse}
