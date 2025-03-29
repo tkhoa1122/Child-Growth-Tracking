@@ -15,7 +15,7 @@ export const ProductManagement = () => {
         safetyFeature: '',
         rating: 0,
         recommendedBy: '',
-        imageUrl: '',
+        imageUrl: '/Images/pro1.png',
         brand: '',
         isActive: true,
         productType: ''
@@ -149,7 +149,7 @@ export const ProductManagement = () => {
                 safetyFeature: '',
                 rating: 0,
                 recommendedBy: '',
-                imageUrl: '',
+                imageUrl: '/Images/pro1.png',
                 brand: '',
                 isActive: true,
                 productType: ''

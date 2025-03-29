@@ -122,7 +122,6 @@ export const ConsultationDetail = () => {
         }
     };
 
-
     useEffect(() => {
         if (reportId) {
             fetchFeedbacksByReportId(reportId);
@@ -132,7 +131,7 @@ export const ConsultationDetail = () => {
     }, [childId, reportId]);
 
     // Hàm gửi feedback của bác sĩ
-    const handleSubmitFeedback = async (feedbackId) => {
+    const handleSubmitFeedback = async (feedbackId, feedback) => {
         try {
             if (!doctorFeedback.trim()) {
                 setNotification({
@@ -160,7 +159,11 @@ export const ConsultationDetail = () => {
             });
 
             // Lấy lại dữ liệu feedback mới nhất
-            await fetchAllFeedbacks();
+            if (reportId) {
+                await fetchFeedbacksByReportId(reportId);
+            } else {
+                await fetchAllFeedbacks();
+            }
 
             // Lấy lại danh sách BMI Reports để cập nhật UI
             const bmiReportsResponse = await axios.get(`reports/child/${childId}`);
@@ -436,7 +439,6 @@ export const ConsultationDetail = () => {
                 )}
 
                 {/* Feedback Section */}
-                {/* Feedback Section */}
                 <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
                     <h2 className="text-xl font-bold text-gray-800 mb-4">Phản hồi</h2>
 
@@ -451,7 +453,9 @@ export const ConsultationDetail = () => {
                                     </div>
                                 </div>
 
-                                {!feedback.report.feedbacks[0]?.isResponsed ? (
+                                {!feedback.feedbackContentResponse || 
+                                 feedback.feedbackContentResponse.trim() === '' || 
+                                 feedback.feedbackContentResponse === 'string' ? (
                                     <>
                                         <div className="mb-4">
                                             <h3 className="text-lg font-semibold text-gray-700 mb-2">Phản hồi của bác sĩ:</h3>
@@ -465,7 +469,7 @@ export const ConsultationDetail = () => {
                                         </div>
 
                                         <button
-                                            onClick={() => handleSubmitFeedback(feedback.feedbackId)}
+                                            onClick={() => handleSubmitFeedback(feedback.feedbackId, feedback)}
                                             className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
                                         >
                                             Gửi phản hồi

@@ -26,10 +26,14 @@ export const RequestManagement = () => {
                 const pendingResponse = await axios.get('reports/pending');
                 const activeResponse = await axios.get('reports/active');
 
+                // Kiểm tra và chuyển đổi dữ liệu nếu cần
+                const pendingData = Array.isArray(pendingResponse.data) ? pendingResponse.data : [];
+                const activeData = Array.isArray(activeResponse.data) ? activeResponse.data : [];
+
                 // Kết hợp các yêu cầu và lọc theo reportId
                 const allRequests = [
-                    ...pendingResponse.data.filter(request => reportIds.includes(request.reportId)),
-                    ...activeResponse.data.filter(request => reportIds.includes(request.reportId))
+                    ...pendingData.filter(request => reportIds.includes(request.reportId)),
+                    ...activeData.filter(request => reportIds.includes(request.reportId))
                 ];
                 console.log(allRequests)
                 
@@ -107,29 +111,40 @@ export const RequestManagement = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredRequests.map((request) => (
-                                <tr key={request.reportId}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{`${request.firstName} ${request.lastName}`}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.height} cm</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.weight} kg</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.bmi.toFixed(1)}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                            request.reportIsActive === "0" ? 'bg-yellow-100 text-yellow-800' :
-                                            request.reportIsActive === "1" ? 'bg-green-100 text-green-800' :
-                                            'bg-red-100 text-red-800'
-                                        }`}>
-                                            {request.reportIsActive === "1" ? "Active" : "Pending"}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.gender}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <Link to={`/consultation-detail/${request.childId}`} className="text-blue-600 hover:text-blue-900 mr-4">
-                                            Xem chi tiết
-                                        </Link>
+                            {filteredRequests.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7" className="px-6 py-4 text-center text-gray-400">
+                                        Không có dữ liệu để hiển thị!
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                filteredRequests.map((request) => (
+                                    <tr key={request.reportId}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{`${request.firstName} ${request.lastName}`}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.height} cm</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.weight} kg</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.bmi.toFixed(1)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                request.reportIsActive === "0" ? 'bg-yellow-100 text-yellow-800' :
+                                                request.reportIsActive === "1" ? 'bg-green-100 text-green-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
+                                                {request.reportIsActive === "1" ? "Active" : "Pending"}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.gender}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <Link 
+                                                to={`/consultation-detail/${request.childId}?reportId=${request.reportId}`} 
+                                                className="text-blue-600 hover:text-blue-900 mr-4"
+                                            >
+                                                Xem chi tiết
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
