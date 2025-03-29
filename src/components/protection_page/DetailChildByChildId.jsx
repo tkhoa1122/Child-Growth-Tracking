@@ -15,7 +15,55 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 // Thêm hàm helper để format ngày
 const formatDate = (date) => {
-    return moment(date).format('DD-MM-YYYY');
+    // Nếu chuỗi ngày đã ở định dạng DD-MM-YYYY
+    if (typeof date === 'string' && date.includes('-') && !date.includes('T')) {
+        const parts = date.split('-');
+        if (parts.length === 3) {
+            // Kiểm tra xem có phải định dạng hợp lệ không
+            if (!isNaN(parseInt(parts[0])) && !isNaN(parseInt(parts[1])) && !isNaN(parseInt(parts[2]))) {
+                return `${parts[0]}-${parts[1]}-${parts[2]}`;
+            }
+        }
+    }
+    
+    // Nếu là chuỗi ISO hoặc đối tượng Date
+    try {
+        const momentDate = moment(date);
+        if (momentDate.isValid()) {
+            return momentDate.format('DD-MM-YYYY');
+        }
+    } catch (error) {
+        console.error('Lỗi khi xử lý ngày:', error);
+    }
+    
+    // Nếu không xử lý được, thử chuyển đổi bằng convertToValidDate
+    try {
+        const validDate = convertToValidDate(date);
+        return moment(validDate).format('DD-MM-YYYY');
+    } catch (error) {
+        console.error('Lỗi khi chuyển đổi ngày:', error, date);
+        return 'Ngày không hợp lệ';
+    }
+};
+
+// Thêm hàm convertToValidDate để xử lý chuyển đổi ngày chính xác
+const convertToValidDate = (dateString) => {
+    // Nếu là chuỗi ISO hoặc đối tượng Date, sử dụng trực tiếp
+    if (dateString instanceof Date || (typeof dateString === 'string' && dateString.includes('T'))) {
+        return new Date(dateString);
+    }
+    
+    // Nếu là định dạng DD-MM-YYYY, chuyển đổi sang MM-DD-YYYY cho JavaScript
+    if (typeof dateString === 'string' && dateString.includes('-')) {
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+            // Chuyển từ DD-MM-YYYY sang MM-DD-YYYY
+            return new Date(`${parts[1]}-${parts[0]}-${parts[2]}`);
+        }
+    }
+    
+    // Trường hợp khác, sử dụng moment để phân tích
+    return moment(dateString).toDate();
 };
 
 // Thêm hàm tính tuổi
@@ -91,6 +139,8 @@ const DetailChildByChildId = () => {
     const [reportContent, setReportContent] = useState('');
     const [reportCreateDate, setReportCreateDate] = useState(new Date().toISOString());
     const [reportIsActive, setReportIsActive] = useState('Active');
+    const [currentPage, setCurrentPage] = useState(1);
+    const reportsPerPage = 9;
 
     // Đặt hàm disabledDate vào trong component để có thể truy cập childData
     const disabledDate = (current) => {
@@ -143,17 +193,7 @@ const DetailChildByChildId = () => {
             setBmi(calculatedBmi.toFixed(2));
             
             // Đưa ra nhận xét
-            if (calculatedBmi < 18.5) {
-                setComment('Thiếu cân');
-            } else if (calculatedBmi < 23) {
-                setComment('Bình thường');
-            } else if (calculatedBmi < 25) {
-                setComment('Tiền béo phì');
-            } else if (calculatedBmi < 30) {
-                setComment('Béo phì độ I');
-            } else {
-                setComment('Béo phì độ II');
-            }
+            setComment(getBmiCategory(calculatedBmi));
         }
     }, [height, weight]);
 
@@ -180,15 +220,29 @@ const DetailChildByChildId = () => {
     // Xử lý dữ liệu cho biểu đồ
     useEffect(() => {
         if (reports.length > 0) {
-            // Sắp xếp báo cáo theo thời gian
+            console.log('Reports trước khi sắp xếp:', reports.map(r => ({
+                id: r.reportId,
+                date: r.reportCreateDate,
+                type: typeof r.reportCreateDate
+            })));
+            
+            // Sắp xếp báo cáo theo thời gian với hàm chuyển đổi ngày đúng
             const sortedReports = [...reports].sort((a, b) => {
-                const dateA = new Date(a.reportContent.split(' ')[3]);
-                const dateB = new Date(b.reportContent.split(' ')[3]);
+                const dateA = convertToValidDate(a.reportCreateDate);
+                const dateB = convertToValidDate(b.reportCreateDate);
+                console.log(`So sánh: ${a.reportCreateDate} -> ${dateA} và ${b.reportCreateDate} -> ${dateB}`);
                 return dateA - dateB;
             });
 
+            // Xử lý từng ngày trước khi tạo labels
+            const labels = sortedReports.map(report => {
+                const formattedDate = formatDate(report.reportCreateDate);
+                console.log(`Định dạng ngày: ${report.reportCreateDate} -> ${formattedDate}`);
+                return formattedDate;
+            });
+
             const chartData = {
-                labels: sortedReports.map(report => report.reportContent.split(' ')[3]),
+                labels: labels,
                 datasets: [
                     {
                         label: 'Chỉ số BMI',
@@ -299,13 +353,13 @@ const DetailChildByChildId = () => {
     const updateChartData = (reports) => {
         if (reports.length > 0) {
             const sortedReports = [...reports].sort((a, b) => {
-                const dateA = new Date(a.reportContent.split(' ')[3]);
-                const dateB = new Date(b.reportContent.split(' ')[3]);
+                const dateA = convertToValidDate(a.reportCreateDate);
+                const dateB = convertToValidDate(b.reportCreateDate);
                 return dateA - dateB;
             });
 
             const chartData = {
-                labels: sortedReports.map(report => report.reportContent.split(' ')[3]),
+                labels: sortedReports.map(report => formatDate(report.reportCreateDate)),
                 datasets: [
                     {
                         label: 'Chỉ số BMI',
@@ -402,15 +456,15 @@ const DetailChildByChildId = () => {
                 childId: childData.childId,
                 height: parseFloat(editHeight),
                 weight: parseFloat(editWeight),
-                date: editDate.toISOString()
+                date: editDate.format('YYYY-MM-DD')
             };
 
             const response = await api.put(`/reports/${selectedReport.reportId}`, requestData);
 
             if (response.status === 200) {
                 toast.success('Cập nhật thành công!');
-                // Gọi lại API để cập nhật dữ liệu mới nhất
                 await handleRefreshReports();
+                setShowEditReport(false);
                 setSelectedReport(null);
             }
         } catch (error) {
@@ -494,6 +548,21 @@ const DetailChildByChildId = () => {
         } finally {
             setLoadingFeedbacks(false);
         }
+    };
+
+    // Tính toán số trang
+    const totalPages = Math.ceil(reports.length / reportsPerPage);
+
+    // Lấy báo cáo cho trang hiện tại
+    const getCurrentPageReports = () => {
+        const indexOfLastReport = currentPage * reportsPerPage;
+        const indexOfFirstReport = indexOfLastReport - reportsPerPage;
+        return reports.slice(indexOfFirstReport, indexOfLastReport);
+    };
+
+    // Thay đổi trang
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
     };
 
     return (
@@ -595,8 +664,9 @@ const DetailChildByChildId = () => {
                                 <label className="block text-sm font-medium mb-1 text-black">Chiều cao (cm)</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={height}
-                                    onChange={(e) => setHeight(e.target.value)}
+                                    onChange={(e) => setHeight(e.target.value >= 0 ? e.target.value : 0)}
                                     className="w-full p-2 border rounded"
                                     placeholder="Nhập chiều cao"
                                 />
@@ -606,8 +676,9 @@ const DetailChildByChildId = () => {
                                 <label className="block text-sm font-medium mb-1 text-black">Cân nặng (kg)</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={weight}
-                                    onChange={(e) => setWeight(e.target.value)}
+                                    onChange={(e) => setWeight(e.target.value >= 0 ? e.target.value : 0)}
                                     className="w-full p-2 border rounded"
                                     placeholder="Nhập cân nặng"
                                 />
@@ -634,7 +705,7 @@ const DetailChildByChildId = () => {
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-black">Chỉ số BMI</label>
                                     <div className="p-2 border rounded bg-gray-50">
-                                        <span className="font-medium">{bmi}</span>
+                                        <span className={`font-medium ${getBmiTextClass(parseFloat(bmi))}`}>{bmi}</span>
                                         <span className="ml-2 text-sm text-gray-600">({comment})</span>
                                     </div>
                                 </div>
@@ -849,8 +920,9 @@ const DetailChildByChildId = () => {
                                     <label className="block text-sm font-medium mb-1">Chỉnh sửa chiều cao (cm)</label>
                                     <input
                                         type="number"
+                                        min="0"
                                         value={editHeight}
-                                        onChange={(e) => setEditHeight(e.target.value)}
+                                        onChange={(e) => setEditHeight(e.target.value >= 0 ? e.target.value : 0)}
                                         className="w-full p-2 border rounded"
                                     />
                                 </div>
@@ -858,8 +930,9 @@ const DetailChildByChildId = () => {
                                     <label className="block text-sm font-medium mb-1">Chỉnh sửa cân nặng (kg)</label>
                                     <input
                                         type="number"
+                                        min="0"
                                         value={editWeight}
-                                        onChange={(e) => setEditWeight(e.target.value)}
+                                        onChange={(e) => setEditWeight(e.target.value >= 0 ? e.target.value : 0)}
                                         className="w-full p-2 border rounded"
                                     />
                                 </div>
@@ -897,59 +970,140 @@ const DetailChildByChildId = () => {
                             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                         </div>
                     ) : reports.length > 0 && childData ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-black">
-                            {reports.map((report) => (
-                                <div
-                                    key={report.reportId}
-                                    onClick={() => handleSelectReport(report)}
-                                    onDoubleClick={() => handleShowEditForm()}
-                                    className={`bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
-                                        selectedReport?.reportId === report.reportId ? 'ring-2 ring-blue-500' : ''
-                                    }`}
-                                >
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between hidden">
-                                            <span className="font-medium">Mã báo cáo:</span>
-                                            <span>{report.reportId}</span>
-                                        </div>
-                                        <div className="flex justify-between hidden ">
-                                            <span className="font-medium">Tên báo cáo:</span>
-                                            <span>{report.reportName}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="font-medium">Chiều cao:</span>
-                                            <span>{report.height} cm</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="font-medium">Cân nặng:</span>
-                                            <span>{report.weight} kg</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="font-medium">BMI:</span>
-                                            <span className={getBmiTextClass(report.bmi)}>
-                                                {report.bmi.toFixed(2)}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between hidden">
-                                            <span className="font-medium">Độ tuổi ghi nhận:</span>
-                                            <span>
-                                                {calculateAgeAtReport(childData.dob, report.reportContent.split(' ')[3])} tuổi
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="font-medium">Nhận xét:</span>
-                                            <span className="text-sm text-gray-600">{report.reportMark}</span>
-                                        </div>
-                                        <div className="flex justify-between mt-2">
-                                            <span className="font-medium">Ngày tạo:</span>
-                                            <span className="text-sm text-gray-500">
-                                                {moment(report.reportCreateDate).format('DD-MM-YYYY')}
-                                            </span>
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-black">
+                                {getCurrentPageReports().map((report) => (
+                                    <div
+                                        key={report.reportId}
+                                        onClick={() => handleSelectReport(report)}
+                                        onDoubleClick={() => handleShowEditForm()}
+                                        className={`bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
+                                            selectedReport?.reportId === report.reportId ? 'ring-2 ring-blue-500' : ''
+                                        }`}
+                                    >
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between hidden">
+                                                <span className="font-medium">Mã báo cáo:</span>
+                                                <span>{report.reportId}</span>
+                                            </div>
+                                            <div className="flex justify-between hidden ">
+                                                <span className="font-medium">Tên báo cáo:</span>
+                                                <span>{report.reportName}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Chiều cao:</span>
+                                                <span>{report.height} cm</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Cân nặng:</span>
+                                                <span>{report.weight} kg</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">BMI:</span>
+                                                <span className={getBmiTextClass(report.bmi)}>
+                                                    {report.bmi.toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between hidden">
+                                                <span className="font-medium">Độ tuổi ghi nhận:</span>
+                                                <span>
+                                                    {calculateAgeAtReport(childData.dob, report.reportContent.split(' ')[3])} tuổi
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Nhận xét:</span>
+                                                <span className="text-sm text-gray-600">{report.reportMark}</span>
+                                            </div>
+                                            <div className="flex justify-between mt-2">
+                                                <span className="font-medium">Ngày tạo:</span>
+                                                <span className="text-sm text-gray-500">
+                                                    {moment(report.reportCreateDate).format('DD-MM-YYYY')}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
+                                ))}
+                            </div>
+
+                            {/* Phân trang */}
+                            {reports.length > reportsPerPage && (
+                                <div className="flex justify-center mt-6">
+                                    <nav className="inline-flex rounded-md shadow">
+                                        <button
+                                            onClick={() => handlePageChange(1)}
+                                            disabled={currentPage === 1}
+                                            className={`px-3 py-1 rounded-l-md ${
+                                                currentPage === 1 
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                                    : 'bg-white text-blue-500 hover:bg-blue-50'
+                                            } border border-gray-300 focus:outline-none`}
+                                        >
+                                            &lt;&lt;
+                                        </button>
+                                        <button
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                            className={`px-3 py-1 ${
+                                                currentPage === 1 
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                                    : 'bg-white text-blue-500 hover:bg-blue-50'
+                                            } border-t border-b border-gray-300 focus:outline-none`}
+                                        >
+                                            &lt;
+                                        </button>
+                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                            // Tính toán số trang hiển thị
+                                            let pageNum;
+                                            if (totalPages <= 5) {
+                                                pageNum = i + 1;
+                                            } else if (currentPage <= 3) {
+                                                pageNum = i + 1;
+                                            } else if (currentPage >= totalPages - 2) {
+                                                pageNum = totalPages - 4 + i;
+                                            } else {
+                                                pageNum = currentPage - 2 + i;
+                                            }
+                                            
+                                            return (
+                                                <button
+                                                    key={pageNum}
+                                                    onClick={() => handlePageChange(pageNum)}
+                                                    className={`px-3 py-1 ${
+                                                        currentPage === pageNum
+                                                            ? 'bg-blue-500 text-white'
+                                                            : 'bg-white text-blue-500 hover:bg-blue-50'
+                                                    } border-t border-b border-gray-300 focus:outline-none`}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            );
+                                        })}
+                                        <button
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            disabled={currentPage === totalPages}
+                                            className={`px-3 py-1 ${
+                                                currentPage === totalPages
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-white text-blue-500 hover:bg-blue-50'
+                                            } border-t border-b border-gray-300 focus:outline-none`}
+                                        >
+                                            &gt;
+                                        </button>
+                                        <button
+                                            onClick={() => handlePageChange(totalPages)}
+                                            disabled={currentPage === totalPages}
+                                            className={`px-3 py-1 rounded-r-md ${
+                                                currentPage === totalPages
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-white text-blue-500 hover:bg-blue-50'
+                                            } border border-gray-300 focus:outline-none`}
+                                        >
+                                            &gt;&gt;
+                                        </button>
+                                    </nav>
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                        </>
                     ) : (
                         <p className="text-gray-600">Không có báo cáo nào.</p>
                     )}
@@ -1064,11 +1218,26 @@ const InfoRow = ({ label, value }) => (
 
 // Thêm hàm helper cho màu BMI
 const getBmiTextClass = (bmi) => {
-    if (bmi < 18.5) return 'text-blue-600'; // Thiếu cân
-    if (bmi < 23) return 'text-green-600'; // Bình thường
-    if (bmi < 25) return 'text-yellow-600'; // Tiền béo phì
-    if (bmi < 30) return 'text-orange-600'; // Béo phì độ I
-    return 'text-red-600'; // Béo phì độ II
+    if (bmi < 16.0) return 'text-blue-800 font-bold'; // Gầy độ III - Nguy cơ cao
+    if (bmi < 16.9) return 'text-blue-600'; // Gầy độ II - Nguy cơ vừa
+    if (bmi < 18.4) return 'text-blue-400'; // Gầy độ I - Nguy cơ thấp
+    if (bmi < 24.9) return 'text-green-500'; // Cân nặng bình thường
+    if (bmi < 29.9) return 'text-yellow-500'; // Thừa cân - Nguy cơ tăng nhẹ
+    if (bmi < 34.9) return 'text-orange-500'; // Béo phì độ I - Nguy cơ trung bình
+    if (bmi < 39.9) return 'text-red-500'; // Béo phì độ II - Nguy cơ cao
+    return 'text-red-800 font-bold'; // Béo phì độ III - Nguy cơ rất cao
+};
+
+// Thêm hàm để phân loại BMI theo mô tả
+const getBmiCategory = (bmi) => {
+    if (bmi < 16.0) return "Gầy độ III (Rất gầy) - Nguy cơ cao";
+    if (bmi < 16.9) return "Gầy độ II - Nguy cơ vừa";
+    if (bmi < 18.4) return "Gầy độ I - Nguy cơ thấp";
+    if (bmi < 24.9) return "Cân nặng bình thường - Bình thường";
+    if (bmi < 29.9) return "Thừa cân - Nguy cơ tăng nhẹ";
+    if (bmi < 34.9) return "Béo phì độ I - Nguy cơ trung bình";
+    if (bmi < 39.9) return "Béo phì độ II - Nguy cơ cao";
+    return "Béo phì độ III - Nguy cơ rất cao";
 };
 
 export default DetailChildByChildId;

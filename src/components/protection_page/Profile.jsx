@@ -523,7 +523,7 @@ const Profile = () => {
                                         <p className="font-medium text-gray-900">
                                             {child.lastName} {child.firstName}
                                         </p>
-                                        <p className="text-sm">
+                                        <p className="text-sm hidden">
                                             <span className="font-medium">ID:</span> 
                                             <span className="text-gray-600 ml-1">{child.childId}</span>
                                         </p>
