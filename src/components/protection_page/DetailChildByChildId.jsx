@@ -528,9 +528,10 @@ const DetailChildByChildId = () => {
         
         try {
             const birthDate = moment(childData.dob);
+            const oneYearAfterBirth = birthDate.add(1, 'years');
             const today = moment().endOf('day');
             
-            return date >= birthDate && date <= today;
+            return date >= oneYearAfterBirth && date <= today;
         } catch (error) {
             console.error('Lỗi kiểm tra ngày:', error);
             return false;
