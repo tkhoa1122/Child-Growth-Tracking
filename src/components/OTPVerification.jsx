@@ -4,6 +4,7 @@ import { FaEnvelope } from 'react-icons/fa';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import api from "../components/Utils/Axios";
+import { toast } from 'react-toastify';
 
 const backgroundImage = '/Images/background.jpg';
 
@@ -17,6 +18,7 @@ export const OTPVerification = () => {
         message: '',
         type: 'success'
     });
+    const [isResendDisabled, setIsResendDisabled] = useState(false);
 
     useEffect(() => {
         // Lấy email từ URL parameters
@@ -28,6 +30,19 @@ export const OTPVerification = () => {
         }
         setEmail(emailParam);
     }, [location, navigate]);
+
+    const handleResendOtp = async () => {
+        try {
+            const response = await api.post('/Auth/resend-otp', { email });
+            if (response.status === 200) {
+                toast.success('Đã gửi OTP thành công');
+                setIsResendDisabled(true);
+                setTimeout(() => setIsResendDisabled(false), 45000); // Vô hiệu hóa trong 45 giây
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Đã xảy ra lỗi');
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -130,6 +145,16 @@ export const OTPVerification = () => {
                             </button>
                         </div>
                     </form>
+
+                    <div className="mt-4 text-center">
+                        <button
+                            onClick={handleResendOtp}
+                            disabled={isResendDisabled}
+                            className={`text-blue-500 hover:underline ${isResendDisabled ? 'text-gray-400 cursor-not-allowed' : ''}`}
+                        >
+                            Gửi lại OTP xác thực tài khoản
+                        </button>
+                    </div>
                 </div>
             </div>
 

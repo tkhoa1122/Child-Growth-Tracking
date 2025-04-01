@@ -241,7 +241,7 @@ export const Login = () => {
                             </div>
 
                             {/* Remember Me & Forgot Password */}
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between hidden">
                                 <div className="flex items-center">
                                     <input
                                         type="checkbox"
