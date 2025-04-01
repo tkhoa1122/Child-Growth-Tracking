@@ -189,12 +189,12 @@ const AppointmentManagement = () => {
             }
 
             // Kiểm tra ngày và giờ cập nhật phải là tương lai
-            const selectedDate = new Date(updateForm.appointmentDate);
+            let selectedDate = new Date(updateForm.appointmentDate);
             const currentDate = new Date();
 
+            // Nếu selectedDate không phải là tương lai, thêm 1 phút
             if (selectedDate <= currentDate) {
-                showNotification('Ngày và giờ hẹn phải là thời gian trong tương lai!', 'error');
-                return;
+                selectedDate = new Date(currentDate.getTime() + 60000); // Thêm 1 phút
             }
 
             // Chuyển đổi ngày và giờ sang múi giờ UTC và format lại
@@ -264,8 +264,17 @@ const AppointmentManagement = () => {
             // Chuyển đổi trạng thái từ text sang số
             const statusNumber = getStatusNumber(newStatus);
 
+            // Kiểm tra ngày và giờ cập nhật phải là tương lai
+            let selectedDate = new Date(appointment.appointmentDate);
+            const currentDate = new Date();
+
+            // Nếu selectedDate không phải là tương lai, thêm 1 phút
+            if (selectedDate <= currentDate) {
+                selectedDate = new Date(currentDate.getTime() + 60000); // Thêm 1 phút
+            }
+
             const updateData = {
-                scheduledTime: new Date(appointment.appointmentDate).toISOString(), // Giữ nguyên ngày giờ cũ
+                scheduledTime: selectedDate.toISOString(), // Giữ nguyên ngày giờ cũ
                 status: statusNumber // Cập nhật trạng thái mới dưới dạng số
             };
 
