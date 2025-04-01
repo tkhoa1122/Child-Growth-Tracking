@@ -37,7 +37,7 @@ const ProductManagement = () => {
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">Product Management</h1>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Quản lý danh sách sản phẩm</h1>
             
             <div className="overflow-x-auto">
                 <table className="w-full table-auto">
@@ -53,7 +53,7 @@ const ProductManagement = () => {
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Thương hiệu</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Trạng thái</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Loại</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Thao tác</th>
+                            {/* <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Thao tác</th> */}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -96,12 +96,12 @@ const ProductManagement = () => {
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex space-x-2">
-                                        <button className="text-blue-600 hover:text-blue-800">
+                                        {/* <button className="text-blue-600 hover:text-blue-800">
                                             <FaEdit />
                                         </button>
                                         <button className="text-red-600 hover:text-red-800">
                                             <FaTrash />
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </td>
                             </tr>
