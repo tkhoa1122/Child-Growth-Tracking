@@ -30,7 +30,7 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaHome className="text-xl" />
-                                <span className="font-medium">Dash Board</span>
+                                <span className="font-medium">TRANG CHỦ</span>
                             </button>
                             <button
                                 onClick={() => navigate('/admin/doctors')}
@@ -41,7 +41,7 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaUserMd className="text-xl" />
-                                <span className="font-medium">Doctor Management</span>
+                                <span className="font-medium">BÁC SĨ</span>
                             </button>
 
                             <button
@@ -53,7 +53,7 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaUsers className="text-xl" />
-                                <span className="font-medium">User Management</span>
+                                <span className="font-medium">NGƯỜI DÙNG</span>
                             </button>
 
                             <button
@@ -65,7 +65,7 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaClipboardList className="text-xl" />
-                                <span className="font-medium">Service Management</span>
+                                <span className="font-medium">DỊCH VỤ</span>
                             </button>
 
                             <button
@@ -77,7 +77,7 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaList className="text-xl" />
-                                <span className="font-medium">Order Management</span>
+                                <span className="font-medium">ĐƠN MUA</span>
                             </button>
 
                            
@@ -91,10 +91,10 @@ export const AdminLayout = () => {
                                 }`}
                             >
                                 <FaClipboardList className="text-xl" />
-                                <span className="font-medium">Product Management</span>
+                                <span className="font-medium">SẢN PHẨM</span>
                             </button>
 
-                            <button
+                            {/* <button
                                 onClick={() => navigate('/admin/statistics')}
                                 className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-colors ${
                                     location.pathname.includes('/admin/statistics') 
@@ -104,7 +104,7 @@ export const AdminLayout = () => {
                             >
                                 <FaChartBar className="text-xl" />
                                 <span className="font-medium">Statistic</span>
-                            </button>
+                            </button> */}
 
                             
 

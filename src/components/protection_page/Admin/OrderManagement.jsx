@@ -38,13 +38,13 @@ const OrderManagement = () => {
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">Order Management</h1>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Quản lý đơn mua hàng</h1>
             
             <div className="overflow-x-auto">
                 <table className="w-full table-auto">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Order ID</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã đơn mua hàng</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Dịch vụ</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số lượng</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Đơn giá</th>
@@ -52,7 +52,7 @@ const OrderManagement = () => {
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày tạo</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày hết hạn</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Trạng thái</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Thao tác</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 hidden">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -84,7 +84,7 @@ const OrderManagement = () => {
                                         {new Date(order.endDate) > new Date() ? 'Đang hoạt động' : 'Hết hạn'}
                                     </span>
                                 </td>
-                                <td className="px-4 py-3">
+                                <td className="px-4 py-3 hidden">
                                     <div className="flex space-x-2">
                                         <button className="text-blue-600 hover:text-blue-800">
                                             <FaEdit />

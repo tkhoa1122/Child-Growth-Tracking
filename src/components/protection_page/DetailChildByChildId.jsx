@@ -149,11 +149,13 @@ const DetailChildByChildId = () => {
         try {
             // Chuyển đổi ngày sinh của trẻ thành đối tượng moment
             const birthDate = moment(childData.dob);
+            // Tính ngày sinh nhật 1 tuổi
+            const oneYearAfterBirth = birthDate.add(1, 'years');
             // Lấy ngày hiện tại
             const today = moment().endOf('day');
             
-            // Không cho phép chọn ngày trước ngày sinh và sau ngày hiện tại
-            return current < birthDate || current > today;
+            // Không cho phép chọn ngày trước khi trẻ đủ 1 tuổi và sau ngày hiện tại
+            return current < oneYearAfterBirth || current > today;
         } catch (error) {
             console.error('Lỗi kiểm tra ngày:', error);
             return false;
@@ -526,9 +528,10 @@ const DetailChildByChildId = () => {
         
         try {
             const birthDate = moment(childData.dob);
+            const oneYearAfterBirth = birthDate.add(1, 'years');
             const today = moment().endOf('day');
             
-            return date >= birthDate && date <= today;
+            return date >= oneYearAfterBirth && date <= today;
         } catch (error) {
             console.error('Lỗi kiểm tra ngày:', error);
             return false;
@@ -696,7 +699,7 @@ const DetailChildByChildId = () => {
                                 />
                                 {childData && (
                                     <p className="text-xs text-gray-500 mt-1">
-                                        *Chỉ được chọn ngày từ {moment(childData.dob).format('DD-MM-YYYY')} đến {moment().format('DD-MM-YYYY')}
+                                        *Chỉ được chọn ngày từ {moment(childData.dob).add(1, 'years').format('DD-MM-YYYY')} đến {moment().format('DD-MM-YYYY')}
                                     </p>
                                 )}
                             </div>

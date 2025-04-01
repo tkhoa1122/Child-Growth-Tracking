@@ -323,7 +323,7 @@ const AdminDashboard = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {child.gender}
+                                        {child.gender === 'Female' ? 'Nữ' : 'Nam'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {formatDate(child.dob)}
