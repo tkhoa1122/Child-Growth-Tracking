@@ -188,8 +188,8 @@ const DoctorManagement = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-semibold text-gray-800">{doctor.fullName}</h3>
-                                        <p className="text-gray-600 text-sm">Account ID: {doctor.accountId}</p>
-                                        <p className="text-gray-600 text-sm">Doctor ID: {doctor.doctorId}</p>
+                                        <p className="text-gray-600 text-sm hidden">Account ID: {doctor.accountId}</p>
+                                        <p className="text-gray-600 text-sm hidden">Doctor ID: {doctor.doctorId}</p>
                                         <p className="text-blue-600 font-medium">{doctor.specialization}</p>
                                         <p className="text-gray-600">{doctor.email}</p>
                                         <p className="text-gray-600">{doctor.phoneNumber}</p>

@@ -75,7 +75,10 @@ const OrderManagement = () => {
                                 <td className="px-4 py-3 text-sm text-gray-700">
                                     {formatDate(order.endDate)}
                                 </td>
-                                <td className="px-4 py-3">
+                                <td className="px-4 py-3 text-sm text-gray-700">
+                                    {order.status == 'Completed' ? 'Đã thanh toán' : 'Đã huỷ'}
+                                </td>
+                                {/* <td className="px-4 py-3">
                                     <span className={`px-2 py-1 rounded-full text-xs ${
                                         new Date(order.endDate) > new Date()
                                             ? 'bg-green-100 text-green-800'
@@ -83,7 +86,7 @@ const OrderManagement = () => {
                                     }`}>
                                         {new Date(order.endDate) > new Date() ? 'Đang hoạt động' : 'Hết hạn'}
                                     </span>
-                                </td>
+                                </td> */}
                                 <td className="px-4 py-3 hidden">
                                     <div className="flex space-x-2">
                                         <button className="text-blue-600 hover:text-blue-800">

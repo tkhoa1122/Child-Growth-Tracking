@@ -173,8 +173,8 @@ const UserManagement = () => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avartar</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã tài khoản</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã cha mẹ</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden">Mã tài khoản</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden">Mã cha mẹ</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên phụ huynh</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden">Dịch vụ đã mua</th>
                             </tr>
@@ -190,8 +190,8 @@ const UserManagement = () => {
                                             className="h-12 w-12 rounded-full object-cover"
                                         />
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.accountId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.parentId}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden">{user.accountId}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden">{user.parentId}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {user.account ? `${user.account.firstName} ${user.account.lastName}` : "N/A"}
                                     </td>
@@ -323,7 +323,9 @@ const UserManagement = () => {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                {['STT', 'Mã cha mẹ', 'Mã trẻ', 'Avatar', 'Tên',
+                                {['STT'
+                                // , 'Mã cha mẹ', 'Mã trẻ'
+                                , 'Avatar', 'Tên',
                                     'Họ', 'Giới tính', 'Tuổi', 'Ngày tháng năm sinh', 'TG tạo thông tin',
                                     'TG chỉnh sửa thông tin', 'Tiện ích'].map((header, idx) => (
                                         <th key={idx} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -337,8 +339,8 @@ const UserManagement = () => {
                             {currentChildren.map((child, index) => (
                                 <tr key={child.childId}>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{child.parentId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{child.childId}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden">{child.parentId}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden">{child.childId}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <img
                                             src={child.gender === 'Female'

@@ -108,8 +108,8 @@ const AdminDashboard = () => {
                         <div>
                             <h3 className="text-lg font-semibold text-gray-700">Thông tin cá nhân</h3>
                             <div className="mt-2 space-y-2">
-                                <p className="text-gray-600">
-                                    <span className="font-medium">ID:</span>{' '}
+                                <p className="text-gray-600 hidden">
+                                    <span className="font-medium ">ID:</span>{' '}
                                     {adminInfo.userId}
                                 </p>
                                 <p className="text-gray-600">
@@ -145,8 +145,8 @@ const AdminDashboard = () => {
                         <div>
                             <h3 className="text-lg font-semibold text-gray-700">Thông tin Token</h3>
                             <div className="mt-2 space-y-2">
-                                <p className="text-gray-600">
-                                    <span className="font-medium">Token ID:</span>{' '}
+                                <p className="text-gray-600 hidden">
+                                    <span className="font-medium ">Token ID:</span>{' '}
                                     {adminInfo.jti}
                                 </p>
                                 <p className="text-gray-600">
